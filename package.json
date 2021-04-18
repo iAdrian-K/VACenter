@@ -1,0 +1,32 @@
+{
+  "name": "vacenter",
+  "version": "2.0.0",
+  "description": "A crew center for IF",
+  "main": "server/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sam-Neale/VACenter.git"
+  },
+  "keywords": [
+    "VACenter",
+    "IF",
+    "CC",
+    "VANet"
+  ],
+  "author": "Sam Neale",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sam-Neale/VACenter/issues"
+  },
+  "homepage": "https://github.com/Sam-Neale/VACenter#readme",
+  "dependencies": {
+    "atob": "^2.1.2",
+    "bcrypt": "^5.0.1",
+    "btoa": "^1.2.1",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  }
+}
