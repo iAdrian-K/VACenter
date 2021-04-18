@@ -4,18 +4,7 @@
 }
 body{
     width:100vw;
-    height: 100vh;
-    overflow: hidden;
-}
-#page{
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    overflow-y: scroll;
-    padding-bottom: 5vh;
     overflow-x: hidden;
-    -webkit-backdrop-filter: blur(10px) brightness(50%);
-    backdrop-filter: blur(10px) brightness(50%);
 }
 
 
