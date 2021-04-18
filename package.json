@@ -1,32 +1,30 @@
 {
-  "name": "vacenter",
+  "name": "vacenter-server",
   "version": "2.0.0",
-  "description": "A crew center for IF",
-  "main": "server/server.js",
+  "description": "The server files for VACenter 2.0",
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Sam-Neale/VACenter.git"
+    "start": "nodemon server/index.js --config nodemon.json"
   },
   "keywords": [
     "VACenter",
-    "IF",
-    "CC",
-    "VANet"
+    "cc",
+    "crew",
+    "Center"
   ],
   "author": "Sam Neale",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Sam-Neale/VACenter/issues"
-  },
-  "homepage": "https://github.com/Sam-Neale/VACenter#readme",
   "dependencies": {
     "atob": "^2.1.2",
     "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
     "btoa": "^1.2.1",
+    "cors": "^2.8.5",
+    "crypto-random-string": "^2.0.0",
+    "ejs": "^3.1.6",
     "express": "^4.17.1",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "request": "^2.88.2",
+    "unique-string": "^2.0.0"
   }
 }

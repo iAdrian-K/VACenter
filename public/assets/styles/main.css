@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+*{
+  font-family: 'Varela Round';
+}
+body{
+    width:100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+#page{
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow-y: scroll;
+    padding-bottom: 5vh;
+    overflow-x: hidden;
+    -webkit-backdrop-filter: blur(10px) brightness(50%);
+    backdrop-filter: blur(10px) brightness(50%);
+}
+
+
+
+.halfBgFullSm{
+  width: 50%;
+}
+@media only screen and (max-width: 950px ){
+  .halfBgFullSm{
+    width: 100%;
+  }
+  nav{
+    overflow-y: scroll;
+    max-height: 100vh !important;
+  }
+  .w-sm-100{
+    width: 100% !important;
+  }
+  .bgimg{
+    width: 50vw !important;
+  }
+  .bgimg-2{
+    width: 30vw !important;
+  }
+}
