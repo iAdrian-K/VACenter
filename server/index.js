@@ -2,7 +2,8 @@ const express = require('express');
 const RateLimit = require('express-rate-limit');
 let limiter = new RateLimit({
     windowMs: 1*60*1000,
-    max: 5
+    max: 25,
+    message: "Limits exceded, contact your system admin if you think this is an error."
 })
 const bodyParser = require('body-parser');
 const cors = require('cors');
