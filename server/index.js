@@ -154,13 +154,13 @@ function remToken(tokens) {
     const realTokenPreAdjust = unBased.split(":")[1];
     if (realTokenPreAdjust) {
         const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length)
-        const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
+        const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
             if (exists) {
                 FileRead(`${usersPath}/` + sanitze(userID) + '.json').then(rawUser => {
                     const user = JSON.parse(rawUser)
                     if (user.tokens.includes(realToken)) {
                         user.tokens = arrayRemove(user.tokens, realToken);
-                        FileWrite(`${usersPath}/` + userID + '.json', JSON.stringify(user, null, 2))
+                        FileWrite(`${usersPath}/` + sanitize(userID) + '.json', JSON.stringify(user, null, 2))
                         reloadUsers()
                     }
                 })
@@ -178,7 +178,7 @@ function isAdminUser(tokens) {
             const realTokenPreAdjust = unBased.split(":")[1];
             if (realTokenPreAdjust) {
                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
-                const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
+                const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
                     if (exists) {
                         FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
                             const user = JSON.parse(rawUser)
@@ -215,7 +215,7 @@ function isNormalUser(tokens) {
             const realTokenPreAdjust = unBased.split(":")[1];
             if (realTokenPreAdjust) {
                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
-                const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
+                const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
                     if (exists) {
                         FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
                             const user = JSON.parse(rawUser)
@@ -260,7 +260,7 @@ function getUserData(tokens){
             const realTokenPreAdjust = unBased.split(":")[1];
             if (realTokenPreAdjust) {
                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
-                const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
+                const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
                     if (exists) {
                         FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
                             const user = JSON.parse(rawUser)
@@ -431,7 +431,7 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                if (await FileExists(`${dataPath}/events/` + atob(req.query.id) + '.json')) {
+                                if (await FileExists(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json')) {
                                     const targetEvent = JSON.parse(await FileRead(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json'));
                                     res.render('admin/viewEvent', {
                                         config: clientConfig,
@@ -507,7 +507,7 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                if (await FileExists(`${usersPath}/` + req.query.u + '.json')) {
+                                if (await FileExists(`${usersPath}/` + sanitize(req.query.u) + '.json')) {
                                     const targetUser = JSON.parse(await FileRead(`${usersPath}/` + sanitize(req.query.u) + '.json'));
                                     delete targetUser['password']
                                     delete targetUser['tokens']
@@ -632,13 +632,13 @@ app.get('*', async (req, res) => {
                         const realTokenPreAdjust = unBased.split(":")[1];
                         console.log(await FileRead(`${usersPath}/${sanitize(userID)}.json`))
                         if(userID){
-                            if(await FileExists(`${usersPath}/${userID}.json`)){
+                            if (await FileExists(`${usersPath}/${sanitize(userID)}.json`)){
                                 const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(userID)}.json`))
                                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
                                 var index = user.tokens.indexOf(realToken);
                                 if (index > -1) {
                                     user.tokens.splice(index, 1);
-                                    FileWrite(`${usersPath}/${userID}.json`, JSON.stringify(user, null, 2))
+                                    FileWrite(`${usersPath}/${sanitize(userID)}.json`, JSON.stringify(user, null, 2))
                                 }
                             }
                         }
@@ -660,7 +660,7 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
                 if (req.body.id && req.body.title && req.body.desc && req.body.arrAir && req.body.depAir && req.body.depTime) {
-                    if (await FileExists(`${dataPath}/events/${atob(req.body.id)}.json`)) {
+                    if (await FileExists(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`)) {
                         const event = JSON.parse(await FileRead(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`))
                         if (event.title != req.body.title) {
                             event.title = req.body.title
@@ -677,7 +677,7 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
                         if (event.depTime != req.body.depTime) {
                             event.depTime = req.body.depTime + "Z"
                         }
-                        FileWrite(`${dataPath}/events/${atob(req.body.id)}.json`, JSON.stringify(event, null, 2))
+                        FileWrite(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`, JSON.stringify(event, null, 2))
                         reloadData()
                         setTimeout(function () {
                             res.redirect("/admin/events")
@@ -710,7 +710,7 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
                 if (req.body.id) {
-                    if(await FileExists(`${dataPath}/events/${atob(req.body.id)}.json`) == true){
+                    if (await FileExists(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`) == true){
                         FileRemove(`${dataPath}/events/${atob(req.body.id)}.json`)
                         reloadData()
                         setTimeout(function () {
@@ -760,7 +760,7 @@ app.post("/newPirep", async function (req, res){
                     status: "n"
                 }
                 author.pireps.push(pirepObj.id)
-                FileWrite(`${usersPath}/${pirepObj.author}.json`, JSON.stringify(author, null, 2))
+                FileWrite(`${usersPath}/${sanitize(pirepObj.author)}.json`, JSON.stringify(author, null, 2))
                 reloadUsers();
                 FileWrite(`${dataPath}/pireps/${pirepObj.id}.json`, JSON.stringify(pirepObj, null, 2))
                 reloadData();
@@ -822,7 +822,7 @@ app.post("/OSOR", async function (req, res){
         if(await isNormalUser(cookies)){
             const user = await getUserData(cookies);
             user.tokens = [];
-            FileWrite(`${usersPath}/${user.username}.json`, JSON.stringify(user, null, 2))
+            FileWrite(`${usersPath}/${sanitize(user.username)}.json`, JSON.stringify(user, null, 2))
             res.redirect("/logout")
         }
     }catch (error) {
@@ -842,7 +842,7 @@ app.post("/updateUser", async function (req, res){
                      user.name = req.body.name
                 }    
             }
-            FileWrite(`${usersPath}/${user.username}.json`, JSON.stringify(user, null, 2))
+            FileWrite(`${usersPath}/${sanitize(user.username)}.json`, JSON.stringify(user, null, 2))
             res.redirect("/account")
         }
     }catch (error){
@@ -858,7 +858,7 @@ app.post("/admin/reqs/updateUser", async function (req, res){
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
                 if (req.body.uid) {
-                    if (await FileExists(`${usersPath}/${btoa(req.body.uid)}.json`)) {
+                    if (await FileExists(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`)) {
                         const user = JSON.parse(await FileRead(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`))
                         console.log(req.body)
                         if(user.name != req.body.name){
@@ -872,7 +872,7 @@ app.post("/admin/reqs/updateUser", async function (req, res){
                             console.log(user)
                         }
                         user.tokens = [];
-                        FileWrite(`${usersPath}/${btoa(req.body.uid)}.json`, JSON.stringify(user, null, 2))
+                        FileWrite(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`, JSON.stringify(user, null, 2))
                         reloadUsers()
                         setTimeout(function() {
                             res.redirect("/admin/accounts")
@@ -905,11 +905,11 @@ app.put("/admin/reqs/unremUser", async function (req, res){
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
                 if (req.body.uid) {
-                    if (await FileExists(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`)) {
+                    if (await FileExists(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`)) {
                         const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`))
                         user.revoked = false;
                         user.tokens = [];
-                        FileWrite(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`, JSON.stringify(user, null, 2))
+                        FileWrite(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`, JSON.stringify(user, null, 2))
                         reloadUsers()
                         res.redirect("/admin/accounts")
                     } else {
@@ -939,11 +939,11 @@ app.delete("/admin/reqs/remUser", async function (req, res){
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
                 if (req.body.uid) {
-                    if (await FileExists(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`) ) {
+                    if (await FileExists(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`) ) {
                         const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`))
                         user.revoked = true;
                         user.tokens = [];
-                        FileWrite(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`, JSON.stringify(user, null, 2))
+                        FileWrite(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`, JSON.stringify(user, null, 2))
                         reloadUsers()
                         res.redirect("/admin/accounts")
                     } else {
@@ -976,10 +976,10 @@ app.delete("/admin/reqs/remData", async function (req, res){
                     case "p":
                         if (req.body.id) {
                             console.log(req.body)
-                            if (await FileExists(`${dataPath}/pireps/${req.body.id}.json`)) {
+                            if (await FileExists(`${dataPath}/pireps/${sanitize(req.body.id)}.json`)) {
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "d";
-                                FileWrite(`${dataPath}/pireps/${req.body.id}.json`, JSON.stringify(pirep, null, 2))
+                                FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
                                 res.sendStatus(200)
                             } else {
@@ -991,8 +991,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                         break;
                     case "r":
                         if (req.body.id) {
-                                if (await FileExists(`${dataPath}/routes/${req.body.id}.json`)) {
-                                    await FileRemove(`${dataPath}/routes/${req.body.id}.json`);
+                                if (await FileExists(`${dataPath}/routes/${sanitize(req.body.id)}.json`)) {
+                                    await FileRemove(`${dataPath}/routes/${sanitize(req.body.id)}.json`);
                                     reloadData();
                                     setTimeout(() => {
                                         res.redirect("/admin/pireps")
@@ -1007,8 +1007,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                     case "a":
                         if(req.body.id){
                             if(req.body.id != "MAIN"){
-                            if (await FileExists(`${dataPath}/operators/${req.body.id}.json`)) {
-                                await FileRemove(`${dataPath}/operators/${req.body.id}.json`);
+                            if (await FileExists(`${dataPath}/operators/${sanitize(req.body.id)}.json`)) {
+                                await FileRemove(`${dataPath}/operators/${sanitize(req.body.id)}.json`);
                                 reloadData();
                                 setTimeout(() => {
                                     res.redirect("/admin/pireps")
@@ -1025,8 +1025,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                         break;
                     case "c":
                         if (req.body.id) {
-                            if (await FileExists(`${dataPath}/aircraft/${req.body.id}.json`)) {
-                                await FileRemove(`${dataPath}/aircraft/${req.body.id}.json`);
+                            if (await FileExists(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`)) {
+                                await FileRemove(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`);
                                 reloadData();
                                 setTimeout(() => {
                                     res.redirect("/admin/pireps")
@@ -1065,10 +1065,10 @@ app.post("/admin/reqs/newData", async function (req, res){
                     case "p":
                         if(req.body.id){
                             console.log(req.body)
-                            if (await FileExists(`${dataPath}/pireps/${req.body.id}.json`)) {
+                            if (await FileExists(`${dataPath}/pireps/${sanitize(req.body.id)}.json`)) {
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "a";
-                                FileWrite(`${dataPath}/pireps/${req.body.id}.json`, JSON.stringify(pirep, null, 2))
+                                FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
                                 res.sendStatus(200)
                             }else{
@@ -1084,8 +1084,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 name: req.body.vicName,
                                 id: uniqueString()
                             };
-                            if(await FileExists(`${dataPath}/aircraft/${newObj.id}.json`) == false){
-                                await FileWrite(`${dataPath}/aircraft/${newObj.id}.json`, JSON.stringify(newObj, null,2));
+                            if (await FileExists(`${dataPath}/aircraft/${sanitize(newObj.id)}.json`) == false){
+                                await FileWrite(`${dataPath}/aircraft/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null,2));
                                 reloadData();
                                 setTimeout(() => {
                                     res.redirect("/admin/pireps")
@@ -1104,8 +1104,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                     name: req.body.routeName,
                                     id: uniqueString()
                                 };
-                                if (await FileExists(`${dataPath}/routes/${newObj.id}.json`) == false) {
-                                    await FileWrite(`${dataPath}/routes/${newObj.id}.json`, JSON.stringify(newObj, null, 2));
+                                if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false) {
+                                    await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                     reloadData();
                                     setTimeout(() => {
                                         res.redirect("/admin/pireps")
@@ -1124,8 +1124,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 name: req.body.airName,
                                 id: uniqueString()
                             };
-                            if (await FileExists(`${dataPath}/operators/${newObj.id}.json`) == false) {
-                                await FileWrite(`${dataPath}/operators/${newObj.id}.json`, JSON.stringify(newObj, null, 2));
+                            if (await FileExists(`${dataPath}/operators/${sanitize(newObj.id)}.json`) == false) {
+                                await FileWrite(`${dataPath}/operators/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                 reloadData();
                                 setTimeout(() => {
                                     res.redirect("/admin/pireps")
@@ -1161,7 +1161,7 @@ app.post("/admin/reqs/newUser", async (req, res) => {
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
                 if (req.body.username && req.body.password && req.body.Name && req.body.CPW) {
-                    if (await FileExists(`${usersPath}/${btoa(req.body.username)}.json`) == false) {
+                    if (await FileExists(`${usersPath}/${btoa(sanitize(req.body.username))}.json`) == false) {
                         const admin = req.body.admin ? true : false;
                         const newUser = {
                             username: btoa(req.body.username),
@@ -1180,7 +1180,7 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                             },
                             revoked: false
                         }
-                        FileWrite(`${usersPath}/${btoa(req.body.username)}.json`, JSON.stringify(newUser, null, 2))
+                        FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
                         reloadUsers()
                         res.redirect("/admin/accounts")
                     } else {
@@ -1253,14 +1253,14 @@ app.post("/login2", async function (req, res) {
         const clientToken = req.body.token
         const uid = atob(clientToken).split(":")[0]
         const token = atob(clientToken).split(":")[1]
-        const userExists = await FileExists(`${usersPath}/` + uid + '.json')
+        const userExists = await FileExists(`${usersPath}/` + sanitize(uid) + '.json')
         if (userExists) {
             const user = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'));
             if (user.revoked != true) {
                 if (user.tokens.includes(token)) {
                     res.send('/home')
                     user.meta.llogin = new Date();
-                    FileWrite(`${usersPath}/` + uid + '.json', JSON.stringify(user, null, 2))
+                    FileWrite(`${usersPath}/` + sanitize(uid) + '.json', JSON.stringify(user, null, 2))
                     reloadUsers()
                 } else {
                     res.clearCookie('authToken').send('/?r=ii')
@@ -1278,7 +1278,7 @@ app.post("/login2", async function (req, res) {
 
 app.post("/login", async function (req, res) {
     if (req.body.uidI && req.body.pwdI) {
-        const userExists = await FileExists(`${usersPath}/` + btoa(req.body.uidI) + '.json')
+        const userExists = await FileExists(`${usersPath}/` + btoa(sanitize(req.body.uidI)) + '.json')
         if (userExists) {
             const user = JSON.parse(await FileRead(`${usersPath}/` + btoa(sanitize(req.body.uidI)) + '.json'))
             if (user.revoked == false) {
@@ -1291,7 +1291,7 @@ app.post("/login", async function (req, res) {
                         const clientToken = btoa(userwToken);
                         await user.tokens.push(token);
                         user.meta.llogin = new Date();
-                        await FileWrite(`${usersPath}/` + btoa(req.body.uidI) + '.json', JSON.stringify(user, null, 2));
+                        await FileWrite(`${usersPath}/` + btoa(sanitize(req.body.uidI)) + '.json', JSON.stringify(user, null, 2));
                         reloadUsers()
                         res.cookie('authToken', clientToken, { maxAge: new Date().getTime() + (10 * 365 * 24 * 60 * 60) }).redirect('/home')
                     } else {
@@ -1315,7 +1315,7 @@ app.post("/CPWD", async (req, res) => {
         const clientToken = cookies.authToken
         const uid = atob(clientToken).split(":")[0]
         const token = atob(clientToken).split(":")[1]
-        const userExists = await FileExists(`${usersPath}/` + uid + '.json')
+        const userExists = await FileExists(`${usersPath}/` + sanitize(uid) + '.json')
         if (userExists) {
             const userData = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
             if (userData.tokens.includes(token.slice(0, token.length - 1))) {
@@ -1324,7 +1324,7 @@ app.post("/CPWD", async (req, res) => {
                     userData.password = bcrypt.hashSync(req.body.pwd, 10)
                     userData.tokens = [];
                     delete userData.meta['cp']
-                    FileWrite(`${usersPath}/` + uid + '.json', JSON.stringify(userData, null, 2));
+                    FileWrite(`${usersPath}/` + sanitize(uid) + '.json', JSON.stringify(userData, null, 2));
                     reloadUsers()
                     res.clearCookie('authToken').redirect("/");
                 } else {
