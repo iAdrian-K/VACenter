@@ -1,4 +1,9 @@
 const express = require('express');
+const RateLimit = require('express-rate-limit');
+let limiter = new RateLimit({
+    windowMs: 1*60*1000,
+    max: 5
+})
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -44,6 +49,7 @@ pireps.set("vdfhiobfdjnl", {
 
 app.use(urlEncodedParser)
 app.use(cors())
+app.use(limiter)
 
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs')
