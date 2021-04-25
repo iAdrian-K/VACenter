@@ -78,13 +78,13 @@
             </div>
         </div>
     </nav>
-    <div class="w-100 h-auto p-5">
-        <h1>User <%= Buffer.from(user.username, 'base64').toString(); %></h1>
-        <hr>
+    <div class="w-100 h-auto p-5 text-center">
+        <i class="display-1 text-dark bi bi-person"></i>
+        <h1 class="display-2 mt-1">User <%= Buffer.from(user.username, 'base64' ).toString(); %></h1>
+        <br>
         <div class="px-3 py-1 w-100">
         <h2><i class="bi bi-file-person"></i> General</h2>
-        <hr class="w-25">
-        <form action="/updateUser" method="post" class="form-control">
+        <form action="/updateUser" method="post" class="form-control p-3 mt-3">
             <label>Name: 
             <input class="form-control" type="text" name="name" value="<%= user.name %>">
             </label><br>
@@ -94,13 +94,12 @@
         <br>
         <div class="px-3 py-1 w-100">
             <h2><i class="bi bi-file-lock"></i> Security</h2>
-            <hr class="w-25">
-            <form action="OSOR" method="post">
+            <form action="OSOR" method="post" class="p-3 mt-3">
             <button class="btn btn-primary">Log out of all sessions</button>
-            </form>
-            <br>
-            <form action="CPWD" method="post" class="w-25">
-                <input class="form-control" name="pwd" placeholder="New Password"><br>
+            </form> 
+            <form action="CPWD" method="post" class="form-control py-3 mt-3">
+                <h3>New Password</h3>
+                <input class="form-control halfBgFullSm mx-auto"  name="pwd" placeholder="New Password"><br>
                 <button class="btn btn-danger">Reset Password</button>
             </form>
             

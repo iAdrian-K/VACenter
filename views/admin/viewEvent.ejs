@@ -80,9 +80,9 @@
         </div>
     </nav>
     <div class="w-100 h-auto p-5 text-center">
-        <h1>Event <%= targetEvent.title %>
-        </h1>
-        <hr>
+        <i class="display-1 text-dark bi bi-calendar2-event"></i>
+        <h1 class="display-2 mt-1"><%= targetEvent.title %></h1>
+        <br>
         <form class="halfBgFullSm form-control mx-auto" action="/admin/reqs/updateEvent" method="POST">
             <input class="visually-hidden" value="<%= Buffer.from(targetEvent.id).toString(`base64`) %>" name="id">
                 <p class="form-label">

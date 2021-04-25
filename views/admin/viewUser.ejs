@@ -80,8 +80,9 @@
         </div>
     </nav>
     <div class="w-100 h-auto p-5 text-center">
-        <h1>User <%= config.code + Buffer.from(targetUser.username, 'base64').toString(); %></h1>
-        <hr>
+        <i class="display-1 text-dark bi bi-person-circle"></i>
+        <h1 class="display-2 mt-1">User <%= config.code + Buffer.from(targetUser.username, 'base64' ).toString(); %></h1>
+        <br>
         <form class="halfBgFullSm form-control mx-auto" action="/admin/reqs/updateUser" method="POST" onsubmit="document.getElementsByName('uid')[0].removeAttribute('disabled');">
             <label class="w-100 px-5 py-2 mt-2">
                 <p class="form-label">
