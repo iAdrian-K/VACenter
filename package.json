@@ -1,5 +1,5 @@
 {
-  "name": "vacenter-server",
+  "name": "vacenter",
   "version": "2.0.0",
   "description": "The server files for VACenter 2.0",
   "main": "server/index.js",

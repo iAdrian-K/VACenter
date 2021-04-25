@@ -3,7 +3,7 @@ const RateLimit = require('express-rate-limit');
 const sanitize = require("sanitize-filename");
 let limiter = new RateLimit({
     windowMs: 1*60*1000,
-    max: 25,
+    max: 100,
     message: "Limits exceded, contact your system admin if you think this is an error."
 })
 const bodyParser = require('body-parser');
