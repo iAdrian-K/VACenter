@@ -348,31 +348,6 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
-                case "/admin":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin', {
-                                    config: config,
-                                    user: userInfo,
-                                    stats: stats,
-                                    users: users,
-                                    active: req.path.split('/')[1]
-                                })
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
                 case "/account":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -466,7 +441,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                 case "/admin/vacenter":
@@ -489,7 +464,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                     break;
@@ -513,7 +488,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                 case "/admin/viewUser":
@@ -545,7 +520,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                 case "/admin/accounts":
@@ -568,7 +543,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                 case "/admin/pireps":
@@ -594,7 +569,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                 case "/admin/events":
@@ -617,7 +592,7 @@ app.get('*', async (req, res) => {
                             res.sendStatus(403)
                         }
                     } else {
-                        res.sendStatus(401)
+                        res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
                 case "/changePWD":
