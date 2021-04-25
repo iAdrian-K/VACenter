@@ -37,6 +37,21 @@
                     
                 </ul>
                 <ul class="navbar-nav mb-2 float-end me-5 mb-lg-0">
+                    <% if(user.admin){%>
+                    <li class="nav-item dropdown me-5">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/admin/accounts">Accounts</a></li>
+                            <li><a class="dropdown-item" href="/admin/events">Events</a></li>
+                            <li><a class="dropdown-item" href="/admin/pireps">Pireps</a></li>
+                            <li><a class="dropdown-item" href="/admin/news">News</a></li>
+                            <li><a class="dropdown-item" href="/admin/vacenter">Settings</a></li>
+                        </ul>
+                    </li>    
+                    <%}%>
                     <li class="nav-item dropdown me-5">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
@@ -57,6 +72,11 @@
             </div>
         </div>
     </nav>
+    <div class="w-100 h-auto p-5 text-center">
+        <i class="display-1 text-warning bi bi-cone-striped"></i>
+        <h1 class="display-1">Coming Soon</h1>
+        <h3 class="text-muted">Dashboard is under construction</h3>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
         crossorigin="anonymous"></script>
