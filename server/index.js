@@ -1,5 +1,6 @@
 const express = require('express');
 const RateLimit = require('express-rate-limit');
+const sanitize = require("sanitize-filename");
 let limiter = new RateLimit({
     windowMs: 1*60*1000,
     max: 25,
@@ -155,7 +156,7 @@ function remToken(tokens) {
         const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length)
         const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
             if (exists) {
-                FileRead(`${usersPath}/` + userID + '.json').then(rawUser => {
+                FileRead(`${usersPath}/` + sanitze(userID) + '.json').then(rawUser => {
                     const user = JSON.parse(rawUser)
                     if (user.tokens.includes(realToken)) {
                         user.tokens = arrayRemove(user.tokens, realToken);
@@ -179,7 +180,7 @@ function isAdminUser(tokens) {
                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
                 const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
                     if (exists) {
-                        FileRead(`${usersPath}/` + userID + '.json').then(rawUser => {
+                        FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
                             const user = JSON.parse(rawUser)
                             const correctToken = user.tokens.includes(realToken);
                             if (correctToken) {
@@ -216,7 +217,7 @@ function isNormalUser(tokens) {
                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
                 const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
                     if (exists) {
-                        FileRead(`${usersPath}/` + userID + '.json').then(rawUser => {
+                        FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
                             const user = JSON.parse(rawUser)
                             const correctToken = (user.tokens.includes(realToken) && user.revoked == false);
                             resolve(correctToken);
@@ -261,7 +262,7 @@ function getUserData(tokens){
                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
                 const userExists = FileExists(`${usersPath}/` + userID + '.json').then(exists => {
                     if (exists) {
-                        FileRead(`${usersPath}/` + userID + '.json').then(rawUser => {
+                        FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
                             const user = JSON.parse(rawUser)
                             resolve(user);
                         })
@@ -314,7 +315,7 @@ app.get('*', async (req, res) => {
                 case "/news":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (!userInfo.meta.cp) {
                             delete userInfo['password']
                             delete userInfo['tokens']
@@ -337,7 +338,7 @@ app.get('*', async (req, res) => {
                 case "/home":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (!userInfo.meta.cp) {
                             delete userInfo['password']
                             delete userInfo['tokens']
@@ -358,7 +359,7 @@ app.get('*', async (req, res) => {
                 case "/account":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (!userInfo.meta.cp) {
                             delete userInfo['password']
                             delete userInfo['tokens']
@@ -379,7 +380,7 @@ app.get('*', async (req, res) => {
                 case "/pirep":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (!userInfo.meta.cp) {
                             delete userInfo['password']
                             delete userInfo['tokens']
@@ -404,7 +405,7 @@ app.get('*', async (req, res) => {
                 case "/events":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (!userInfo.meta.cp) {
                             delete userInfo['password']
                             delete userInfo['tokens']
@@ -426,12 +427,12 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
                                 if (await FileExists(`${dataPath}/events/` + atob(req.query.id) + '.json')) {
-                                    const targetEvent = JSON.parse(await FileRead(`${dataPath}/events/` + atob(req.query.id) + '.json'));
+                                    const targetEvent = JSON.parse(await FileRead(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json'));
                                     res.render('admin/viewEvent', {
                                         config: clientConfig,
                                         user: userInfo,
@@ -455,7 +456,7 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
@@ -479,7 +480,7 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
@@ -502,12 +503,12 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
                                 if (await FileExists(`${usersPath}/` + req.query.u + '.json')) {
-                                    const targetUser = JSON.parse(await FileRead(`${usersPath}/` + req.query.u + '.json'));
+                                    const targetUser = JSON.parse(await FileRead(`${usersPath}/` + sanitize(req.query.u) + '.json'));
                                     delete targetUser['password']
                                     delete targetUser['tokens']
                                     targetUser.atobUsername = atob(targetUser.username)
@@ -534,7 +535,7 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
@@ -557,7 +558,7 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
@@ -583,7 +584,7 @@ app.get('*', async (req, res) => {
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
@@ -605,7 +606,7 @@ app.get('*', async (req, res) => {
                 case "/changePWD":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (userInfo.meta.cp) {
                             res.render("changePWD")
                         } else {
@@ -629,10 +630,10 @@ app.get('*', async (req, res) => {
                         const unBased = atob(CToken)
                         const userID = unBased.split(":")[0];
                         const realTokenPreAdjust = unBased.split(":")[1];
-                        console.log(await FileRead(`${usersPath}/${userID}.json`))
+                        console.log(await FileRead(`${usersPath}/${sanitize(userID)}.json`))
                         if(userID){
                             if(await FileExists(`${usersPath}/${userID}.json`)){
-                                const user = JSON.parse(await FileRead(`${usersPath}/${userID}.json`))
+                                const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(userID)}.json`))
                                 const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
                                 var index = user.tokens.indexOf(realToken);
                                 if (index > -1) {
@@ -660,7 +661,7 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
             if (await isAdminUser(cookies)) {
                 if (req.body.id && req.body.title && req.body.desc && req.body.arrAir && req.body.depAir && req.body.depTime) {
                     if (await FileExists(`${dataPath}/events/${atob(req.body.id)}.json`)) {
-                        const event = JSON.parse(await FileRead(`${dataPath}/events/${atob(req.body.id)}.json`))
+                        const event = JSON.parse(await FileRead(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`))
                         if (event.title != req.body.title) {
                             event.title = req.body.title
                         }
@@ -858,7 +859,7 @@ app.post("/admin/reqs/updateUser", async function (req, res){
             if (await isAdminUser(cookies)) {
                 if (req.body.uid) {
                     if (await FileExists(`${usersPath}/${btoa(req.body.uid)}.json`)) {
-                        const user = JSON.parse(await FileRead(`${usersPath}/${btoa(req.body.uid)}.json`))
+                        const user = JSON.parse(await FileRead(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`))
                         console.log(req.body)
                         if(user.name != req.body.name){
                             user.name = req.body.name
@@ -905,7 +906,7 @@ app.put("/admin/reqs/unremUser", async function (req, res){
             if (await isAdminUser(cookies)) {
                 if (req.body.uid) {
                     if (await FileExists(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`)) {
-                        const user = JSON.parse(await FileRead(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`))
+                        const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`))
                         user.revoked = false;
                         user.tokens = [];
                         FileWrite(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`, JSON.stringify(user, null, 2))
@@ -939,7 +940,7 @@ app.delete("/admin/reqs/remUser", async function (req, res){
             if (await isAdminUser(cookies)) {
                 if (req.body.uid) {
                     if (await FileExists(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`) ) {
-                        const user = JSON.parse(await FileRead(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`))
+                        const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`))
                         user.revoked = true;
                         user.tokens = [];
                         FileWrite(`${usersPath}/${decodeURIComponent(req.body.uid)}.json`, JSON.stringify(user, null, 2))
@@ -976,7 +977,7 @@ app.delete("/admin/reqs/remData", async function (req, res){
                         if (req.body.id) {
                             console.log(req.body)
                             if (await FileExists(`${dataPath}/pireps/${req.body.id}.json`)) {
-                                const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${req.body.id}.json`))
+                                const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "d";
                                 FileWrite(`${dataPath}/pireps/${req.body.id}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
@@ -1065,7 +1066,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                         if(req.body.id){
                             console.log(req.body)
                             if (await FileExists(`${dataPath}/pireps/${req.body.id}.json`)) {
-                                const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${req.body.id}.json`))
+                                const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "a";
                                 FileWrite(`${dataPath}/pireps/${req.body.id}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
@@ -1254,7 +1255,7 @@ app.post("/login2", async function (req, res) {
         const token = atob(clientToken).split(":")[1]
         const userExists = await FileExists(`${usersPath}/` + uid + '.json')
         if (userExists) {
-            const user = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'));
+            const user = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'));
             if (user.revoked != true) {
                 if (user.tokens.includes(token)) {
                     res.send('/home')
@@ -1279,7 +1280,7 @@ app.post("/login", async function (req, res) {
     if (req.body.uidI && req.body.pwdI) {
         const userExists = await FileExists(`${usersPath}/` + btoa(req.body.uidI) + '.json')
         if (userExists) {
-            const user = JSON.parse(await FileRead(`${usersPath}/` + btoa(req.body.uidI) + '.json'))
+            const user = JSON.parse(await FileRead(`${usersPath}/` + btoa(sanitize(req.body.uidI)) + '.json'))
             if (user.revoked == false) {
                 bcrypt.compare(req.body.pwdI, user.password, async (err, same) => {
                     if (err) {
@@ -1316,7 +1317,7 @@ app.post("/CPWD", async (req, res) => {
         const token = atob(clientToken).split(":")[1]
         const userExists = await FileExists(`${usersPath}/` + uid + '.json')
         if (userExists) {
-            const userData = JSON.parse(await FileRead(`${usersPath}/` + uid + '.json'))
+            const userData = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
             if (userData.tokens.includes(token.slice(0, token.length - 1))) {
                 if (req.body.pwd) {
                     console.log(req.body)
