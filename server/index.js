@@ -711,7 +711,7 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
             if (await isAdminUser(cookies)) {
                 if (req.body.id) {
                     if (await FileExists(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`) == true){
-                        FileRemove(`${dataPath}/events/${atob(req.body.id)}.json`)
+                        FileRemove(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`)
                         reloadData()
                         setTimeout(function () {
                             res.redirect("/admin/events")
