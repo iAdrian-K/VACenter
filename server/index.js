@@ -1435,9 +1435,6 @@ update.on('end', () => {
     console.log('Application updated');
 });
 
-// Start checking
-
-autoupdater.fire('check');
 app.post("/update", async function (req, res) {
     try {
         const cookies = getAppCookies(req);
