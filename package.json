@@ -3,6 +3,10 @@
   "version": "2.0.0",
   "description": "The server files for VACenter 2.0",
   "main": "server/index.js",
+  "auto-updater": {
+    "repo": "VACenter/VACenter",
+    "branch": "master"
+  },
   "scripts": {
     "start": "nodemon server/index.js --config nodemon.json"
   },
@@ -16,6 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "atob": "^2.1.2",
+    "auto-updater": "^1.0.2",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "btoa": "^1.2.1",

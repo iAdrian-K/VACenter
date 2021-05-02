@@ -1,6 +1,8 @@
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 const sanitize = require("sanitize-filename");
+const cv = require('./../package.json').version;
+console.log(cv)
 let limiter = new RateLimit({
     windowMs: 1*60*1000,
     max: 100,
@@ -463,6 +465,7 @@ app.get('*', async (req, res) => {
                                 res.render('admin/settings', {
                                     config: clientConfig,
                                     user: userInfo,
+                                    cv: cv,
                                     active: req.path.split('/')[1]
                                 })
                             } else {
@@ -1276,6 +1279,8 @@ app.post("/login2", async function (req, res) {
     }
 })
 
+
+
 app.post("/login", async function (req, res) {
     if (req.body.uidI && req.body.pwdI) {
         const userExists = await FileExists(`${usersPath}/` + btoa(sanitize(req.body.uidI)) + '.json')
@@ -1391,3 +1396,93 @@ function FileRead(path) {
     })
 }
 console.log(uniqueString())
+var AutoUpdater = require('auto-updater');
+
+var autoupdater = new AutoUpdater({
+    pathToJson: '',
+    autoupdate: false,
+    checkgit: true,
+    jsonhost: 'raw.githubusercontent.com',
+    contenthost: 'codeload.github.com',
+    progressDebounce: 0,
+    devmode: false
+});
+//TEST
+// State the events
+autoupdater.on('git-clone', function () {
+    console.error("You have installed this with Git, as such updating is not possible.");
+});
+autoupdater.on('check.up-to-date', function (v) {
+    console.info("You have the latest version: " + v);
+});
+autoupdater.on('check.out-dated', function (v_old, v) {
+    console.warn("Your version is outdated. " + v_old + " of " + v);
+    autoupdater.fire('download-update'); // If autoupdate: false, you'll have to do this manually.
+    // Maybe ask if the'd like to download the update.
+});
+autoupdater.on('update.downloaded', function () {
+    console.log("Update downloaded and ready for install");
+    autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
+});
+autoupdater.on('update.not-installed', function () {
+    console.log("The Update was already in your folder! It's read for install");
+    autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
+});
+autoupdater.on('update.extracted', function () {
+    console.log("Update extracted successfully!");
+    console.warn("RESTART THE APP!");
+    console.log("This is pid " + process.pid);
+    setTimeout(function () {
+        process.on("exit", function () {
+            require("child_process").spawn(process.argv.shift(), process.argv, {
+                cwd: process.cwd(),
+                detached: true,
+                stdio: "inherit"
+            });
+        });
+        process.exit();
+    }, 5000);
+});
+autoupdater.on('download.start', function (name) {
+    console.log("Starting downloading: " + name);
+});
+autoupdater.on('download.progress', function (name, perc) {
+    process.stdout.write("Downloading " + perc + "% \033[0G");
+});
+autoupdater.on('download.end', function (name) {
+    console.log("Downloaded " + name);
+});
+autoupdater.on('download.error', function (err) {
+    console.error("Error when downloading: " + err);
+});
+autoupdater.on('end', function () {
+    console.log("The app is ready to function");
+});
+autoupdater.on('error', function (name, e) {
+    console.error(name, e);
+});
+
+// Start checking
+
+autoupdater.fire('check');
+app.post("/update", async function (req, res) {
+    try {
+        const cookies = getAppCookies(req);
+        if (await isNormalUser(cookies)) {
+            if (await isAdminUser(cookies)) {
+                res.sendStatus(200);
+                
+                autoupdater.fire('check');
+                console.log("TEST")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500)
+        res.send(`${error}`)
+    }
+})
