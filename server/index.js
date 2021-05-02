@@ -1436,7 +1436,7 @@ autoupdater.on('update.extracted', function () {
         process.on("exit", function () {
             require("child_process").spawn(process.argv.shift(), process.argv, {
                 cwd: process.cwd(),
-                detached: true,
+                detached: false,
                 stdio: "inherit"
             });
         });
