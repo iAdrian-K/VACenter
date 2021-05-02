@@ -91,6 +91,18 @@
                         <hr><br>
                         <h3> <i class="bi bi-clock"></i> Departure Time</h3>
                         <p class="loadInBTZ"><%- new Date(event.depTime) %></p>
+                        <br>
+                        <h3><i class="bi bi-arrow-up-right"></i> Departure Airport</h3>
+                        <p>
+                            <i class="bi bi-geo"></i> <%= event.depAir %>
+                        </p>
+                        <br>
+                        <h3><i class="bi bi-arrow-down-right"></i> Arrival Airport</h3>
+                        <p>
+                            <i class="bi bi-geo"></i>
+                            <%= event.arrAir %>
+                        </p>
+                        <br>
                 <%})%>
                 <% if(events.size == 0){%>
                     <hr>

@@ -792,7 +792,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             body: req.body.desc,
                             arrAir: req.body.arrAir,
                             depAir: req.body.depAir,
-                            depTime: new Date(req.body.depTime).toISOString() + "Z"
+                            depTime: req.body.depTime + "Z"
                         }
                         FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
                         reloadData()
