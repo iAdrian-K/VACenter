@@ -1439,7 +1439,7 @@ update.on('end', () => {
 
             require("child_process").spawn(process.argv.shift(), process.argv, {
                 cwd: process.cwd(),
-                detached: true,
+                detached: false,
                 stdio: "inherit"
             });
         });
