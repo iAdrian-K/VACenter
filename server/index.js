@@ -1396,70 +1396,43 @@ function FileRead(path) {
     })
 }
 console.log(uniqueString())
-var AutoUpdater = require('auto-updater');
+const AutoUpdate = require('gh-autoupdater');
 
-var autoupdater = new AutoUpdater({
-    pathToJson: '',
-    autoupdate: false,
-    checkgit: true,
-    jsonhost: 'raw.githubusercontent.com',
-    contenthost: 'codeload.github.com',
-    progressDebounce: 0,
-    devmode: false
+const update = new AutoUpdate({
+    repo: 'https://github.com/VACenter/VACenter',
+    branch: 'master',
+    temp: './temp-update',
+    testing: false,
 });
-//TEST
-// State the events
-autoupdater.on('git-clone', function () {
-    console.error("You have installed this with Git, as such updating is not possible.");
+
+// Initialize update
+update.autoUpdate();
+
+// Events
+update.on('out-dated', (local, remote) => {
+    console.log('Out-dated: Local-' + local + ' Remote-' + remote);
 });
-autoupdater.on('check.up-to-date', function (v) {
-    console.info("You have the latest version: " + v);
+update.on('up-to-date', (local) => {
+    console.log('Up to date: local-' + local);
 });
-autoupdater.on('check.out-dated', function (v_old, v) {
-    console.warn("Your version is outdated. " + v_old + " of " + v);
-    autoupdater.fire('download-update'); // If autoupdate: false, you'll have to do this manually.
-    // Maybe ask if the'd like to download the update.
+update.on('modules.start', () => {
+    console.log('Updating dependencies...');
 });
-autoupdater.on('update.downloaded', function () {
-    console.log("Update downloaded and ready for install");
-    autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
+update.on('modules.end', (modules) => {
+    console.log('Dependencies updated: ');
+    console.log(modules);
 });
-autoupdater.on('update.not-installed', function () {
-    console.log("The Update was already in your folder! It's read for install");
-    autoupdater.fire('extract'); // If autoupdate: false, you'll have to do this manually.
+update.on('download.start', (repo) => {
+    console.log('Downloading files from: ' + repo);
 });
-autoupdater.on('update.extracted', function () {
-    console.log("Update extracted successfully!");
-    console.warn("RESTART THE APP!");
-    console.log("This is pid " + process.pid);
-    setTimeout(function () {
-        process.on("exit", function () {
-            require("child_process").spawn(process.argv.shift(), process.argv, {
-                cwd: process.cwd(),
-                detached: false,
-                stdio: "inherit"
-            });
-        });
-        process.exit();
-    }, 5000);
+update.on('download.end', () => {
+    console.log('Files downloaded');
 });
-autoupdater.on('download.start', function (name) {
-    console.log("Starting downloading: " + name);
+update.on('update.start', () => {
+    console.log('Copying files...');
 });
-autoupdater.on('download.progress', function (name, perc) {
-    process.stdout.write("Downloading " + perc + "% \033[0G");
-});
-autoupdater.on('download.end', function (name) {
-    console.log("Downloaded " + name);
-});
-autoupdater.on('download.error', function (err) {
-    console.error("Error when downloading: " + err);
-});
-autoupdater.on('end', function () {
-    console.log("The app is ready to function");
-});
-autoupdater.on('error', function (name, e) {
-    console.error(name, e);
+update.on('end', () => {
+    console.log('Application updated');
 });
 
 // Start checking
@@ -1472,7 +1445,7 @@ app.post("/update", async function (req, res) {
             if (await isAdminUser(cookies)) {
                 res.sendStatus(200);
                 
-                autoupdater.fire('check');
+                update.autoUpdate();
                 console.log("TEST")
             } else {
                 res.sendStatus(403);
