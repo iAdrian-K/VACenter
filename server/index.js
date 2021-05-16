@@ -1396,3 +1396,24 @@ function FileRead(path) {
     })
 }
 console.log(uniqueString())
+
+const fetch = require('node-fetch');
+
+function update(){
+return new Promise(resolve => {
+    let url = "https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json";
+
+    let settings = { method: "Get" };
+
+    fetch(url, settings)
+        .then(res => res.json())
+        .then((json) => {
+            if (cv != json.currentVersion ){
+                resolve([true, json.currentVersion]);
+
+            }else{
+                resolve([false, null])
+            }
+        });
+})
+}
