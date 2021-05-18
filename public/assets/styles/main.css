@@ -16,6 +16,19 @@ body{
   .halfBgFullSm{
     width: 100%;
   }
+  .specialCheckboxContainer{
+    text-align: center !important;
+  }
+  .specialCheckbox{
+    width: 7.5vh;
+    height:7.5vh;
+    margin-bottom: 10px;
+    text-align:center;
+    float:none !important;
+  }
+  .iconSize{
+    font-size: 1.5rem;
+  }
   nav{
     overflow-y: scroll;
     max-height: 100vh !important;

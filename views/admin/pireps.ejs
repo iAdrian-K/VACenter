@@ -42,7 +42,7 @@
                     </li>
 
                 </ul>
-                <ul class="navbar-nav mb-2 float-end me-5 mb-lg-0">
+                <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
                     <% if(user.admin){%>
                         <li class="nav-item dropdown me-5">
                             <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button"
@@ -79,14 +79,14 @@
             </div>
         </div>
     </nav>
-    <div class="w-100 h-auto p-5 text-center">
+    <div class="w-100 h-auto py-5 px-2 px-lg-5 text-center">
         <i class="display-1 text-dark bi bi-file-earmark-plus"></i>
         <h1 class="display-2 mt-1">PIREPS</h1>
         <br>
         <hr class="w-75 mx-auto">
-        <div class='form-control w-75 mx-auto px-5 py-3'>
+        <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 py-3'>
             <h2>Current PIREPS</h2>
-            <p>Times given in your TZ</p>
+            <p>Times given in your TZ, you can scroll left and right to view more data.</p>
             <button class="btn btn-primary" onclick="document.getElementById('PIREPTable').classList.toggle('d-none')">Toggle Viewing</button>
             <br>
             <div class="table-responsive d-none" id="PIREPTable">
@@ -133,8 +133,9 @@
                             </td>
                             <td>
                                 <% if(pirep.status == "n"){%>
-                                    <i class="bi bi-check-circle text-success" style="cursor: pointer;" onclick="aprPirep('<%= pirep.id %>')"></i>
-                                    <i class="bi bi-x-circle text-danger" style="cursor: pointer;" onclick="remPirep('<%= pirep.id %>')"></i>
+                                    <p><i class="bi bi-check-circle text-success my-5 iconSize" style="cursor: pointer;" onclick="aprPirep('<%= pirep.id %>')"></i><br><br>
+                                    <i class="bi bi-x-circle text-danger my-5 iconSize" style="cursor: pointer;" onclick="remPirep('<%= pirep.id %>')"></i>
+                                    </p>
                                 <%}%>
                             </td>
                         </tr>
@@ -143,12 +144,13 @@
             </table>
             </div>
         </div>
-        <div class="w-100 h-auto p-5 text-center">
+        <div class="w-100 h-auto py-5 px-0 px-lg-5 text-center">
             <h1>PIREP Options</h1>
             <hr class="w-75 mx-auto">
-            <div class='form-control w-75 mx-auto px-5 mt-3 py-3'>
+            <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 mt-3 py-3'>
                 <h2>Current Aircraft</h2>
                 <br>
+                <div class="table-responsive">
                 <table class="table table-striped text-center">
                     <thead>
                     <tr>
@@ -169,6 +171,7 @@
                     
                 </tbody>
                 </table>
+                </div>
                 <br>
                 <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=c">
                     <h2>New Aircraft</h2>
@@ -177,7 +180,7 @@
                     <button class="btn btn-primary">Add</button>
                 </form>
             </div>
-            <div class='form-control w-75 mx-auto px-5 mt-3 py-3'>
+            <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 mt-3 py-3'>
                 <h2>Current Airlines</h2>
                 <br>
                 <table class="table table-striped text-center">
@@ -211,7 +214,7 @@
                     <button class="btn btn-primary">Add</button>
                 </form>
             </div>
-            <div class='form-control w-75 mx-auto px-5 mt-3 py-3'>
+            <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 mt-3 py-3'>
                 <h2>Current Routes</h2>
                 <button class="btn btn-primary" onclick="document.getElementById('RoutesTable').classList.toggle('d-none')">Toggle
                     Viewing</button>

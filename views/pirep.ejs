@@ -42,7 +42,7 @@
                     </li>
 
                 </ul>
-                <ul class="navbar-nav mb-2 float-end me-5 mb-lg-0">
+                <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
                     <% if(user.admin){%>
                     <li class="nav-item dropdown me-5">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -78,14 +78,14 @@
             </div>
         </div>
     </nav>
-    <div class="w-100 h-auto p-5 text-center">
+    <div class="w-100 h-auto p-lg-5 mt-3 text-center">
         <i class="display-1 text-dark bi bi-file-earmark-plus"></i>
-        <h1 class="display-2 mt-1">PIREPS</h1>
+        <h1 class="display-2 mt-1">PIREP</h1>
         <br>
-        <form class="halfBgFullSm h-auto mx-auto form-control" action="/newPirep" method="POST" onsubmit="document.getElementsByName('flightTime')[0].removeAttribute('disabled');">
+        <form class="w-75 w-sm-100 h-auto mx-auto form-control" action="/newPirep" method="POST" onsubmit="document.getElementsByName('flightTime')[0].removeAttribute('disabled');">
             <h1>New Pirep</h1>
             <br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
             <label class="form-label">
                 <h4>Aircraft</h4>
                 <select class="form-select" name="vehicle" required>
@@ -96,7 +96,7 @@
                 </select>
             </label>
             </div><br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Airline</h4>
                     <select class="form-select" name="airline" required>
@@ -109,7 +109,7 @@
                     </select>
                 </label>
             </div><br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Route</h4>
                     <input type="text" class="form-control" required list="routeList" name="route">
@@ -122,27 +122,27 @@
                     </datalist>
                 </label>
             </div><br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Departure</h4>
                     <input type="datetime-local" required class="form-control" name="departureT">
                     <p class="text-muted">Give answer in Zulu</p>
                 </label>
             </div><br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Arrival</h4>
                     <input type="datetime-local" required class="form-control" name="arrivalT">
                     <p class="text-muted">Give answer in Zulu</p>
                 </label>
             </div><br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Flight Time</h4>
                     <input type="text form-disabled" disabled required class="form-control" name="flightTime">
                 </label>
             </div><br>
-            <div class="form-control w-auto p-3">
+            <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label w-100">
                     <h4>Comments</h4>
                     <textarea class="form-text text-dark p-3 halfBgFullSm" required name="comments"></textarea>

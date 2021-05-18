@@ -43,7 +43,7 @@
                     </li>
 
                 </ul>
-                <ul class="navbar-nav mb-2 float-end me-5 mb-lg-0">
+                <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
                     <% if(user.admin){%>
                         <li class="nav-item dropdown me-5">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -79,13 +79,13 @@
             </div>
         </div>
     </nav>
-    <div class="w-100 h-auto p-5 text-center">
+    <div class="w-100 h-auto p-lg-5 p-2 text-center">
         <i class="display-1 text-dark bi bi-calendar-event"></i>
         <h1 class="display-2 mt-1">Events</h1>
         <br>
-            <div class="h-auto w-75 mx-auto">
+            <div class="h-auto w-75 w-sm-100 mx-auto">
                 <% events.forEach(event =>{%>
-                    <div class="form-control px-5 py-2 text-dark">
+                    <div class="form-control px-5 py-4 text-dark">
                         <h1><%= event.title%></h1>
                         <p><%= event.body%></p>
                         <hr><br>

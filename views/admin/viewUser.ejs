@@ -42,7 +42,7 @@
                     </li>
 
                 </ul>
-                <ul class="navbar-nav mb-2 float-end me-5 mb-lg-0">
+                <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
                     <% if(user.admin){%>
                         <li class="nav-item dropdown me-5">
                             <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button"
@@ -79,7 +79,7 @@
             </div>
         </div>
     </nav>
-    <div class="w-100 h-auto p-5 text-center">
+    <div class="w-100 h-auto py-5 px-3 text-center">
         <i class="display-1 text-dark bi bi-person-circle"></i>
         <h1 class="display-2 mt-1">User <%= config.code + Buffer.from(targetUser.username, 'base64' ).toString(); %></h1>
         <br>
@@ -97,8 +97,8 @@
                 </p>
                 <input type="text" class="form-control form-disabled" name="name" placeholder="name" value="<%= targetUser.name %>">
             </label>
-            <div class="form-check mt-3 text-start px-5">
-                <input class="form-check-input mx-1" type="checkbox" value="true" <% if(targetUser.meta.cp == true){ %>checked disabled<%}%> name="cpwd" id="flexCheckDefault">
+            <div class="form-check mt-3 text-start px-5 specialCheckboxContainer">
+                <input class="form-check-input mx-1 specialCheckbox" type="checkbox" value="true" <% if(targetUser.meta.cp == true){ %>checked disabled<%}%> name="cpwd" id="flexCheckDefault">
                 <label class="form-check-label" for="flexCheckDefault">
                     Require password change next login.
                 </label>
