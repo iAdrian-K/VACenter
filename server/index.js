@@ -1447,23 +1447,33 @@ async function update(version){
             package.version = version;
             console.log(package)
             fs.writeFileSync(`${path.join(__dirname, "/../") + "package.json"}`, JSON.stringify(package, null, 2))
+            let proccessed = 0;
             json.versions[version].FilesChanged.forEach(file =>{
                 const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
                 const filePath = path.join(__dirname, '/../', file)
-                const request = require('request');
+                
                 console.log(filePath)
+                
                 const options = {
                     method: 'GET',
                     url: gitPath
                 };
 
                 request(options, function (error, response, body) {
+                    console.log(error)
                     if (error) throw new Error(error);
                     fs.writeFileSync(`${filePath}`, body)
+                    console.log(body)
+                    console.log("1")
+                    proccessed++;
+                    if (proccessed === json.versions[version].FilesChanged.length) {
+                        process.exit(1)
+                        
+                    }
                 });
                 
             })
-            process.exit(1)
+            
         });
 }
 
