@@ -87,10 +87,10 @@
         <h1 class="display-2">Updater</h1>
         <p><strong>Current Version: </strong> <%= cv %></p>
         <br>
-        <button class="btn btn-primary" onclick="update()">
+        <button class="btn btn-primary mb-3" onclick="update()">
             Check for updates
         </button>
-        <p><span class="fw-bold text-warning">Warning:</span> This updater is very primitive, it will check for updates, if it finds any it will install and restart the server. This page will reload in 15s from clicking.</p>
+        <p><span class="fw-bold text-warning">Warning:</span> This updater is very primitive, it will check for updates, if it finds any it will install and restart the server. This page will reload in 10s from clicking. In the mean time, please avoid touching other elements of the CC.</p>
     </div>
     <script>
         function update(){
@@ -112,7 +112,7 @@
             xhr.send(data);
             setTimeout(() => {
                 window.location.reload();
-            }, 15000);    
+            }, 10000);    
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
