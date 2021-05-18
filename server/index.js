@@ -1446,18 +1446,23 @@ async function update(version){
                 });
                 
             })
-            setTimeout(function () {
-                process.on("exit", function () {
-                    require("child_process").spawn(process.argv.shift(), process.argv, {
-                        cwd: process.cwd(),
-                        detached: false,
-                        stdio: "inherit"
-                    });
-                });
-                process.exit();
-            }, 5000);
+            process.exit(1)
         });
 }
+
+app.post("/update", async function (req, res){
+    const cookies = getAppCookies(req)
+    if(await isNormalUser(cookies)){
+        if(await isAdminUser(cookies)){
+            updater()
+            res.sendStatus(200)
+        }else{
+            res.sendStatus(401)
+        }
+    }else{
+        res.sendStatus(403)
+    }
+})
 
 async function updater(){
     const updateRequired = await checkForNewVersion()
@@ -1465,5 +1470,18 @@ async function updater(){
         update(updateRequired[1])
     }
 }
-updater()
+//updater()
 //console.log(path.resolve(__dirname, '../'))
+
+
+function updateTest(){
+    const val = fs.readFileSync(`${__dirname}/test.txt`).toString();
+    console.log("This is pid " + process.pid);
+    console.log(val)
+    if(val == 1){
+        fs.writeFileSync(`${__dirname}/test.txt`, "0")
+        process.exit(1)
+    }
+}
+
+//updateTest()
