@@ -1,5 +1,6 @@
 const express = require('express');
 const RateLimit = require('express-rate-limit');
+require('dotenv').config()
 const sanitize = require("sanitize-filename");
 const package = require('./../package.json')
 const cv = require('./../package.json').version;
@@ -1348,7 +1349,7 @@ app.post("/CPWD", async (req, res) => {
     }
 })
 
-app.listen(3000)
+app.listen(process.env.port)
 function FileWrite(path, data) {
     return new Promise(resolve => {
         fs.writeFile(path, data, function (err) {
