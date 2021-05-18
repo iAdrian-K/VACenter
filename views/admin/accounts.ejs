@@ -117,7 +117,7 @@
                         <tr>
                             <th scope="col">Username</th>
                             <th scope="col">Name</th>
-                            <th scope="col">Edit</th>
+                            <th scope="col">View</th>
                             <th scope="col">Revoke</th>
                         </tr>
                     </thead>
@@ -126,7 +126,7 @@
                             <tr <%if(LUser.revoked){%>class="disabled text-dark" disabled style="background-color: rgba(255, 0,0, 0.3);"<% }%> >
                                 <th scope="row"><%= Buffer.from(LUser.username, 'base64').toString(); %></th>
                                 <td><%= LUser.name %></td>
-                                <td><i class="bi bi-pencil-square" style="cursor: pointer;" onclick="window.location.href='/admin/viewUser?u=<%=LUser.username%>'"></i></td>
+                                <td><i class="bi bi-folder2-open" style="cursor: pointer;" onclick="window.location.href='/admin/viewUser?u=<%=LUser.username%>'"></i></td>
                                 <td><% if(LUser.revoked == false){ %><i class="bi bi-x-circle" style="cursor: pointer;" onclick="revokeUser('<%= LUser.username %>')"></i><% } %></td>
                             </tr>
                         <% }) %>

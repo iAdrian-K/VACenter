@@ -1061,6 +1061,17 @@ app.delete("/admin/reqs/remData", async function (req, res){
     }
 })
 
+async function addHoursToPilot(uid, amount){
+    if(await FileExists(`${usersPath}/${uid}.json`)){
+        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
+        user.hours = user.hours + amount
+        FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
+        console.log(`ADDED ${amount} hours to ${atob(uid)}`)
+    }else{
+        console.error("NO USER FOUND TO ADD TIME")
+    }
+}
+
 app.post("/admin/reqs/newData", async function (req, res){
     try{
         const cookies = getAppCookies(req);
@@ -1073,6 +1084,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                             if (await FileExists(`${dataPath}/pireps/${sanitize(req.body.id)}.json`)) {
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "a";
+                                addHoursToPilot(pirep.author, (pirep.flightTime / 60))
                                 FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
                                 res.sendStatus(200)
@@ -1403,20 +1415,24 @@ const fetch = require('node-fetch');
 
 function checkForNewVersion(){
 return new Promise(resolve => {
-    let url = "https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json";
+    const options = {
+        method: 'GET',
+        url: 'https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        form: {}
+    };
 
-    let settings = { method: "Get" };
+    request(options, function (error, response, body) {
+        if (error) throw new Error(error);
 
-    fetch(url, settings)
-        .then(res => res.json())
-        .then((json) => {
-            if (cv != json.currentVersion ){
-                resolve([true, json.currentVersion]);
+        const returned = JSON.parse(body);
+        if (cv != returned.currentVersion) {
+            resolve([true, returned.currentVersion]);
 
-            }else{
-                resolve([false, null])
-            }
-        });
+        } else {
+            resolve([false, null])
+        }
+    });
 })
 }
 async function update(version){

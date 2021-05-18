@@ -83,7 +83,8 @@
         <i class="display-1 text-dark bi bi-person-circle"></i>
         <h1 class="display-2 mt-1">User <%= config.code + Buffer.from(targetUser.username, 'base64' ).toString(); %></h1>
         <br>
-        <form class="halfBgFullSm form-control mx-auto" action="/admin/reqs/updateUser" method="POST" onsubmit="document.getElementsByName('uid')[0].removeAttribute('disabled');">
+        <form class="halfBgFullSm form-control mx-auto py-2" action="/admin/reqs/updateUser" method="POST" onsubmit="document.getElementsByName('uid')[0].removeAttribute('disabled');">
+            <h2>Options</h2>
             <label class="w-100 px-5 py-2 mt-2">
                 <p class="form-label">
                     Username:
@@ -106,6 +107,30 @@
             <% if(targetUser.revoked==true){ %><button class="btn btn-danger" type="button" onclick="unrevokeUser('<%= targetUser.username %>')">Unrevoke</button>
                 <% } %>
         </form>
+        <div class="halfBgFullSm form-control mx-auto py-2">
+            <h2>Data</h2>
+            <div class="text-start px-5">
+            <h4>Rank:</h4>
+            <p><%= targetUser.rank %></p>
+            <p class="fs-6 text-muted">Please note that ranks are not calculated at this time.</p>
+            <h4>Flight Hours:</h4>
+            <p>
+                <%= targetUser.hours %>
+            </p>
+            <h4>Account Information:</h4>
+            <div class="px-3">
+                <h5>Last Login:</h5>
+                <p>
+                    <%= targetUser.meta.llogin %>
+                </p>
+                <h5>Account Created:</h5>
+                <p>
+                    <%= targetUser.meta.created %>
+                </p>
+            </div>
+            
+            </div>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
