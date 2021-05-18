@@ -1,6 +1,7 @@
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 const sanitize = require("sanitize-filename");
+const package = require('./../package.json')
 const cv = require('./../package.json').version;
 console.log(cv)
 let limiter = new RateLimit({
@@ -22,7 +23,7 @@ const request = require("request");
 const app = express();
 const urlEncodedParser = bodyParser.urlencoded({ extended: false })
 
-let config = JSON.parse(fs.readFileSync(path.resolve("config.json")))
+let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../") + "config.json"))
 let clientConfig = config
 
 let stats = {
@@ -57,9 +58,9 @@ app.use(limiter)
 
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs')
-const publicPath = path.resolve(__dirname + '/../public')
-const dataPath = path.resolve(__dirname + '/../data')
-const usersPath = path.resolve('data' + '/users')
+const publicPath = path.join(__dirname + '/../public')
+const dataPath = path.join(__dirname + '/../data')
+const usersPath = path.join(__dirname + '/../data/users')
 
 function reloadData(){
     setTimeout(() => {
@@ -1232,7 +1233,7 @@ app.post("/setupData", async function (req, res) {
                     }, null, 2))
                     reloadUsers()
                     reloadData()
-                    config = JSON.parse(fs.readFileSync(path.resolve("config.json")))
+                    config = JSON.parse(fs.readFileSync(path.join(__dirname + "/../") + "config.json"))
                     clientConfig = config
                     res.sendStatus(200)
                 } else {
@@ -1399,7 +1400,7 @@ console.log(uniqueString())
 
 const fetch = require('node-fetch');
 
-function update(){
+function checkForNewVersion(){
 return new Promise(resolve => {
     let url = "https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json";
 
@@ -1417,3 +1418,52 @@ return new Promise(resolve => {
         });
 })
 }
+async function update(version){
+    let url = "https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json";
+
+    let settings = { method: "Get" };
+
+    fetch(url, settings)
+        .then(res => res.json())
+        .then((json) => {
+            console.log(json)
+            package.version = version;
+            console.log(package)
+            fs.writeFileSync(`${path.join(__dirname, "/../") + "package.json"}`, JSON.stringify(package, null, 2))
+            json.versions[version].FilesChanged.forEach(file =>{
+                const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
+                const filePath = path.join(__dirname, '/../', file)
+                const request = require('request');
+                console.log(filePath)
+                const options = {
+                    method: 'GET',
+                    url: gitPath
+                };
+
+                request(options, function (error, response, body) {
+                    if (error) throw new Error(error);
+                    fs.writeFileSync(`${filePath}`, body)
+                });
+                
+            })
+            setTimeout(function () {
+                process.on("exit", function () {
+                    require("child_process").spawn(process.argv.shift(), process.argv, {
+                        cwd: process.cwd(),
+                        detached: false,
+                        stdio: "inherit"
+                    });
+                });
+                process.exit();
+            }, 5000);
+        });
+}
+
+async function updater(){
+    const updateRequired = await checkForNewVersion()
+    if(updateRequired[0] == true){
+        update(updateRequired[1])
+    }
+}
+updater()
+//console.log(path.resolve(__dirname, '../'))
