@@ -87,7 +87,9 @@
         <div class='form-control w-75 mx-auto px-5 py-3'>
             <h2>Current PIREPS</h2>
             <p>Times given in your TZ</p>
+            <button class="btn btn-primary" onclick="document.getElementById('PIREPTable').classList.toggle('d-none')">Toggle Viewing</button>
             <br>
+            <div class="table-responsive d-none" id="PIREPTable">
             <table class="table table-striped text-center">
                 <thead>
                     <tr>
@@ -127,7 +129,7 @@
                                 <%= pirep.flightTime %>
                             </td>
                             <td>
-                                <%= pirep.comments %>
+                                <p style="max-width: 500px; width:auto; word-wrap: break-word"><%= pirep.comments %></p>
                             </td>
                             <td>
                                 <% if(pirep.status == "n"){%>
@@ -139,6 +141,7 @@
                     <%})%>
                 </tbody>
             </table>
+            </div>
         </div>
         <div class="w-100 h-auto p-5 text-center">
             <h1>PIREP Options</h1>
@@ -210,8 +213,10 @@
             </div>
             <div class='form-control w-75 mx-auto px-5 mt-3 py-3'>
                 <h2>Current Routes</h2>
+                <button class="btn btn-primary" onclick="document.getElementById('RoutesTable').classList.toggle('d-none')">Toggle
+                    Viewing</button>
                 <br>
-                <table class="table table-striped text-center">
+                <table class="table table-striped text-center d-none" id="RoutesTable">
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
