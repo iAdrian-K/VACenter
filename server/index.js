@@ -1470,7 +1470,7 @@ async function updater(){
         update(updateRequired[1])
     }
 }
-//updater()
+updater()
 //console.log(path.resolve(__dirname, '../'))
 
 
