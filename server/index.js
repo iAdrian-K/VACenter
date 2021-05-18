@@ -1460,11 +1460,8 @@ async function update(version){
                 };
 
                 request(options, function (error, response, body) {
-                    console.log(error)
                     if (error) throw new Error(error);
                     fs.writeFileSync(`${filePath}`, body)
-                    console.log(body)
-                    console.log("1")
                     proccessed++;
                     if (proccessed === json.versions[version].FilesChanged.length) {
                         process.exit(1)
