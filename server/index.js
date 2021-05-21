@@ -270,7 +270,7 @@ function getUserData(tokens){
             const userID = unBased.split(":")[0];
             const realTokenPreAdjust = unBased.split(":")[1];
             if (realTokenPreAdjust) {
-                const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
+                const realToken = realTokenPreAdjust.length == 33 ? realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1) : realTokenPreAdjust
                 const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
                     if (exists) {
                         FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
@@ -646,7 +646,7 @@ app.get('*', async (req, res) => {
                         if(userID){
                             if (await FileExists(`${usersPath}/${sanitize(userID)}.json`)){
                                 const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(userID)}.json`))
-                                const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
+                                const realToken = realTokenPreAdjust.length == 33 ? realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1) : realTokenPreAdjust
                                 var index = user.tokens.indexOf(realToken);
                                 if (index > -1) {
                                     user.tokens.splice(index, 1);
@@ -1355,7 +1355,8 @@ app.post("/CPWD", async (req, res) => {
         const userExists = await FileExists(`${usersPath}/` + sanitize(uid) + '.json')
         if (userExists) {
             const userData = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-            if (userData.tokens.includes(token.slice(0, token.length - 1))) {
+            const realToken = token.length == 33 ? token.slice(0, token.length - 1) : token
+            if (userData.tokens.includes(realToken)) {
                 if (req.body.pwd) {
                     console.log(req.body)
                     userData.password = bcrypt.hashSync(req.body.pwd, 10)
