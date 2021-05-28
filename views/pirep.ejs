@@ -15,6 +15,14 @@
 </head>
 
 <body class="w-100 h-auto">
+    <% if(user.ifcCapable != true){ %>
+    <div class="alert alert-warning d-flex align-items-center alert-dismissible fade show position-absolute w-100"
+        role="alert" style="z-index: 100;">
+        <i class="bi bi-exclamation-triangle-fill me-3 h-100 fs-3"></i>
+        <div><strong>Be aware!</strong><br>These changes will not be reflected in the VANet storage.<br>This is because your account was created before version <kbd>2.1</kbd> Please contact an admin if you would like to have your account revoked and a new one created.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <% } %>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/home">
@@ -52,7 +60,7 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="/admin/accounts">Accounts</a></li>
                             <li><a class="dropdown-item" href="/admin/events">Events</a></li>
-                            <li><a class="dropdown-item" href="/admin/pireps">Pireps</a></li>
+                            <li><a class="dropdown-item" href="/admin/pireps">PIREPS</a></li>
                             <li><a class="dropdown-item" href="/admin/news">News</a></li>
                             <li><a class="dropdown-item" href="/admin/vacenter">Settings</a></li>
                         </ul>
@@ -82,16 +90,16 @@
         <i class="display-1 text-dark bi bi-file-earmark-plus"></i>
         <h1 class="display-2 mt-1">PIREP</h1>
         <br>
-        <form class="w-75 w-sm-100 h-auto mx-auto form-control" action="/newPirep" method="POST" onsubmit="document.getElementsByName('flightTime')[0].removeAttribute('disabled');">
+        <form class="w-75 w-sm-100 h-auto mx-auto form-control" action="/newPirep" method="POST"s>
             <h1>New Pirep</h1>
             <br>
             <div class="form-control w-auto p-3 w-sm-100">
             <label class="form-label">
                 <h4>Aircraft</h4>
                 <select class="form-select" name="vehicle" required>
-                    <option selected disabled value="">==Select==</option>
+                    <option selected disabled value="">-Select-</option>
                     <% data.crafts.forEach(craft =>{%>
-                        <option value="<%= craft.name %>"><%= craft.name %></option>
+                        <option value="<%= craft.livID %>"><%= craft.publicName %></option>
                     <%})%>
                 </select>
             </label>
@@ -99,8 +107,8 @@
             <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Airline</h4>
-                    <select class="form-select" name="airline" required>
-                        <option selected disabled value="">==Select==</option>
+                    <select class="form-select text-center" name="airline" required>
+                        <option selected disabled value="">-Select-</option>
                         <% data.ops.forEach(op=>{%>
                             <option value="<%= op.name %>">
                                 <%= op.name %>
@@ -112,6 +120,7 @@
             <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Route</h4>
+                    <p class="text-muted">Type to search.</p>
                     <input type="text" class="form-control" required list="routeList" name="route">
                     <datalist id="routeList">
                         <% data.routes.forEach(route=>{%>
@@ -124,22 +133,36 @@
             </div><br>
             <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
-                    <h4>Departure</h4>
-                    <input type="datetime-local" required class="form-control" name="departureT">
-                    <p class="text-muted">Give answer in Zulu</p>
-                </label>
-            </div><br>
-            <div class="form-control w-auto p-3 w-sm-100">
-                <label class="form-label">
-                    <h4>Arrival</h4>
-                    <input type="datetime-local" required class="form-control" name="arrivalT">
-                    <p class="text-muted">Give answer in Zulu</p>
+                    <h4>Departure Date</h4>
+                    <input type="date" required class="form-control" name="departureT">
                 </label>
             </div><br>
             <div class="form-control w-auto p-3 w-sm-100">
                 <label class="form-label">
                     <h4>Flight Time</h4>
-                    <input type="text form-disabled" disabled required class="form-control" name="flightTime">
+                    <input type="number" required class="form-control" name="flightTime">
+                    <p class="text-muted">Answer in minutes</p>
+                </label>
+            </div><br>
+            <div class="form-control w-auto p-3 w-sm-100">
+                <label class="form-label">
+                    <h4>Departure ICAO</h4>
+                    <input type="text" required class="form-control" name="dICAO">
+                    <p class="text-muted">Answer in minutes</p>
+                </label>
+            </div><br>
+            <div class="form-control w-auto p-3 w-sm-100">
+                <label class="form-label">
+                    <h4>Arrival ICAO</h4>
+                    <input type="text" required class="form-control" name="aICAO">
+                    <p class="text-muted">Answer in minutes</p>
+                </label>
+            </div><br>
+            <div class="form-control w-auto p-3 w-sm-100">
+                <label class="form-label">
+                    <h4>Fuel Used</h4>
+                    <input type="number form-disabled" required class="form-control" name="fuel">
+                    <p class="text-muted">Answer in kg</p>
                 </label>
             </div><br>
             <div class="form-control w-auto p-3 w-sm-100">
@@ -155,41 +178,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
         crossorigin="anonymous"></script>
-    <script>
-        function adjust(v) {
-                if (v > 9) {
-                    return v.toString();
-                } else {
-                    return '0' + v.toString();
-                }
-            }
-            var today = new Date();
-            var date = today.getFullYear() + '-' + adjust(today.getMonth() + 1) + '-' + adjust(today.getDate());
-            var time = adjust(today.getHours()) + ":" + adjust(today.getMinutes());
-            var dateTime = `${date}T${time}`;
-            document.getElementsByName("departureT")[0].value = dateTime
-            document.getElementsByName("arrivalT")[0].value = dateTime
-            function isValidDate(d) {
-                    return d instanceof Date && !isNaN(d);
-                }
-            function updateFT(){
-                    console.log("NEWFT")
-                    const DDatePre = new Date(document.getElementsByName("departureT")[0].value)
-                    const ADatePre = new Date(document.getElementsByName("arrivalT")[0].value)
-                    const DDate = new Date(DDatePre.getTime() - DDatePre.getTimezoneOffset())
-                    const ADate = new Date(ADatePre.getTime() - ADatePre.getTimezoneOffset())
-                    if ((isValidDate(DDate) && isValidDate(ADate)) && DDate.getTime() <= ADate.getTime()) {
-                        var diff = Math.abs(DDate - ADate)
-                        var minutes = Math.floor((diff / 1000) / 60);
-                        document.getElementsByName("flightTime")[0].value = minutes
-                    }else{
-                        document.getElementsByName("flightTime")[0].value = "ERROR"
-                    }
-            }
-            updateFT()
-            document.getElementsByName("departureT")[0].addEventListener("input", updateFT);
-            document.getElementsByName("arrivalT")[0].addEventListener("input", updateFT);
-    </script>
 </body>
 
 </html>

@@ -53,7 +53,7 @@
                                 <li><a class="dropdown-item"
                                         href="/admin/accounts">Accounts</a></li>
                                 <li><a class="dropdown-item active" aria-current="page" href="/admin/events">Events</a></li>
-                                <li><a class="dropdown-item" href="/admin/pireps">Pireps</a></li>
+                                <li><a class="dropdown-item" href="/admin/pireps">PIREPS</a></li>
                                 <li><a class="dropdown-item" href="/admin/news">News</a></li>
                                 <li><a class="dropdown-item" href="/admin/vacenter">Settings</a></li>
                             </ul>
@@ -79,7 +79,7 @@
             </div>
         </div>
     </nav>
-    <div class="w-100 h-auto px-2 px-lg-5 text-center">
+    <div class="w-100 h-auto px-2 px-lg-5 text-center pt-4">
         <i class="display-1 text-dark bi bi-calendar-event"></i>
         <h1 class="display-2 mt-1">Events</h1>
         <br>
@@ -95,14 +95,25 @@
             <input type="datetime-local" class="form-control mb-3" required name="depTime">
             <p class="form-text">Give answer in zulu</p>
             </label>
-            <div class="form-check mt-3 text-start">
-                <input class="form-check-input" type="checkbox" value="true" name="admin" id="flexCheckDefault">
-                <label class="form-check-label" for="flexCheckDefault">
-                    Allocated Sign Up
-                </label>
-                <p class="form-text"><strong>NOTICE:</strong> This currently has no effect.</p>
-            </div>
+            <label class="text-start w-100">
+                <p class="text-dark">Aircraft</p>
+                <select class="form-select mb-3" required name="aircraft">
+                    <% craft.forEach(vic=>{%>
+                        <option value="<%= vic.livID %>"><%= vic.publicName %></option>
+                    <%})%>
+                </select>
+            </label>
+            <label class="text-start w-100">
+                <p class="text-dark">Server</p>
+                <select class="form-select mb-3" required name="server">
+                    <option value="Casual">Casual</option>
+                    <option value="Training">Training</option>
+                    <option value="Expert">Expert</option>
+                </select>
+            </label>
             <button class="btn btn-primary">Create</button>
+            <br><br>
+            <p class="text-muted">Gate allocation is not supported at this time.</p>
         </form>
         <div class='form-control w-75 mx-auto px-3 px-lg-5 py-3'>
             <h2>Current Events</h2>
@@ -124,10 +135,10 @@
                                 <%= event.title %>
                             </th>
                             <td>
-                                <i class="bi bi-pencil-square" style="cursor: pointer;" onclick="window.location.href='/admin/viewEvent?id=<%= Buffer.from(event.id).toString(`base64`) %>'"></i>
+                                <a class="btn btn-primary" href="/admin/viewEvent?id=<%= Buffer.from(event.id).toString(`base64`) %>"><i class="bi bi-pencil"></i></a>
                             </td>
                             <td>
-                                <i class="bi bi-x-circle" style="cursor: pointer;" onclick="remEvent('<%= Buffer.from(event.id).toString(`base64`) %>')"></i>
+                                <button class="btn btn-danger" onclick="remEvent('<%= Buffer.from(event.id).toString(`base64`) %>')"><i class="bi bi-x-circle"></i></button>
                             </td>
                         </tr>
                     <%})%>

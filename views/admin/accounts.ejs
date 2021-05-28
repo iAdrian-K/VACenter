@@ -53,7 +53,7 @@
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item active" aria-current="page" href="/admin/accounts">Accounts</a></li>
                                 <li><a class="dropdown-item" href="/admin/events">Events</a></li>
-                                <li><a class="dropdown-item" href="/admin/pireps">Pireps</a></li>
+                                <li><a class="dropdown-item" href="/admin/pireps">PIREPS</a></li>
                                 <li><a class="dropdown-item" href="/admin/news">News</a></li>
                                 <li><a class="dropdown-item" href="/admin/vacenter">Settings</a></li>
                             </ul>
@@ -92,6 +92,8 @@
                         aria-describedby="basic-addon1" name="username">
                 </div>
                 <input type="text" class="form-control mb-3" placeholder="Name" required aria-label="Name" name="Name">
+                <input type="text" class="form-control mb-3" placeholder="IFC Username" required aria-label="IFC" name="IFC">
+                <p class="fw-bold"><span class="text-danger">CAUTION</span>: Please make sure the IFC Name is correct, you can not change it later. It must be case correct.</p>
                 <input type="password" class="form-control" placeholder="Password" required aria-label="Password" aria-describedby="basic-addon1"
                     name="password">
                 <div class="form-check mt-3 text-start">
@@ -128,8 +130,13 @@
                             <tr <%if(LUser.revoked){%>class="disabled text-dark" disabled style="background-color: rgba(255, 0,0, 0.3);"<% }%> >
                                 <th scope="row"><%= Buffer.from(LUser.username, 'base64').toString(); %></th>
                                 <td><%= LUser.name %></td>
-                                <td><i class="bi bi-folder2-open" style="cursor: pointer;" onclick="window.location.href='/admin/viewUser?u=<%=LUser.username%>'"></i></td>
-                                <td><% if(LUser.revoked == false){ %><i class="bi bi-x-circle" style="cursor: pointer;" onclick="revokeUser('<%= LUser.username %>')"></i><% } %></td>
+                                
+                                <td><a href="/admin/viewUser?u=<%=LUser.username%>" class="btn btn-primary"><i class="bi bi-folder2-open"></i></a></td>
+                                
+                                <td>
+                                    <% if(LUser.revoked==false){ %>
+                                        <button class="btn btn-danger" onclick="revokeUser('<%= LUser.username %>')"><i class="bi bi-x-circle"></i></button>
+                                    <%} %>
                             </tr>
                         <% }) %>
                     </tbody>

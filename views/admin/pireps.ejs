@@ -53,7 +53,7 @@
                                 <li><a class="dropdown-item"
                                         href="/admin/accounts">Accounts</a></li>
                                 <li><a class="dropdown-item" href="/admin/events">Events</a></li>
-                                <li><a class="dropdown-item active" aria-current="page" href="/admin/pireps">Pireps</a></li>
+                                <li><a class="dropdown-item active" aria-current="page" href="/admin/pireps">PIREPS</a></li>
                                 <li><a class="dropdown-item" href="/admin/news">News</a></li>
                                 <li><a class="dropdown-item" href="/admin/vacenter">Settings</a></li>
                             </ul>
@@ -83,105 +83,179 @@
         <i class="display-1 text-dark bi bi-file-earmark-plus"></i>
         <h1 class="display-2 mt-1">PIREPS</h1>
         <br>
-        <hr class="w-75 mx-auto">
-        <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 py-3'>
-            <h2>Current PIREPS</h2>
-            <p>Times given in your TZ, you can scroll left and right to view more data.</p>
-            <button class="btn btn-primary" onclick="document.getElementById('PIREPTable').classList.toggle('d-none')">Toggle Viewing</button>
-            <br>
-            <div class="table-responsive d-none" id="PIREPTable">
-            <table class="table table-striped text-center">
-                <thead>
-                    <tr>
-                        <th scope="col">Pilot</th>
-                        <th scope="col">Aircraft</th>
-                        <th scope="col">Airline</th>
-                        <th scope="col">Route</th>
-                        <th scope="col">Departure Time</th>
-                        <th scope="col">Arrival Time</th>
-                        <th scope="col">Flight Time</th>
-                        <th scope="col">Comments</th>
-                        <th scope="col">Actions </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% pireps.forEach(pirep =>{ %>
-                        <tr class="<% if(pirep.status == 'a'){%>bg-success text-light<%}%> <%if(pirep.status == 'd'){%> bg-danger text-light<%}%>">
-                            <td>
-                                <%= pirep.pilot.name %>
-                            </td>
-                            <td>
-                                <%= pirep.vehicle %>
-                            </td>
-                            <td>
-                                <%= pirep.airline %>
-                            </td>
-                            <td>
-                                <%= pirep.route %>
-                            </td>
-                            <td class="loadInBTZ">
-                                <%- new Date(pirep.departureT) %>
-                            </td>
-                            <td class="loadInBTZ">
-                                <%- new Date(pirep.arrivalT) %>
-                            </td>
-                            <td>
-                                <%= pirep.flightTime %>
-                            </td>
-                            <td>
-                                <p style="max-width: 500px; width:auto; word-wrap: break-word"><%= pirep.comments %></p>
-                            </td>
-                            <td>
-                                <% if(pirep.status == "n"){%>
-                                    <p><i class="bi bi-check-circle text-success my-5 iconSize" style="cursor: pointer;" onclick="aprPirep('<%= pirep.id %>')"></i><br><br>
-                                    <i class="bi bi-x-circle text-danger my-5 iconSize" style="cursor: pointer;" onclick="remPirep('<%= pirep.id %>')"></i>
-                                    </p>
-                                <%}%>
-                            </td>
-                        </tr>
-                    <%})%>
-                </tbody>
-            </table>
+        <ul class="nav nav-tabs d-none d-md-flex text-center mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pirep-tab" data-bs-toggle="tab" data-bs-target="#pirep" type="button"
+                    role="tab" aria-controls="pirep" aria-selected="true">Filed PIREPS</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="aircraft-tab" data-bs-toggle="tab" data-bs-target="#aircraft" type="button" role="tab"
+                    aria-controls="aircraft" aria-selected="false">Aircraft</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="airlines-tab" data-bs-toggle="tab" data-bs-target="#airlines" type="button" role="tab"
+                    aria-controls="airlines" aria-selected="false">Codeshare</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab"
+                    aria-controls="routes" aria-selected="false">Routes</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="ranks-tab" data-bs-toggle="tab" data-bs-target="#ranks" type="button" role="tab"
+                    aria-controls="ranks" aria-selected="false">Ranks</button>
+            </li>
+        </ul>
+        <ul class="nav nav-pills d-flex d-md-none text-center mb-4 border-bottom border-1 pb-1" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pirep-tab" data-bs-toggle="tab" data-bs-target="#pirep" type="button"
+                    role="tab" aria-controls="pirep" aria-selected="true">Filed PIREPS</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="aircraft-tab" data-bs-toggle="tab" data-bs-target="#aircraft" type="button"
+                    role="tab" aria-controls="aircraft" aria-selected="false">Aircraft</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="airlines-tab" data-bs-toggle="tab" data-bs-target="#airlines" type="button"
+                    role="tab" aria-controls="airlines" aria-selected="false">Codeshare</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab"
+                    aria-controls="routes" aria-selected="false">Routes</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="pirep" role="tabpanel" aria-labelledby="pirep-tab">
+                <h2>Current PIREPS</h2>
+                <br>
+                <div class="table-responsive" id="PIREPTable">
+                    <table class="table table-striped text-center">
+                        <thead>
+                            <tr>
+                                <th scope="col">Pilot</th>
+                                <th scope="col">Aircraft</th>
+                                <th scope="col">Airline</th>
+                                <th scope="col">Route</th>
+                                <th scope="col">Departure Date</th>
+                                <th scope="col">Fuel Used</th>
+                                <th scope="col">Flight Time</th>
+                                <th scope="col">Comments</th>
+                                <th scope="col">Actions </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% pireps.forEach(pirep=>{ %>
+                                <tr
+                                    class="<% if(pirep.status == 'a'){%>bg-success text-light<%}%> <%if(pirep.status == 'd'){%> bg-danger text-light<%}%>">
+                                    <td>
+                                        <%= pirep.pilot.name %>
+                                    </td>
+                                    <td>
+                                        <%= pirep.vehiclePublic %>
+                                    </td>
+                                    <td>
+                                        <%= pirep.airline %>
+                                    </td>
+                                    <td>
+                                        <%= pirep.route %>
+                                    </td>
+                                    <td>
+                                        <%- new Date(pirep.departureT).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <%= pirep.fuel %>kg
+                                    </td>
+                                    <td>
+                                        <%= pirep.flightTime %>
+                                    </td>
+                                    <td>
+                                        <p style="max-width: 500px; width:auto; word-wrap: break-word">
+                                            <%= pirep.comments %>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <% if(pirep.status=="n" ){%>
+                                            <button class="btn btn-success my-1" onclick="aprPirep('<%= pirep.id %>')"><i
+                                                    class="bi bi-check-circle"></i></button>
+                                            <button class="btn btn-danger my-1" onclick="remPirep('<%= pirep.id %>')"><i
+                                                    class="bi bi-x-circle"></i></button>
+                                            </p>
+                                            <%}else{%>
+                                                <p>Already Actioned</p>
+                                                <%}%>
+                                    </td>
+                                </tr>
+                                <%})%>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-        <div class="w-100 h-auto py-5 px-0 px-lg-5 text-center">
-            <h1>PIREP Options</h1>
-            <hr class="w-75 mx-auto">
-            <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 mt-3 py-3'>
+            <div class="tab-pane fade" id="aircraft" role="tabpanel" aria-labelledby="aircraft-tab">
                 <h2>Current Aircraft</h2>
                 <br>
                 <div class="table-responsive">
-                <table class="table table-striped text-center">
-                    <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Actions </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% craft.forEach(vehicle =>{%>
-                        <tr>
-                            <td scope="row"><%= vehicle.name %></td>
-                            <td>
-                                <i class="bi bi-x-circle text-danger" style="cursor: pointer;" onclick="remData('c', '<%= vehicle.id %>')"></i>
-                            </td>
-                        </tr>
-                    <%})%>
-                    
-                    
-                </tbody>
-                </table>
+                    <table class="table table-striped text-center">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Actions </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% craft.forEach(vehicle=>{%>
+                                <tr>
+                                    <td scope="row">
+                                        <%= vehicle.publicName %>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" onclick="remData('c', '<%= vehicle.livId %>')"><i
+                                                class="bi bi-x-circle"></i></button>
+                                    </td>
+                                </tr>
+                                <%})%>
+                
+                
+                        </tbody>
+                    </table>
                 </div>
                 <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=c">
-                    <h2>New Aircraft</h2>
-                    <input type="text" class="form-control" name="vicName" placeholder="Name: EG ('B738')">
-                    <br>
-                    <button class="btn btn-primary">Add</button>
-                </form>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Add Aircraft
+                </button>
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Add Aircraft</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST" action="/admin/reqs/newData?t=c">
+                                    <label class="form-label">Aircraft
+                                        <select class="form-select" id="newAirAirSel" name="airID" onchange="loadAircraftLivData()">
+                                            <% listAircraft.forEach(obj=>{%>
+                                                <option value='<%=obj.id%>'>
+                                                    <%= obj.name %>
+                                                </option>
+                                                <%})%>
+                                        </select>
+                                    </label><br>
+                                    <label class="form-label">Livery
+                                        <select class="form-select" id="newAirLivSel" name="livID">
+                                            <option value="">Waiting Selection</option>
+                                        </select>
+                                    </label><br>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 mt-3 py-3'>
-                <h2>Current Airlines</h2>
+            <div class="tab-pane fade" id="airlines" role="tabpanel" aria-labelledby="airlines-tab">
+                <h2>Current Codeshare</h2>
                 <br>
                 <table class="table table-striped text-center">
                     <thead>
@@ -197,29 +271,36 @@
                                     <%= airline.name %>
                                 </td>
                                 <td>
-                                    <i class="bi bi-x-circle <%if(airline.id != 'MAIN'){%>text-danger" style="cursor: pointer;"<%}else{%>text-secondary disabled" disabled style="cursor: not-allowed;"<%}%> 
-                                        <% if(airline.id != 'MAIN'){%>onclick="remData('a', '<%= airline.id %>')"<%}%></i>
+                                    <button class="btn <%if(airline.id != 'MAIN'){%> btn-danger"
+                                        onclick="remData('a', '<%= airline.id %>')">
+                                        <%}else{%> btn-secondary" style="cursor: not-allowed"><%}%><i class="bi bi-x-circle"></i>
+                                    </button>
                                 </td>
                             </tr>
                             <%})%>
-            
-            
+                
+                
                     </tbody>
                 </table>
                 <br>
                 <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=a">
-                    <h2>New Airline</h2>
+                    <h2>New Codeshare</h2>
                     <input type="text" class="form-control" name="airName" placeholder="Name: EG ('CODESHARE: Alitalia Virtual')">
                     <br>
                     <button class="btn btn-primary">Add</button>
                 </form>
             </div>
-            <div class='form-control w-75 w-sm-100 mx-auto px-2 px-lg-5 mt-3 py-3'>
+            <div class="tab-pane fade" id="routes" role="tabpanel" aria-labelledby="routes-tab">
                 <h2>Current Routes</h2>
-                <button class="btn btn-primary" onclick="document.getElementById('RoutesTable').classList.toggle('d-none')">Toggle
-                    Viewing</button>
                 <br>
-                <table class="table table-striped text-center d-none" id="RoutesTable">
+                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=r">
+                    <h2>New Route</h2>
+                    <input type="text" class="form-control" name="routeName" placeholder="Name: EG ('<%= config.code %>0001')">
+                    <br>
+                    <button class="btn btn-primary">Add</button>
+                </form>
+                <br>
+                <table class="table table-striped text-center" id="RoutesTable">
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
@@ -233,7 +314,53 @@
                                     <%= route.name %>
                                 </td>
                                 <td>
-                                    <i class="bi bi-x-circle text-danger" style="cursor: pointer;" onclick="remData('r', '<%= route.id %>')"></i>
+                                    <button class="btn btn-danger" onclick="remData('r', '<%= route.id %>')"><i
+                                            class="bi bi-x-circle"></i></button>
+                                </td>
+                            </tr>
+                            <%})%>
+                
+                
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="ranks" role="tabpanel" aria-labelledby="ranks-tab">
+                <h2>Current Ranks</h2>
+                <br>
+                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=ra">
+                    <h2>New Rank</h2>
+                    <label class="form-label mb-3">
+                    <strong>Name:</strong>
+                    <input type="text" class="form-control" name="name" placeholder="Cadet">
+                    </label>
+                    <label class="form-label mb-3">
+                    <strong>Minimum Hours:</strong>
+                    <input type="number" class="form-control" name="min" placeholder="0">
+                    </label>
+                    <br>
+                    <button class="btn btn-primary">Add</button>
+                </form>
+                <br>
+                <table class="table table-striped text-center" id="RanksTable">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Min Hours</th>
+                            <th scope="col">Actions </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% ranks.forEach(rank=>{%>
+                            <tr>
+                                <td scope="row">
+                                    <%= rank.name %>
+                                </td>
+                                <td>
+                                    <%= rank.minH %>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="remData('ra', '<%= rank.name %>')"><i
+                                            class="bi bi-x-circle"></i></button>
                                 </td>
                             </tr>
                             <%})%>
@@ -241,14 +368,8 @@
             
                     </tbody>
                 </table>
-                <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=r">
-                    <h2>New Route</h2>
-                    <input type="text" class="form-control" name="routeName" placeholder="Name: EG ('<%= config.code %>0001')">
-                    <br>
-                    <button class="btn btn-primary">Add</button>
-                </form>
             </div>
+        </div>
         </div>
         
     </div>
@@ -325,6 +446,36 @@
                     window.location.reload();
                 }, 1500);
             }
+            function loadAircraftLivData(){
+                const airID = document.getElementById("newAirAirSel").value;
+                document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
+                const data = null;
+
+                const xhr = new XMLHttpRequest();
+
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === this.DONE) {
+                        console.log(this)
+                        if(this.status == 200){
+                            const data = JSON.parse(this.responseText).result;
+                            document.getElementById("newAirLivSel").innerHTML = "";
+                            data.forEach(liv=>{
+                                const el = document.createElement("option")
+                                el.value = liv.liveryID;
+                                el.innerHTML = liv.liveryName;
+                                document.getElementById("newAirLivSel").appendChild(el)
+                            })
+                        } else {
+                            alert(this.status)
+                        }
+                    }
+                });
+
+                xhr.open("GET", `/getLivData?liv=${airID}`);
+
+                xhr.send(data);
+            }
+            loadAircraftLivData()
     </script>
     
 </body>
