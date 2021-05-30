@@ -967,7 +967,7 @@ app.post("/newPirep", async function (req, res){
     try{
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
-            if (req.body.vehicle && req.body.airline && req.body.route && req.body.departureT && req.body.flightTime && req.body.comments && req.body.fuel && req.body.dICAO && req.body.aICAO){
+            if (req.body.vehicle && req.body.airline && req.body.route && req.body.departureT && req.body.flightTimeH && req.body.flightTimeM && req.body.comments && req.body.fuel && req.body.dICAO && req.body.aICAO){
                 const author = await getUserData(cookies)
                 const pirepObj = {
                     id: uniqueString(),
@@ -982,7 +982,7 @@ app.post("/newPirep", async function (req, res){
                     },
                     route: req.body.route,
                     departureT: req.body.departureT,
-                    flightTime: req.body.flightTime,
+                    flightTime: parseInt((parseInt(req.body.flightTimeH)*60)) + parseInt(req.body.flightTimeM),
                     comments: req.body.comments,
                     status: "n",
                     fuel: req.body.fuel
