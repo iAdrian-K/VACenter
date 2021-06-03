@@ -15,70 +15,7 @@
 </head>
 
 <body class="w-100 h-auto">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/home">
-                <%= config.name %>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/home"><span class="bi bi-house"></span>
-                            Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pirep"><span
-                                class="bi bi-file-earmark-plus"></span> PIREP</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/news"><span class="bi bi-newspaper"></span> News</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/events"><span class="bi bi-calendar-event"></span> Events</a>
-                    </li>
-
-                </ul>
-                <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
-                    <% if(user.admin){%>
-                        <li class="nav-item dropdown me-5">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                Admin
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="/admin/accounts">Accounts</a></li>
-                                <li><a class="dropdown-item" href="/admin/events">Events</a></li>
-                                <li><a class="dropdown-item" href="/admin/pireps">PIREPS</a></li>
-                                <li><a class="dropdown-item" href="/admin/news">News</a></li>
-                                <li><a class="dropdown-item" href="/admin/vacenter">Settings</a></li>
-                            </ul>
-                        </li>
-                        <%}%>
-                            <li class="nav-item dropdown me-5">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <%= user.name %>
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/account">Account</a></li>
-                                    <li><a class="dropdown-item text-danger" href="/report">Report a bug</a></li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                                </ul>
-                            </li>
-
-                </ul>
-
-            </div>
-        </div>
-    </nav>
+    <%- include("./components/nav.ejs")%>
     <div class="w-100 h-auto p-lg-5 p-2 text-center">
         <i class="display-1 text-dark bi bi-calendar-event"></i>
         <h1 class="display-2 mt-1">Events</h1>

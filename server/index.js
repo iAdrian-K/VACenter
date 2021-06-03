@@ -423,7 +423,7 @@ app.get('*', async (req, res) => {
                                 config: clientConfig,
                                 user: userInfo,
                                 news: news,
-                                active: req.path.split('/')[1]
+                                active: req.path
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -446,7 +446,7 @@ app.get('*', async (req, res) => {
                             res.render('home', {
                                 config: clientConfig,
                                 user: userInfo,
-                                active: req.path.split('/')[1]
+                                active: req.path
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -467,7 +467,7 @@ app.get('*', async (req, res) => {
                             res.render('account', {
                                 config: clientConfig,
                                 user: userInfo,
-                                active: req.path.split('/')[1]
+                                active: req.path
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -488,7 +488,7 @@ app.get('*', async (req, res) => {
                             res.render('pirep', {
                                 config: clientConfig,
                                 user: userInfo,
-                                active: req.path.split('/')[1],
+                                active: req.path,
                                 data: {
                                     ops: ops,
                                     crafts: crafts,
@@ -514,7 +514,7 @@ app.get('*', async (req, res) => {
                                 config: clientConfig,
                                 user: userInfo,
                                 events: events,
-                                active: req.path.split('/')[1]
+                                active: req.path
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -537,7 +537,7 @@ app.get('*', async (req, res) => {
                                         config: clientConfig,
                                         user: userInfo,
                                         targetEvent: targetEvent,
-                                        active: req.path.split('/')[1],
+                                        active: req.path,
                                         craft: crafts
                                     })
                                 } else {
@@ -567,7 +567,7 @@ app.get('*', async (req, res) => {
                                         config: clientConfig,
                                         user: userInfo,
                                         target: targetNews,
-                                        active: req.path.split('/')[1]
+                                        active: req.path
                                     })
                                 } else {
                                     res.sendStatus(400)
@@ -597,7 +597,7 @@ app.get('*', async (req, res) => {
                                     config: clientConfig,
                                     user: userInfo,
                                     cv: cv,
-                                    active: req.path.split('/')[1]
+                                    active: req.path
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -621,7 +621,7 @@ app.get('*', async (req, res) => {
                                     res.render('admin/news', {
                                         config: clientConfig,
                                         user: userInfo,
-                                        active: req.path.split('/')[1],
+                                        active: req.path,
                                         news: news
                                     })
                             } else {
@@ -651,7 +651,7 @@ app.get('*', async (req, res) => {
                                         config: clientConfig,
                                         user: userInfo,
                                         targetUser: targetUser,
-                                        active: req.path.split('/')[1]
+                                        active: req.path
                                     })
                                 } else {
                                     res.sendStatus(400)
@@ -677,7 +677,8 @@ app.get('*', async (req, res) => {
                                 res.render('admin/accounts', {
                                     config: clientConfig,
                                     user: userInfo,
-                                    users: users
+                                    users: users,
+                                    active: req.path
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -705,7 +706,8 @@ app.get('*', async (req, res) => {
                                     ops: ops,
                                     craft: crafts,
                                     ranks: ranks,
-                                    listAircraft: vanetCraft
+                                    listAircraft: vanetCraft,
+                                    active: req.path
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -729,7 +731,8 @@ app.get('*', async (req, res) => {
                                     config: clientConfig,
                                     user: userInfo,
                                     events: events,
-                                    craft: crafts
+                                    craft: crafts,
+                                    active: req.path
                                 })
                             } else {
                                 res.redirect("/changePWD")

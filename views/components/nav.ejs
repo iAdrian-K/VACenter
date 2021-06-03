@@ -1,7 +1,6 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="/home">
-            <img class="d-inline-block align-text-center rounded-circle" src="<%= config.other.logo %>" height="30">
             <%= config.name %>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -11,39 +10,51 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link<% if(active == 'home'){%> active" aria-current="page<%}%>" href="/home">Home</a>
+                    <a class="nav-link <% if (active == '/home'){%>active<%}%>" aria-current="page" href="/home"><span class="bi bi-house"></span>
+                        Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link<% if(active == 'pirep'){%> active" aria-current="page<%}%>" href="/pirep">PIREP</a>
+                    <a class="nav-link  <% if (active == '/pirep'){%>active<%}%>" href="/pirep"><span class="bi bi-file-earmark-plus"></span> PIREP</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link<% if(active == 'news'){%> active" aria-current="page<%}%>" href="/news">News</a>
+                    <a class="nav-link <% if (active == '/news'){%>active<%}%>" href="/news"><span class="bi bi-newspaper"></span> News</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link<% if(active == 'map'){%> active" aria-current="page<%}%>" href="/map">Map</a>
+                    <a class="nav-link <% if (active == '/events'){%>active<%}%>" href="/events"><span class="bi bi-calendar-event"></span> Events</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link<% if(active == 'events'){%> active" aria-current="page<%}%>" href="/events">Events</a>
-                </li>
+
             </ul>
-            <ul class="navbar-nav me-lg-5 float-sm-start text-sm-start">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-lg-end text-sm-start<% if(active == 'account' || active == "admin"){%> active<%}%>" id="accountDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        Welcome <%= user.name %>
-                    </a>
-                    <ul class="dropdown-menu mb-5" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item<% if(active == 'account'){%> active" aria-current="page<%}%>" href="/account">Account</a></li>
-                        <li><a class="dropdown-item text-danger" href="/report">Report a bug</a></li>
-                        <% if(user.admin==true){ %>
-                            <li><a class="dropdown-item <% if(active == 'admin' || active == 'viewuser'){%> active text-light" aria-current="page<%}else{%>text-primary<%}%>" href="/admin">Admin Panel</a></li>
-                            <%}%>
+            <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
+                <% if(user.admin){%>
+                    <li class="nav-item dropdown me-5">
+                        <a class="nav-link dropdown-toggle <% if (active == '/admin/accounts' || active == '/admin/viewEvent' || active == '/admin/viewNews' || active == '/admin/viewUser' || active == '/admin/events' || active == '/admin/pireps' || active == '/admin/news' || active == '/admin/vacenter'){%>active<%}%>" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item  <% if (active == '/admin/accounts' || active == '/admin/viewUser'){%>active<%}%>" href="/admin/accounts">Accounts</a></li>
+                            <li><a class="dropdown-item <% if (active == '/admin/events' || active == '/admin/viewEvent'){%>active<%}%>" href="/admin/events">Events</a></li>
+                            <li><a class="dropdown-item <% if (active == '/admin/pireps'){%>active<%}%>" href="/admin/pireps">PIREPS</a></li>
+                            <li><a class="dropdown-item <% if (active == '/admin/news' || active == '/admin/viewNews'){%>active<%}%>" href="/admin/news">News</a></li>
+                            <li><a class="dropdown-item <% if (active == '/admin/vacenter'){%>active<%}%>" href="/admin/vacenter">Settings</a></li>
+                        </ul>
+                    </li>
+                    <%}%>
+                        <li class="nav-item dropdown me-5">
+                            <a class="nav-link dropdown-toggle <% if (active == '/account'){%>active<%}%>" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <%= user.name %>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item <% if (active == '/account'){%>active<%}%>" href="/account">Account</a></li>
+                                <li><a class="dropdown-item text-danger" href="/report">Report a bug</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                    </ul>
-                </li>
+                            </ul>
+                        </li>
+
             </ul>
 
         </div>
