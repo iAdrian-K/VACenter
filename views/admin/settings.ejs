@@ -16,23 +16,23 @@
 
 <body class="w-100 h-auto">
     <%- include("./../components/nav.ejs")%>
-    <div class="w-100 h-auto p-5 text-center">
-        <i class="display-1 text-dark bi bi-gear"></i>
+    <div class="w-100 h-auto p-5 text-center" id="content">
+        <i class="display-1 bi bi-gear"></i>
         <h1 class="display-2 mt-1">Settings</h1>
         <br>
         <ul class="nav nav-tabs d-none d-md-flex text-center mb-4" id="myTab" role="tablist">
             <hr>
             <hr class="text-dark">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button"
+                <button class="nav-link active pirepTab" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button"
                     role="tab" aria-controls="update" aria-selected="true">Updater</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button"
+                <button class="nav-link pirepTab" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button"
                     role="tab" aria-controls="custom" aria-selected="false">Customisation</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button"
+                <button class="nav-link pirepTab" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button"
                     role="tab" aria-controls="logs" aria-selected="false">Logs</button>
             </li>
         </ul>
@@ -88,6 +88,7 @@
         
         
     </div>
+    <%- include("./../components/dark.ejs")%>
     <script>
         function update(){
             const data = null;

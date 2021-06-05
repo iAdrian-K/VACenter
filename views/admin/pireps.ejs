@@ -16,29 +16,29 @@
 
 <body class="w-100 h-auto">
     <%- include("./../components/nav.ejs")%>
-    <div class="w-100 h-auto py-5 px-2 px-lg-5 text-center">
-        <i class="display-1 text-dark bi bi-file-earmark-plus"></i>
+    <div class="w-100 h-auto py-5 px-2 px-lg-5 text-center" id="content">
+        <i class="display-1 bi bi-file-earmark-plus"></i>
         <h1 class="display-2 mt-1">PIREPS</h1>
         <br>
-        <ul class="nav nav-tabs d-none d-md-flex text-center mb-4" id="myTab" role="tablist">
+        <ul class="nav nav-tabs d-none d-md-flex border-bottom border-light text-center mb-4" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pirep-tab" data-bs-toggle="tab" data-bs-target="#pirep" type="button"
+                <button class="nav-link pirepTab active" id="pirep-tab" data-bs-toggle="tab" data-bs-target="#pirep" type="button"
                     role="tab" aria-controls="pirep" aria-selected="true">Filed PIREPS</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="aircraft-tab" data-bs-toggle="tab" data-bs-target="#aircraft" type="button" role="tab"
+                <button class="nav-link pirepTab" id="aircraft-tab" data-bs-toggle="tab" data-bs-target="#aircraft" type="button" role="tab"
                     aria-controls="aircraft" aria-selected="false">Aircraft</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="airlines-tab" data-bs-toggle="tab" data-bs-target="#airlines" type="button" role="tab"
+                <button class="nav-link pirepTab" id="airlines-tab" data-bs-toggle="tab" data-bs-target="#airlines" type="button" role="tab"
                     aria-controls="airlines" aria-selected="false">Codeshare</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab"
+                <button class="nav-link pirepTab" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab"
                     aria-controls="routes" aria-selected="false">Routes</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="ranks-tab" data-bs-toggle="tab" data-bs-target="#ranks" type="button" role="tab"
+                <button class="nav-link pirepTab" id="ranks-tab" data-bs-toggle="tab" data-bs-target="#ranks" type="button" role="tab"
                     aria-controls="ranks" aria-selected="false">Ranks</button>
             </li>
         </ul>
@@ -81,8 +81,8 @@
                         </thead>
                         <tbody>
                             <% pireps.forEach(pirep=>{ %>
-                                <tr
-                                    class="<% if(pirep.status == 'a'){%>bg-success text-light<%}%> <%if(pirep.status == 'd'){%> bg-danger text-light<%}%>">
+                                <tr 
+                                    class="pirepRow <% if(pirep.status == 'a'){%>bg-success text-light<%}%> <%if(pirep.status == 'd'){%> bg-danger text-light<%}%>">
                                     <td>
                                         <%= pirep.pilot.name %>
                                     </td>
@@ -139,7 +139,7 @@
                         </thead>
                         <tbody>
                             <% craft.forEach(vehicle=>{%>
-                                <tr>
+                                <tr class="pirepRow">
                                     <td scope="row">
                                         <%= vehicle.publicName %>
                                     </td>
@@ -203,7 +203,7 @@
                     </thead>
                     <tbody>
                         <% ops.forEach(airline=>{%>
-                            <tr>
+                            <tr class="pirepRow">
                                 <td scope="row">
                                     <%= airline.name %>
                                 </td>
@@ -246,7 +246,7 @@
                     </thead>
                     <tbody>
                         <% routes.forEach(route=>{%>
-                            <tr>
+                            <tr class="pirepRow">
                                 <td scope="row">
                                     <%= route.name %>
                                 </td>
@@ -288,7 +288,7 @@
                     </thead>
                     <tbody>
                         <% ranks.forEach(rank=>{%>
-                            <tr>
+                            <tr class="pirepRow">
                                 <td scope="row">
                                     <%= rank.name %>
                                 </td>
@@ -310,6 +310,7 @@
         </div>
         
     </div>
+    <%- include("./../components/dark.ejs")%>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
         crossorigin="anonymous"></script>

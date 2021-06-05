@@ -16,15 +16,15 @@
 
 <body class="w-100 h-auto">
     <%- include("./components/nav.ejs")%>
-    <div class="w-100 h-auto p-lg-5 p-2 text-center">
-        <i class="display-1 text-dark bi bi-calendar-event"></i>
+    <div class="w-100 h-auto p-lg-5 p-2 text-center" id="content">
+        <i class="display-1 bi bi-calendar-event"></i>
         <h1 class="display-2 mt-1">Events</h1>
         <br>
-            <div class="h-auto w-75 w-sm-100 mx-auto">
-                <div class="w-100 h-auto p-5 container rounded-2 bg-light">
+            <div class="h-auto w-75 w-sm-100 mx-auto" >
+                <div class="w-100 h-auto p-5 container rounded-2 bg-light" id="eventsContainer">
                     <div class="row row-cols-1">
                         <% events.forEach(item=>{ %>
-                            <div class="rounded-3 col mx-2 my-3 pt-3 px-5 pb-5 text-light bg-dark text-start">
+                            <div class="rounded-3 col my-3 pt-3 px-5 pb-5 text-light bg-dark text-start eventsItems">
                                 <h1 class="text-center">
                                     <%= item.title %>
                                 </h1>
@@ -64,6 +64,7 @@
                 </div>
             </div>
     </div>
+    <%- include("./components/dark.ejs")%>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
         crossorigin="anonymous"></script>

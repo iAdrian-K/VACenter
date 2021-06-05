@@ -7,7 +7,9 @@ body{
     overflow-x: hidden;
 }
 
-
+.bg-black{
+  background-color: black !important;
+}
 
 .halfBgFullSm{
   width: 50%;

@@ -1,0 +1,120 @@
+<script>
+    let darkMode = false;
+    function parseBool(value){
+        return (value === "true")
+    }
+    function checkDark(){
+        const storedDark = localStorage.getItem("dark")
+        if(storedDark == null){
+            localStorage.setItem("dark", false);
+            window.location.reload();
+        }else{
+            darkMode = parseBool(localStorage.getItem("dark"));
+            updateDark();
+        }
+    }
+    function updateDark(){    
+        document.getElementById("darkFlag").className = darkMode == true ? "bi fs-4 bi-moon-stars-fill text-light" : "bi fs-4 bi-sun text-dark";
+        document.getElementById("darkFlag").setAttribute('onclick', `setMode(${(darkMode == true) ? false : true})`)
+        let bodySettings = (darkMode == true) ? "bg-black text-light" : "text-dark";
+        let contentSettings = (darkMode == true) ? "w-100 h-auto p-lg-5 mt-3 text-light text-center" : "w-100 h-auto p-lg-5 mt-3 text-center text-dark";
+        let navSettings = (darkMode == true) ? "navbar navbar-expand-lg navbar-dark bg-dark" : "navbar navbar-expand-lg navbar-light bg-light";
+        document.body.className = `h-auto w-100 ${bodySettings}`
+        document.getElementsByTagName("nav")[0].className = navSettings
+        document.getElementById("content").className = contentSettings;
+        let page = "<%=active%>"
+        if(darkMode == true){
+            [...document.getElementsByClassName("form-control")].forEach(el =>{
+                el.classList.add("bg-dark")
+                el.classList.add('text-light')
+            });
+            [...document.getElementsByClassName("form-select")].forEach(el => {
+                el.classList.add("bg-dark")
+                el.classList.add('text-light')
+            });
+            [...document.getElementsByClassName("input-group-text")].forEach(el => {
+                el.classList.add("bg-black")
+                el.classList.add('text-light')
+            });
+            [...document.getElementsByClassName("table")].forEach(el => {
+                el.classList.add("bg-black")
+                el.classList.add('text-light')
+            });
+            [...document.getElementsByClassName("form-text")].forEach(el => {
+                el.classList.remove("text-dark")
+                el.classList.add("bg-dark")
+                el.classList.add('text-light')
+            })
+            console.log(page)
+            switch (page) {
+                case "/pirep":
+                    document.getElementById("PIREP-Form").className = "w-75 w-sm-100 h-auto mx-auto border-0 form-control text-light bg-black"
+                    break;
+                case "/admin/accounts":
+                    [...document.getElementsByClassName("accountRows")].forEach(el => {
+                        console.log(1)
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    }); 
+                    break;
+                case "/admin/pireps":
+                    [...document.getElementsByClassName("pirepTab")].forEach(el => {
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    });
+                    [...document.getElementsByClassName("pirepRow")].forEach(el => {
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    });
+                case "/admin/news":
+                    [...document.getElementsByClassName("pirepRow")].forEach(el => {
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    });
+                break;
+                case "/admin/vacenter":
+                    [...document.getElementsByClassName("pirepTab")].forEach(el => {
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    });
+                    [...document.getElementsByClassName("pirepRow")].forEach(el => {
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    });
+                    break;
+                case "/admin/events":
+                    [...document.getElementsByClassName("eventRows")].forEach(el => {
+                        console.log(1)
+                        el.classList.add("bg-dark")
+                        el.classList.add('text-light')
+                    });
+                    break;
+                case "/news":
+                    document.getElementById("newsContainer").className = "w-100 h-auto p-5 container rounded-2 bg-dark text-light";
+                    [...document.getElementsByClassName("newsItems")].forEach(el => {
+                        el.classList.remove("bg-dark")
+                        el.classList.add("bg-black")
+                        el.classList.add('text-light')
+                    })
+                    break;
+                case "/events":
+                    document.getElementById("eventsContainer").className = "w-100 h-auto p-5 container rounded-2 bg-dark text-light";
+                    [...document.getElementsByClassName("eventsItems")].forEach(el => {
+                        el.classList.remove("bg-dark")
+                        el.classList.add("bg-black")
+                        el.classList.add('text-light')
+                    })
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+    }
+    checkDark();
+    function setMode(flag){
+        localStorage.setItem("dark", flag)
+        window.location.reload();
+        checkDark()
+    }
+</script>

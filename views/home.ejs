@@ -28,6 +28,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
         integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <%- include("./components/dark.ejs")%>
     <script>
         setInterval(function() {
             document.getElementById("date").innerHTML = "It's " + new Date().toLocaleString();

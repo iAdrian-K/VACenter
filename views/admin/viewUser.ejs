@@ -16,8 +16,8 @@
 
 <body class="w-100 h-auto">
     <%- include("./../components/nav.ejs")%>
-    <div class="w-100 h-auto py-5 px-3 text-center">
-        <i class="display-1 text-dark bi bi-person-circle"></i>
+    <div class="w-100 h-auto py-5 px-3 text-center" id="content">
+        <i class="display-1 bi bi-person-circle"></i>
         <h1 class="display-2 mt-1">User <%= config.code + Buffer.from(targetUser.username, 'base64' ).toString(); %></h1>
         <br>
         <form class="halfBgFullSm form-control mx-auto py-2" action="/admin/reqs/updateUser" method="POST" onsubmit="document.getElementsByName('uid')[0].removeAttribute('disabled');">
@@ -49,7 +49,6 @@
             <div class="text-start px-5">
             <h4>Rank:</h4>
             <p><%= targetUser.rank %></p>
-            <p class="fs-6 text-muted">Please note that ranks are not calculated at this time.</p>
             <h4>Flight Hours:</h4>
             <p>
                 <%= targetUser.hours %>
@@ -69,6 +68,7 @@
             </div>
         </div>
     </div>
+    <%- include("./../components/dark.ejs")%>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
         crossorigin="anonymous"></script>
