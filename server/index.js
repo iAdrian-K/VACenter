@@ -6,6 +6,7 @@ const package = require('./../package.json')
 const cv = require('./../package.json').version;
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
+    console.log([method, url, headers, query, data])
     return new Promise(resolve => {
         const options = {
             method: method,
@@ -1166,9 +1167,6 @@ app.post("/admin/reqs/updateUser", async function (req, res){
                         if(user.name != req.body.name){
                             user.name = req.body.name
                         }
-                        if(req.body.cpwd){
-                            user.meta.cp = true
-                        }
                         user.tokens = [];
                         FileWrite(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`, JSON.stringify(user, null, 2))
                         reloadUsers()
@@ -1194,7 +1192,38 @@ app.post("/admin/reqs/updateUser", async function (req, res){
         res.send(`${error}`)
     }
 })
-
+app.post("/admin/reqs/resetPWD", async function (req, res){
+    try{
+        const cookies = getAppCookies(req);
+        if (await isNormalUser(cookies)) {
+            if (await isAdminUser(cookies)) {
+                if (req.body.targetUID) {
+                    if (await FileExists(`${usersPath}/${sanitize(req.body.targetUID)}.json`)) {
+                        const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(req.body.targetUID)}.json`))
+                        user.password = bcrypt.hashSync("VACENTERBACKUP1", 10)
+                        user.tokens = [];
+                        user.meta.cp = true;
+                        FileWrite(`${usersPath}/${sanitize(req.body.targetUID)}.json`, JSON.stringify(user, null, 2))
+                        reloadUsers()
+                        res.redirect(`/admin/viewUser?u=${req.body.targetUID}`)
+                    } else {
+                        res.sendStatus(404)
+                    }
+                } else {
+                    res.sendStatus(400);
+                }
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    }catch (error){
+        console.error(error)
+        res.status(500)
+        res.send(`${error}`)
+    }
+})
 app.put("/admin/reqs/unremUser", async function (req, res){
     try {
         const cookies = getAppCookies(req);
