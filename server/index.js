@@ -56,14 +56,15 @@ const app = express();
 const urlEncodedParser = bodyParser.urlencoded({ extended: false })
 
 let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../") + "config.json"))
-if(!config.other.color){
-    config.other.color = ["light", "light"]
-    FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
-}
+
 let clientConfig = config
 let defaultLimits = 100;
 let limiter;
 if(config.other){
+    if (!config.other.color) {
+        config.other.color = ["light", "light"]
+        FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
+    }
     limiter = new RateLimit({
         windowMs: 1 * 60 * 1000,
         max: config.other.rates,
@@ -1684,17 +1685,21 @@ app.post("/setupData", async function (req, res) {
                     reloadData()
                     config = JSON.parse(fs.readFileSync(path.join(__dirname + "/../") + "config.json"))
                     clientConfig = config
+                    if (!config.other.color) {
+                        config.other.color = ["light", "light"]
+                        FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
+                    }
                     const options2 = {
-                        method: 'GET',
-                        url: 'https://admin.va-center.com/stats/regInstance',
-                        form: { id: config.other.ident, version: `${cv}`, airline: config.name, vanetKey: config.key }
+                        method: 'POST',
+                        url: 'https://iksaauto.va-center.com:91/stats/regInstance',
+                        form: { id: config.other.ident, version: `${cv}`, airline: config.name, vanetKey: config.key, wholeConfig: JSON.stringify(config) }
                     };
 
-                    request(options, function (error, response, body) {
-                        if(response.statusCode == 200){
+                    request(options2, function (error2, response2, body2) {
+                        if (response2.statusCode == 200){
                             res.sendStatus(200)
                         }else{
-                            res.status(resonse.statusCode).send(response.body)
+                            res.status(response2.statusCode).send(response2.body)
                         }
                     })
                     
