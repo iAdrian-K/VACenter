@@ -798,6 +798,36 @@ app.get('*', async (req, res) => {
     }
 })
 
+app.post("/reqs/remUser", async function (req, res){
+    try{
+        const cookies = getAppCookies(req);
+        console.log(cookies)
+        if(cookies.authToken){
+            console.log(await getUserID(cookies.authToken))
+        if (await isNormalUser(cookies)) {
+            if(await FileExists(`${usersPath}/${await getUserID(cookies)}.json`)){
+                fs.unlink(`${usersPath}/${await getUserID(cookies)}.json`, (err) =>{
+                    if(err){
+                        throw err;
+                    }else{
+                        res.clearCookie('authToken').redirect("/")
+                    }
+                })
+            }else{
+                res.sendStatus(404)
+            }
+        }else{
+            res.sendStatus(401)
+        }}else{
+            res.sendStatus(400)
+        }
+    }catch (error){
+        console.error(error)
+        res.status(500)
+        res.send(`${error}`)
+    }
+})
+
 app.post("/admin/reqs/updateEvent", async (req, res) =>{
     try {
         const cookies = getAppCookies(req);

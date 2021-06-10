@@ -44,7 +44,9 @@
             </form>
             </div>
             <br><br>
-            <button class="btn btn-danger disabled" disalbed>Remove Account</button>
+            <form action="/reqs/remUser" method="POST" onsubmit="return confirm('Are you sure you want to delete your account?');">
+                <button class="btn btn-danger">Remove Account</button>
+            </form>
         </div>
     </div>
     <%- include("./components/dark.ejs")%>
