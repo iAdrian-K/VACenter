@@ -56,8 +56,11 @@ const app = express();
 const urlEncodedParser = bodyParser.urlencoded({ extended: false })
 
 let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../") + "config.json"))
+if(!config.other.color){
+    config.other.color = ["light", "light"]
+    FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
+}
 let clientConfig = config
-
 let defaultLimits = 100;
 let limiter;
 if(config.other){
@@ -1531,9 +1534,11 @@ app.post("/admin/reqs/newData", async function (req, res){
                         }
                         break;
                     case "s":
-                        if (req.body.bg && req.body.rates) {
+                        console.log(req.body)
+                        if (req.body.bg && req.body.rates && req.body.navBarColor) {
                             config.other.bg = req.body.bg;
                             config.other.rates = req.body.rates;
+                            config.other.color = [req.body.navBarColor == "light" ? "light" : "dark", req.body.navBarColor]
                             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2))
                             reloadConfig();
                             res.redirect("/admin/vacenter")
@@ -1636,7 +1641,8 @@ app.post("/setupData", async function (req, res) {
                     newConfig.other = {
                         bg: "https://webcdn.infiniteflight.com/blog/content/images/2021/04/Infinite-Flight-3D-Buildings.jpg",
                         logo: "https://va-center.com/assets/images/logo.webp",
-                        rates: 100
+                        rates: 100,
+                        navColor: []
                     }
                     fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2))
                     fs.writeFileSync(`${dataPath}/operators/MAIN.json`, JSON.stringify({

@@ -1,5 +1,6 @@
 <script>
     let darkMode = false;
+    let navMode = "<%= config.other.color[0] %>"
     function parseBool(value){
         return (value === "true")
     }
@@ -14,13 +15,17 @@
         }
     }
     function updateDark(){    
-        document.getElementById("darkFlag").className = darkMode == true ? "bi fs-4 bi-moon-stars-fill text-light" : "bi fs-4 bi-sun text-dark";
+        document.getElementById("darkFlag").className = darkMode == true ? "bi fs-4 bi-moon-stars-fill" : "bi fs-4 bi-sun";
+        if(navMode == "dark"){
+            document.getElementById("darkFlag").classList.add("text-light");
+        }else{
+            document.getElementById("darkFlag").classList.add("text-dark");
+        }
+        
         document.getElementById("darkFlag").setAttribute('onclick', `setMode(${(darkMode == true) ? false : true})`)
         let bodySettings = (darkMode == true) ? "bg-black text-light" : "text-dark";
         let contentSettings = (darkMode == true) ? "w-100 h-auto p-lg-5 mt-3 text-light text-center" : "w-100 h-auto p-lg-5 mt-3 text-center text-dark";
-        let navSettings = (darkMode == true) ? "navbar navbar-expand-lg navbar-dark bg-dark" : "navbar navbar-expand-lg navbar-light bg-light";
         document.body.className = `h-auto w-100 ${bodySettings}`
-        document.getElementsByTagName("nav")[0].className = navSettings
         document.getElementById("content").className = contentSettings;
         let page = "<%=active%>"
         if(darkMode == true){
