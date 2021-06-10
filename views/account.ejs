@@ -20,6 +20,14 @@
         <i class="display-1 bi bi-person"></i>
         <h1 class="display-2 mt-1">Account</h1>
         <br>
+        <% if(!user.ifcCapable){ %>
+            <div class="px-3 py-3 mb-5 w-100 text-start bg-danger rounded text-light">
+                <h2><i class="bi bi-exclamation-circle-fill"></i> Update your Account</h2>
+                <hr>
+                <h1>With Version 2.2 you will be requested to add your IFC to your account.</h1>
+                <p>Please see the General Information pane to add it</p>
+            </div>
+        <%}%>
         <div class="px-3 py-1 w-100 text-start">
         <h2><i class="bi bi-file-person"></i> General Information</h2>
         <form action="/updateUser" method="post" class="form-control p-3 mt-3">

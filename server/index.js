@@ -1672,7 +1672,8 @@ app.post("/setupData", async function (req, res) {
                         bg: "https://webcdn.infiniteflight.com/blog/content/images/2021/04/Infinite-Flight-3D-Buildings.jpg",
                         logo: "https://va-center.com/assets/images/logo.webp",
                         rates: 100,
-                        navColor: []
+                        navColor: [],
+                        ident: uniqueString()
                     }
                     fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2))
                     fs.writeFileSync(`${dataPath}/operators/MAIN.json`, JSON.stringify({
@@ -1683,7 +1684,20 @@ app.post("/setupData", async function (req, res) {
                     reloadData()
                     config = JSON.parse(fs.readFileSync(path.join(__dirname + "/../") + "config.json"))
                     clientConfig = config
-                    res.sendStatus(200)
+                    const options2 = {
+                        method: 'GET',
+                        url: 'https://admin.va-center.com/stats/regInstance',
+                        form: { id: config.other.ident, version: `${cv}`, airline: config.name, vanetKey: config.key }
+                    };
+
+                    request(options, function (error, response, body) {
+                        if(response.statusCode == 200){
+                            res.sendStatus(200)
+                        }else{
+                            res.status(resonse.statusCode).send(response.body)
+                        }
+                    })
+                    
                 } else {
                     res.status(500).send(error)
                 }
