@@ -1687,11 +1687,12 @@ app.post("/setupData", async function (req, res) {
                     clientConfig = config
                     if (!config.other.color) {
                         config.other.color = ["light", "light"]
+                        config.other.toldVACenter = true,
                         FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
                     }
                     const options2 = {
                         method: 'POST',
-                        url: 'https://iksaauto.va-center.com:91/stats/regInstance',
+                        url: 'https://admin.va-center.com/stats/regInstance',
                         form: { id: config.other.ident, version: `${cv}`, airline: config.name, vanetKey: config.key, wholeConfig: JSON.stringify(config) }
                     };
 
@@ -1919,7 +1920,23 @@ async function update(version){
                     fs.writeFileSync(`${filePath}`, body)
                     proccessed++;
                     if (proccessed === json.versions[version].FilesChanged.length) {
-                        process.exit(1)
+                        if(config.other.toldVACenter == true){
+                        const options2 = {
+                            method: 'POST',
+                            url: 'https://admin.va-center.com/stats/updateInstance',
+                            form: { id: config.other.ident, version: `${version}`}
+                        };
+
+                        request(options2, function (error2, response2, body2) {
+                            if (response2.statusCode == 200) {
+                                process.exit(1);
+                            } else {
+                                console.error([response2.statusCode, response2.body])
+                            }
+                        })
+                        }else{
+                            process.exit(1);
+                        }
                         
                     }
                 });
