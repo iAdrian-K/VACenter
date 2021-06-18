@@ -1047,7 +1047,7 @@ app.post("/newPirep", async function (req, res){
                 const reqVANET = JSON.parse(reqVANETRaw[2]).result
                 
                 pirepObj.vehiclePublic = `${reqVANET.liveryName} - ${reqVANET.aircraftName}`;
-                /*if (author.ifcCapable) {
+                if (author.ifcCapable == true) {
                     const reqVANETRaw2 = await JSONReq("POST", `https://api.vanet.app/airline/v1/flights`, { "X-Api-Key": config.key }, null, {
                         pilotId: author.VANETID,
                         departureIcao: pirepObj.depICAO,
@@ -1068,7 +1068,7 @@ app.post("/newPirep", async function (req, res){
                         aircraftLiveryId: pirepObj.vehicle
                     })
                     console.log(reqVANETRaw2[2])
-                }*/
+                }
                 author.pireps.push(pirepObj.id)
 
                 FileWrite(`${usersPath}/${sanitize(pirepObj.author)}.json`, JSON.stringify(author, null, 2))
