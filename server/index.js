@@ -1107,7 +1107,28 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             air: req.body.aircraft,
                             server: req.body.server,
                         }
-                        
+                        const options = {
+                            method: 'GET',
+                            url: `https://api.vanet.app/public/v1/aircraft/livery/${req.body.aircraft}`,
+                            headers: { 'X-Api-Key': 'ace5aa2b-74d3-483d-8df7-bc29028e8300' }
+                        };
+
+                        request(options, function (error, response, body) {
+                        if (error) throw new Error(error);
+                        if(response.statusCode == 200){
+                            const pbody = JSON.parse(body).result;
+                            event.airName = pbody.liveryName + " - " + pbody.aircraftName;
+                            FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
+                            reloadData()
+                            setTimeout(function () {
+                                res.redirect("/admin/events")
+                            }, 1500)
+                        }else{
+                            res.sendStatus(response.statusCode);
+                            console.error(`${response.statusCode} - ${response.body}`)
+                        }
+                            
+                        });
                     /*const vanetSubmission = await JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json"}, null, {
                             name: event.title,
                             description: event.body,
@@ -1118,11 +1139,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             server: event.server,
                             gateNames: ["null"]
                         })*/
-                        FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
-                        reloadData()
-                        setTimeout(function () {
-                            res.redirect("/admin/events")
-                        }, 1500)
+                        
                 } else {
                     res.sendStatus(400);
                 }
