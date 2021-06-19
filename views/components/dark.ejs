@@ -18,8 +18,10 @@
         document.getElementById("darkFlag").className = darkMode == true ? "bi fs-4 bi-moon-stars-fill" : "bi fs-4 bi-sun";
         if(navMode == "dark"){
             document.getElementById("darkFlag").classList.add("text-light");
+            document.getElementById("notificationsFlag").classList.add("text-light");
         }else{
             document.getElementById("darkFlag").classList.add("text-dark");
+            document.getElementById("notificationsFlag").classList.add("text-dark");
         }
         
         document.getElementById("darkFlag").setAttribute('onclick', `setMode(${(darkMode == true) ? false : true})`)
@@ -29,6 +31,7 @@
         document.getElementById("content").className = contentSettings;
         let page = "<%=active%>"
         if(darkMode == true){
+            
             [...document.getElementsByClassName("form-control")].forEach(el =>{
                 el.classList.add("bg-dark")
                 el.classList.add('text-light')

@@ -24,8 +24,32 @@
                 </li>
 
             </ul>
-            <div class="mb-2 float-lg-end me-5 mb-lg-0">
+            <div class="mb-2 float-lg-end  d-inline-block me-5 mb-lg-0">
                 <i class="bi bi-sun fs-4" id="darkFlag" style="cursor:pointer;"></i>
+            </div>
+            <div class="mb-2 float-lg-end dropdown me-5 mb-lg-0">
+                        <a class="nav-link dropdown-toggle text-light"
+                            href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell fs-4" id="notificationsFlag" style="cursor:pointer;"></i>
+                        </a>
+                        <ul class="dropdown-menu hideScroll" style="max-height: 25vh; overflow-y: scroll;" aria-labelledby="navbarDropdown2">
+                            <%user.notifications.forEach(note=>{%>
+                                <li>
+                                    <div class="dropdown-item">
+                                        <h4><%= note.title %></h4>
+                                    </div>
+                                </li>
+                            <%})%>
+                            <% if(user.notifications.length == 0){ %>
+                                <li>
+                                    <div class="dropdown-item">
+                                        <h6>
+                                            No notifications
+                                        </h6>
+                                    </div>
+                                </li>
+                                <%}%>
+                        </ul>
             </div>
             <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
                 <% if(user.admin){%>
