@@ -345,10 +345,10 @@ async function notifyUser(user, event){
             const uid = user.username;
             const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
             userData.notifications.push(event);
-            if(userData.notifications.length > 7){
-                userData.notifications.shift();
+            userData.notifications.sort(compareTime);
+            if (userData.notifications.length > 7) {
+                userData.notifications.pop();
             }
-            userData.notifications.sort(compareTime)
             FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(userData, null, 2));
         })
     }else{
