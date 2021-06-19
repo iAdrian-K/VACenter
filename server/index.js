@@ -325,6 +325,40 @@ function isAdminUser(tokens) {
         }
     })
 }
+function compareTime(a, b) {
+    if (new Date(a.timeStamp).getTime() < new Date(b.timeStamp).getTime()) {
+        return 1;
+    }
+    if (new Date(a.timeStamp).getTime() > new Date(b.timeStamp).getTime()) {
+        return -1;
+    }
+    return 0;
+}
+async function notifyUser(user, event){
+    if(user == "all"){
+        console.log(users)
+        users.forEach(async user =>{
+            console.log(1)
+            const uid = user.username;
+            const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
+            userData.notifications.push(event);
+            if(userData.notifications.length > 7){
+                userData.notifications.shift();
+            }
+            userData.notifications.sort(compareTime)
+            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(userData, null, 2));
+        })
+    }else{
+        const userExists = await FileExists(`${usersPath}/` + sanitize(user) + '.json');
+        if(userExists){
+            const userData = JSON.parse(await FileRead(`${usersPath}/${user}.json`));
+            userData.notifications.push(event);
+            FileWrite(`${usersPath}/${user}.json`, JSON.stringify(userData, null, 2));
+        }else{
+            console.error("No user found to notify! " + user);
+        }
+    }
+}
 
 function isNormalUser(tokens) {
     return new Promise(resolve => {
@@ -876,6 +910,13 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
                         if (event.server != req.body.server) {
                             event.server = req.body.server
                         }
+                        notifyUser("all", {
+                            title: `Event Updated!`,
+                            desc: `The ${event.title} event has been updated.`,
+                            icon: `calendar`,
+                            link: "/events",
+                            timeStamp: new Date()
+                        })
                         /*const vanetSubmission = await URLReq("PUT", `https://api.vanet.app/airline/v1/events/`, { "X-Api-Key": config.key, "Content-Type": "application/x-www-form-urlencoded" }, null, {
                             name: event.title,
                             description: event.body,
@@ -960,6 +1001,13 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
                     if (await FileExists(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`) == true){
                         FileRemove(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`)
                         reloadData()
+                        notifyUser("all", {
+                            title: `Event Removed!`,
+                            desc: `An event has been cancelled.`,
+                            icon: `calendar`,
+                            link: "/events",
+                            timeStamp: new Date()
+                        })
                         setTimeout(function () {
                             res.redirect("/admin/events")
                         }, 1500)
@@ -1113,7 +1161,13 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             url: `https://api.vanet.app/public/v1/aircraft/livery/${req.body.aircraft}`,
                             headers: { 'X-Api-Key': 'ace5aa2b-74d3-483d-8df7-bc29028e8300' }
                         };
-
+                    notifyUser("all", {
+                        title: `Event Created!`,
+                        desc: `The ${event.title} event has been created.`,
+                        icon: `calendar`,
+                        link: "/events",
+                        timeStamp: new Date()
+                    })
                         request(options, async function (error, response, body) {
                         if (error) throw new Error(error);
                         if(response.statusCode == 200){
@@ -1166,6 +1220,13 @@ app.post("/admin/reqs/newNews", async function (req, res) {
                         body: req.body.body,
                         author: req.body.author,
                     }
+                    notifyUser("all", {
+                        title: `New News!`,
+                        desc: `New Headline: ${item.title}`,
+                        icon: `newspaper`,
+                        link: "/news",
+                        timeStamp: new Date()
+                    })
                     FileWrite(`${dataPath}/news/${item.id}.json`, JSON.stringify(item, null, 2))
                     reloadData()
                     setTimeout(function () {
@@ -1472,6 +1533,12 @@ async function addHoursToPilot(uid, amount){
         for(const rank of ranksSorted){
             if(user.hours > rank[1]){
                 user.rank = rank[0];
+                notifyUser("all", {
+                    title: `Ranking!`,
+                    desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
+                    icon: `arrow-up-circle`,
+                    timeStamp: new Date()
+                })
                 break;
             }
         }
@@ -1664,6 +1731,12 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                             },
                             revoked: false
                         }
+                        notifyUser("all", {
+                            title: `New Pilot!`,
+                            desc: `${config.code}${atob(newUser.username)} has joined!`,
+                            icon: `person-circle`,
+                            timeStamp: new Date()
+                        })
                         FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
                         reloadUsers()
                         res.redirect("/admin/accounts")
@@ -1940,6 +2013,12 @@ async function update(version){
             console.log(json.branches[currentBranch].releases[version])
             console.log(json.branches[currentBranch].releses)
             console.log(version)
+            notifyUser("all", {
+                title: `VACenter Updated!`,
+                desc: `VACenter ${version} has been installed!`,
+                icon: `cloud-arrow-down-fill`,
+                timeStamp: new Date()
+            })
             json.branches[currentBranch].releases[version].FilesChanged.forEach(file =>{
                 const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
                 const filePath = path.join(__dirname, '/../', file)

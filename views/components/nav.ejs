@@ -32,12 +32,15 @@
                             href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-bell fs-4" id="notificationsFlag" style="cursor:pointer;"></i>
                         </a>
-                        <ul class="dropdown-menu hideScroll" style="max-height: 25vh; overflow-y: scroll;" aria-labelledby="navbarDropdown2">
+                        <ul class="dropdown-menu hideScroll" style="max-height: 45vh; overflow-y: scroll;" aria-labelledby="navbarDropdown2">
                             <%user.notifications.forEach(note=>{%>
                                 <li>
-                                    <div class="dropdown-item">
-                                        <h4><%= note.title %></h4>
-                                    </div>
+                                    <a href="<%note.link%>" class="dropdown-item border-bottom" style="border-color: rgba(0,0,0,0.5)">
+                                        <h5><i class="bi fs-3 align-middle bi-<%=note.icon%>"></i> <strong><%= note.title %></strong></h5>
+                                        <hr>
+                                        <p><%= note.desc%></p>
+                                        <p class="text-muted"><%= new Date(note.timeStamp).toLocaleString("en-us", {hour12: true}) %></p>
+                                    </a>
                                 </li>
                             <%})%>
                             <% if(user.notifications.length == 0){ %>
