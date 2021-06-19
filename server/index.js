@@ -1056,7 +1056,6 @@ app.post("/newPirep", async function (req, res){
                         fuelUsed: pirepObj.fuel,
                         flightTime: pirepObj.flightTime,
                         aircraftLiveryId: pirepObj.vehicle
-
                     })
                     console.log({
                         pilotId: author.VANETID,
@@ -1096,7 +1095,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
-                if (req.body.title && req.body.desc && req.body.arrAir && req.body.depAir && req.body.depTime && req.body.aircraft && req.body.server) {
+                if (req.body.title && req.body.gates && req.body.desc && req.body.arrAir && req.body.depAir && req.body.depTime && req.body.aircraft && req.body.server) {
                         const event = {
                             id: uniqueString(),
                             title: req.body.title,
@@ -1106,6 +1105,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             depTime: req.body.depTime + "z",
                             air: req.body.aircraft,
                             server: req.body.server,
+                            gates: req.body.gates.split(",")
                         }
                         const options = {
                             method: 'GET',
@@ -1118,6 +1118,16 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                         if(response.statusCode == 200){
                             const pbody = JSON.parse(body).result;
                             event.airName = pbody.liveryName + " - " + pbody.aircraftName;
+                            const vanetSubmission = JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json" }, null, {
+                                name: event.title,
+                                description: event.body,
+                                date: event.depTime,
+                                departureIcao: event.depAir,
+                                arrivalIcao: event.arrAir,
+                                aircraftLiveryId: event.air,
+                                server: event.server,
+                                gateNames: event.gates
+                            })
                             FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
                             reloadData()
                             setTimeout(function () {
@@ -1129,17 +1139,6 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                         }
                             
                         });
-                    /*const vanetSubmission = await JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json"}, null, {
-                            name: event.title,
-                            description: event.body,
-                            date: event.depTime,
-                            departureIcao: event.depAir,
-                            arrivalIcao: event.arrAir,
-                            aircraftLiveryId: event.air,
-                            server: event.server,
-                            gateNames: ["null"]
-                        })*/
-                        
                 } else {
                     res.sendStatus(400);
                 }
@@ -1917,8 +1916,8 @@ return new Promise(resolve => {
         if (error) throw new Error(error);
 
         const returned = JSON.parse(body);
-        if (cv != returned.branches.master.current) {
-            resolve([true, returned.branches.master.current]);
+        if (cv != returned.branches[currentBranch].current) {
+            resolve([true, returned.branches[currentBranch].current]);
 
         } else {
             resolve([false, null])
@@ -1939,10 +1938,10 @@ async function update(version){
             console.log(package)
             fs.writeFileSync(`${path.join(__dirname, "/../") + "package.json"}`, JSON.stringify(package, null, 2))
             let proccessed = 0;
-            console.log(json.branches.master.releases[version])
-            console.log(json.branches.master.releses)
+            console.log(json.branches[currentBranch].releases[version])
+            console.log(json.branches[currentBranch].releses)
             console.log(version)
-            json.branches.master.releases[version].FilesChanged.forEach(file =>{
+            json.branches[currentBranch].releases[version].FilesChanged.forEach(file =>{
                 const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
                 const filePath = path.join(__dirname, '/../', file)
                 
@@ -1957,12 +1956,13 @@ async function update(version){
                     if (error) throw new Error(error);
                     fs.writeFileSync(`${filePath}`, body)
                     proccessed++;
-                    if (proccessed === json.branches.master.releases[version].FilesChanged.length) {
+                    if (proccessed === json.branches[currentBranch].releases[version].FilesChanged.length) {
                         if(config.other.toldVACenter == true){
+                            const addition = currentBranch == "beta" ? "B": ""
                         const options2 = {
                             method: 'POST',
                             url: 'https://admin.va-center.com/stats/updateInstance',
-                            form: { id: config.other.ident, version: `${version}`}
+                            form: { id: config.other.ident, version: `${version}${addition}`}
                         };
 
                         request(options2, function (error2, response2, body2) {
@@ -1983,6 +1983,7 @@ async function update(version){
             
         });
 }
+let currentBranch = "master";
 
 app.post("/update", async function (req, res){
     const cookies = getAppCookies(req)

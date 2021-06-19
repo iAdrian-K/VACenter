@@ -24,7 +24,8 @@
                 <div class="w-100 h-auto p-5 container rounded-2 bg-light" id="eventsContainer">
                     <div class="row row-cols-1 row-cols-md-2">
                         <% events.forEach(item=>{ %>
-                            <div class="rounded-3 col my-3 pt-3 px-5 pb-5 text-light bg-dark text-start eventsItems">
+                            <div class="rounded-3 col my-3">
+                                <div class="w-100 bg-dark rounded-3 pt-3 px-5 pb-5 text-start eventsItems text-light">
                                 <h1 class="text-center">
                                     <%= item.title %>
                                 </h1>
@@ -54,6 +55,7 @@
                                 <hr>
                                 <button class="btn btn-success text-start">Sign up</button>
                                 <button class="btn btn-danger text-end">Pull out</button>
+                                </div>
                             </div>
                             <% })%>
                             <% if(events.size==0){%> 
