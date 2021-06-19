@@ -2061,7 +2061,7 @@ async function update(version){
             
         });
 }
-let currentBranch = "master";
+let currentBranch = "beta";
 
 app.post("/update", async function (req, res){
     const cookies = getAppCookies(req)
@@ -2089,4 +2089,4 @@ async function updater(){
     }
     return updateRequired[0]
 }
-updater()
+//updater()
