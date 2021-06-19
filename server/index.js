@@ -1052,7 +1052,7 @@ app.post("/newPirep", async function (req, res){
                         pilotId: author.VANETID,
                         departureIcao: pirepObj.depICAO,
                         arrivalIcao: pirepObj.arrICAO,
-                        date: pirepObj.departureT + "T00:00:00z",
+                        date: pirepObj.departureT + "T00:00:00Z",
                         fuelUsed: pirepObj.fuel,
                         flightTime: pirepObj.flightTime,
                         aircraftLiveryId: pirepObj.vehicle
@@ -1105,7 +1105,8 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             depTime: req.body.depTime + "z",
                             air: req.body.aircraft,
                             server: req.body.server,
-                            gates: req.body.gates.split(",")
+                            gates: req.body.gates.split(","),
+                            VANET: true
                         }
                         const options = {
                             method: 'GET',
@@ -1113,15 +1114,15 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             headers: { 'X-Api-Key': 'ace5aa2b-74d3-483d-8df7-bc29028e8300' }
                         };
 
-                        request(options, function (error, response, body) {
+                        request(options, async function (error, response, body) {
                         if (error) throw new Error(error);
                         if(response.statusCode == 200){
                             const pbody = JSON.parse(body).result;
                             event.airName = pbody.liveryName + " - " + pbody.aircraftName;
-                            const vanetSubmission = JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json" }, null, {
+                            const vanetSubmission = await JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json" }, null, {
                                 name: event.title,
                                 description: event.body,
-                                date: event.depTime,
+                                date: event.depTime.slice(0, event.depTime.length - 1) + "Z",
                                 departureIcao: event.depAir,
                                 arrivalIcao: event.arrAir,
                                 aircraftLiveryId: event.air,
@@ -1130,9 +1131,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             })
                             FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
                             reloadData()
-                            setTimeout(function () {
-                                res.redirect("/admin/events")
-                            }, 1500)
+                            res.redirect("/admin/events")
                         }else{
                             res.sendStatus(response.statusCode);
                             console.error(`${response.statusCode} - ${response.body}`)
