@@ -2020,7 +2020,7 @@ async function update(version){
                 timeStamp: new Date()
             })
             json.branches[currentBranch].releases[version].FilesChanged.forEach(file =>{
-                const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
+                const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/${currentBranch}/${file}`;
                 const filePath = path.join(__dirname, '/../', file)
                 
                 console.log(filePath)
