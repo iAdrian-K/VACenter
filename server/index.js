@@ -1908,7 +1908,7 @@ function checkForNewVersion(){
 return new Promise(resolve => {
     const options = {
         method: 'GET',
-        url: 'https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json',
+        url: 'https://admin.va-center.com/updateFile',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         form: {}
     };
@@ -1917,8 +1917,8 @@ return new Promise(resolve => {
         if (error) throw new Error(error);
 
         const returned = JSON.parse(body);
-        if (cv != returned.currentVersion) {
-            resolve([true, returned.currentVersion]);
+        if (cv != returned.branches.master.current) {
+            resolve([true, returned.branches.master.current]);
 
         } else {
             resolve([false, null])
@@ -1927,7 +1927,7 @@ return new Promise(resolve => {
 })
 }
 async function update(version){
-    let url = "https://raw.githubusercontent.com/VACenter/VACenter/updateInfo/info.json";
+    let url = "https://admin.va-center.com/updateFile";
 
     let settings = { method: "Get" };
 
@@ -1939,7 +1939,10 @@ async function update(version){
             console.log(package)
             fs.writeFileSync(`${path.join(__dirname, "/../") + "package.json"}`, JSON.stringify(package, null, 2))
             let proccessed = 0;
-            json.versions[version].FilesChanged.forEach(file =>{
+            console.log(json.branches.master.releases[version])
+            console.log(json.branches.master.releses)
+            console.log(version)
+            json.branches.master.releases[version].FilesChanged.forEach(file =>{
                 const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
                 const filePath = path.join(__dirname, '/../', file)
                 
@@ -1954,7 +1957,7 @@ async function update(version){
                     if (error) throw new Error(error);
                     fs.writeFileSync(`${filePath}`, body)
                     proccessed++;
-                    if (proccessed === json.versions[version].FilesChanged.length) {
+                    if (proccessed === json.branches.master.releases[version].FilesChanged.length) {
                         if(config.other.toldVACenter == true){
                         const options2 = {
                             method: 'POST',
