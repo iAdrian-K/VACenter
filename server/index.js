@@ -643,7 +643,7 @@ app.get('*', async (req, res) => {
                     }
                     break;
                 case "/admin/settings":
-                    res.redirect("/admin/settings");
+                    res.redirect("/admin/vacenter");
                 break;
                 case "/admin/vacenter":
                     if (await isNormalUser(cookies)) {
@@ -1799,6 +1799,7 @@ app.post("/setupData", async function (req, res) {
                         config.other.toldVACenter = true,
                         FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
                     }
+                    reloadVANETData()
                     const options2 = {
                         method: 'POST',
                         url: 'https://admin.va-center.com/stats/regInstance',
