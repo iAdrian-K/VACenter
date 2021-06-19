@@ -1991,7 +1991,9 @@ return new Promise(resolve => {
         if (error) throw new Error(error);
 
         const returned = JSON.parse(body);
-        if (cv != returned.branches[currentBranch].current) {
+        const cvnum = cv.split("B")[0];
+        console.log(cvnum)
+        if (cvnum != returned.branches[currentBranch].current) {
             resolve([true, returned.branches[currentBranch].current]);
 
         } else {
@@ -2092,4 +2094,4 @@ async function updater(){
     }
     return updateRequired[0]
 }
-//updater()
+updater()
