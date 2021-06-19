@@ -1,9 +1,12 @@
+let currentBranch = "beta";
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 require('dotenv').config()
 const sanitize = require("sanitize-filename");
 const package = require('./../package.json')
-const cv = require('./../package.json').version;
+const addition2 = currentBranch == "beta" ? "B" : ""
+const cv = require('./../package.json').version + addition2;
+
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
     console.log([method, url, headers, query, data])
@@ -2061,7 +2064,7 @@ async function update(version){
             
         });
 }
-let currentBranch = "beta";
+
 
 app.post("/update", async function (req, res){
     const cookies = getAppCookies(req)
