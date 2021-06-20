@@ -1,11 +1,11 @@
-let currentBranch = "beta";
+let currentBranch = "demo";
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 require('dotenv').config()
 const sanitize = require("sanitize-filename");
 const package = require('./../package.json')
 const addition2 = currentBranch == "beta" ? "B" : ""
-const cv = require('./../package.json').version + addition2;
+const cv = require('./../package.json').version + "D";
 
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
@@ -1979,7 +1979,7 @@ console.log(uniqueString())
 
 const fetch = require('node-fetch');
 
-function checkForNewVersion(){
+/*function checkForNewVersion(){
 return new Promise(resolve => {
     const options = {
         method: 'GET',
@@ -2095,4 +2095,4 @@ async function updater(){
     }
     return updateRequired[0]
 }
-updater()
+updater()*/

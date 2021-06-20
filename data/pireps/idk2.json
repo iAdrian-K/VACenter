@@ -1,0 +1,16 @@
+{
+  "id": "idk2",
+  "vehicle": "02a8c821-2105-4b3d-99eb-1d8223076bb0",
+  "vehiclePublic": "Generic - Boeing 737-800",
+  "author": "QURNSU4x",
+  "airline": "VANet Virtual Airlines",
+  "pilot": {
+    "name": "Administrator"
+  },
+  "route": "DELETE0001",
+  "departureT": "2021-05-28",
+  "flightTime": "60",
+  "comments": "This is a demo PIREP go to Admin > PIREPS > Filed PIREPS and deny this request, to remove it consult the docs.",
+  "status": "d",
+  "fuel": "80"
+}

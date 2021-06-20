@@ -22,7 +22,7 @@
             <%= target.title %>
         </h1>
         <br>
-        <form class="halfBgFullSm form-control mx-auto" action="/admin/reqs/updateNews" method="POST">
+        <form class="halfBgFullSm form-control mx-auto">
             <input class="visually-hidden" value="<%= target.id %>" name="id">
             <p class="form-label">
                 Title:
@@ -39,7 +39,7 @@
             </p>
             <input type="text" class="form-control mb-3" disabled placeholder="Author" required="" value="<%= target.author%>"
                 aria-label="Title" name="author">
-            <button class="btn btn-primary">Update</button>
+            <button class="btn btn-primary" disabled>Update</button>
         </form>
     </div>
     <%- include("./../components/dark.ejs")%>

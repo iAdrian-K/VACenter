@@ -20,7 +20,7 @@
         <i class="display-1 bi bi-newspaper"></i>
         <h1 class="display-2 mt-1">News</h1>
         <br>
-        <form class="w-75 px-2 px-lg-5 mx-auto form-control py-3" action="/admin/reqs/newNews" method="POST">
+        <form class="w-75 px-2 px-lg-5 mx-auto form-control py-3">
             <h2>Create new news</h2>
             <br>
             <input type="text" class="form-control mb-3" placeholder="Title" required aria-label="Title" name="title">
@@ -31,7 +31,7 @@
             </label>
             <input type="text" class="form-control mb-3" placeholder="Author" value="<%= user.name %>" required aria-label="Departure ICAO"
                 name="author">
-            <button class="btn btn-primary">Create</button>
+            <button class="btn btn-primary" disabled>Create</button>
         </form>
         <div class='form-control w-75 mx-auto px-3 px-lg-5 py-3'>
             <h2>Current News</h2>
@@ -51,7 +51,7 @@
                             <tr class="pirepRow">
                                 <th scope="row"><%= item.title %></th>
                                 <td><a href="/admin/viewNews?id=<%= item.id %>" class="btn btn-primary"><i class="bi bi-pencil"></i></a></td>
-                                <td><button onclick="remItem('<%= item.id %>')" class="btn btn-danger"><i class="bi bi-x-circle"></i></button></td>
+                                <td><button disabled class="btn btn-danger"><i class="bi bi-x-circle"></i></button></td>
                             </tr>
                         <%})%>
                     </tbody>

@@ -20,7 +20,7 @@
         <i class="display-1 bi bi-calendar-event"></i>
         <h1 class="display-2 mt-1">Events</h1>
         <br>
-        <form class="w-75 px-2 px-lg-5 mx-auto form-control py-3" action="/admin/reqs/newEvent" method="POST">
+        <form class="w-75 px-2 px-lg-5 mx-auto form-control py-3">
             <h2>Create new event</h2>
             <br>
             <input type="text" class="form-control mb-3" placeholder="Title" required aria-label="Title" name="title">
@@ -53,7 +53,7 @@
                 <p class="fs-6 text-muted"><strong>Note:</strong> Please format like so, with commas seperating gates and no gaps: <i>Gate1,Gate2,Gate3</i></p>
                 <textarea name="gates" class="form-text w-100 mt-1 mb-4 p-2 text-dark">Gate1,Gate2,Gate3</textarea>
             </label>
-            <button class="btn btn-primary">Create</button>
+            <button class="btn btn-primary" disabled>Create</button>
             <br><br>
         </form>
         <div class='form-control w-75 mx-auto px-3 px-lg-5 py-3'>
@@ -79,7 +79,7 @@
                                 <a class="btn btn-primary" href="/admin/viewEvent?id=<%= Buffer.from(event.id).toString(`base64`) %>"><i class="bi bi-pencil"></i></a>
                             </td>
                             <td>
-                                <button class="btn btn-danger" onclick="remEvent('<%= Buffer.from(event.id).toString(`base64`) %>')"><i class="bi bi-x-circle"></i></button>
+                                <button class="btn btn-danger" disabled><i class="bi bi-x-circle"></i></button>
                             </td>
                         </tr>
                     <%})%>
@@ -93,20 +93,7 @@
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
         crossorigin="anonymous"></script>
     <script>
-        function remEvent(id) {
-            const data = `id=${encodeURIComponent(id)}`;
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.open("DELETE", "/admin/reqs/remEvent");
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            xhr.send(data);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        }
+        
     </script>
 </body>
 

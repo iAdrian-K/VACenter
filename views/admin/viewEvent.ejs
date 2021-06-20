@@ -25,7 +25,7 @@
         <i class="display-1 bi bi-calendar2-event"></i>
         <h1 class="display-2 mt-1"><%= targetEvent.title %></h1>
         <br>
-        <form class="halfBgFullSm form-control mx-auto" action="/admin/reqs/updateEvent" method="POST">
+        <form class="halfBgFullSm form-control mx-auto">
             <input class="visually-hidden" value="<%= Buffer.from(targetEvent.id).toString(`base64`) %>" name="id">
                 <p class="form-label">
                     Title:
@@ -72,7 +72,7 @@
                         <i>Gate1,Gate2,Gate3</i></p>
                     <textarea name="gates" class="form-text w-100 mt-1 mb-4 p-2 text-dark"><%= targetEvent.gates.join(",") %></textarea>
                 </label>
-                <button class="btn btn-primary">Update</button>
+                <button class="btn btn-primary" disabled>Update</button>
         </form>
     </div>
     <%- include("./../components/dark.ejs")%>

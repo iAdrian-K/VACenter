@@ -111,9 +111,9 @@
                                     </td>
                                     <td>
                                         <% if(pirep.status=="n" ){%>
-                                            <button class="btn btn-success my-1" onclick="aprPirep('<%= pirep.id %>')"><i
+                                            <button class="btn btn-success my-1" disabled><i
                                                     class="bi bi-check-circle"></i></button>
-                                            <button class="btn btn-danger my-1" onclick="remPirep('<%= pirep.id %>')"><i
+                                            <button class="btn btn-danger my-1" disabled><i
                                                     class="bi bi-x-circle"></i></button>
                                             </p>
                                             <%}else{%>
@@ -144,7 +144,7 @@
                                         <%= vehicle.publicName %>
                                     </td>
                                     <td>
-                                        <button class="btn btn-danger" onclick="remData('c', '<%= vehicle.livId %>')"><i
+                                        <button class="btn btn-danger" disabled><i
                                                 class="bi bi-x-circle"></i></button>
                                     </td>
                                 </tr>
@@ -166,7 +166,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/reqs/newData?t=c">
+                                <form>
                                     <label class="form-label">Aircraft
                                         <select class="form-select" id="newAirAirSel" name="airID" onchange="loadAircraftLivData()">
                                             <% listAircraft.forEach(obj=>{%>
@@ -181,7 +181,7 @@
                                             <option value="">Waiting Selection</option>
                                         </select>
                                     </label><br>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" disabled class="btn btn-primary">Submit</button>
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -209,7 +209,7 @@
                                 </td>
                                 <td>
                                     <button class="btn <%if(airline.id != 'MAIN'){%> btn-danger"
-                                        onclick="remData('a', '<%= airline.id %>')">
+                                        disabled>
                                         <%}else{%> btn-secondary" style="cursor: not-allowed"><%}%><i class="bi bi-x-circle"></i>
                                     </button>
                                 </td>
@@ -220,21 +220,21 @@
                     </tbody>
                 </table>
                 <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=a">
+                <form class="halfBgFullSm mx-auto h-auto">
                     <h2>New Codeshare</h2>
                     <input type="text" class="form-control" name="airName" placeholder="Name: EG ('CODESHARE: Alitalia Virtual')">
                     <br>
-                    <button class="btn btn-primary">Add</button>
+                    <button class="btn btn-primary" disabled>Add</button>
                 </form>
             </div>
             <div class="tab-pane fade" id="routes" role="tabpanel" aria-labelledby="routes-tab">
                 <h2>Current Routes</h2>
                 <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=r">
+                <form class="halfBgFullSm mx-auto h-auto">
                     <h2>New Route</h2>
                     <input type="text" class="form-control" name="routeName" placeholder="Name: EG ('<%= config.code %>0001')">
                     <br>
-                    <button class="btn btn-primary">Add</button>
+                    <button class="btn btn-primary" disabled>Add</button>
                 </form>
                 <br>
                 <table class="table table-striped text-center" id="RoutesTable">
@@ -251,7 +251,7 @@
                                     <%= route.name %>
                                 </td>
                                 <td>
-                                    <button class="btn btn-danger" onclick="remData('r', '<%= route.id %>')"><i
+                                    <button class="btn btn-danger" disabled><i
                                             class="bi bi-x-circle"></i></button>
                                 </td>
                             </tr>
@@ -264,7 +264,7 @@
             <div class="tab-pane fade" id="ranks" role="tabpanel" aria-labelledby="ranks-tab">
                 <h2>Current Ranks</h2>
                 <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=ra">
+                <form class="halfBgFullSm mx-auto h-auto">
                     <h2>New Rank</h2>
                     <label class="form-label mb-3">
                     <strong>Name:</strong>
@@ -275,7 +275,7 @@
                     <input type="number" class="form-control" name="min" placeholder="0">
                     </label>
                     <br>
-                    <button class="btn btn-primary">Add</button>
+                    <button class="btn btn-primary" disabled>Add</button>
                 </form>
                 <br>
                 <table class="table table-striped text-center" id="RanksTable">
@@ -296,7 +296,7 @@
                                     <%= rank.minH %>
                                 </td>
                                 <td>
-                                    <button class="btn btn-danger" onclick="remData('ra', '<%= rank.name %>')"><i
+                                    <button class="btn btn-danger" disabled><i
                                             class="bi bi-x-circle"></i></button>
                                 </td>
                             </tr>
@@ -320,70 +320,6 @@
                 const time = new Date(timeEl.innerHTML)
                 timeEl.innerHTML = time.toString();
             })
-        function remData(type, id){
-            const data = `id=${id}`;
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function () {
-                console.log(this)
-                if (this.readyState === this.DONE) {
-                    console.log(this.responseText);
-                }
-            });
-
-            xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            xhr.send(data);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        }
-
-        function aprPirep(id){
-            const data = `id=${id}`;
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function () {
-                console.log(this)
-                if (this.readyState === this.DONE) {
-                    console.log(this.responseText);
-                }
-            });
-
-            xhr.open("POST", `/admin/reqs/newData?t=p`);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            xhr.send(data);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        }
-        function remPirep(id) {
-                const data = `id=${id}`;
-
-                const xhr = new XMLHttpRequest();
-                xhr.withCredentials = true;
-
-                xhr.addEventListener("readystatechange", function () {
-                    console.log(this)
-                    if (this.readyState === this.DONE) {
-                        console.log(this.responseText);
-                    }
-                });
-
-                xhr.open("DELETE", `/admin/reqs/remData?t=p`);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                xhr.send(data);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            }
             function loadAircraftLivData(){
                 const airID = document.getElementById("newAirAirSel").value;
                 document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
