@@ -66,6 +66,12 @@
                         <%})%>
                     </select>
                 </label>
+                <label class="text-start w-100">
+                    <p class="text-dark">Gate Names</p>
+                    <p class="fs-6 text-muted"><strong>Note:</strong> Please format like so, with commas seperating gates and no gaps:
+                        <i>Gate1,Gate2,Gate3</i></p>
+                    <textarea name="gates" class="form-text w-100 mt-1 mb-4 p-2 text-dark"><%= targetEvent.gates.join(",") %></textarea>
+                </label>
                 <button class="btn btn-primary">Update</button>
         </form>
     </div>

@@ -1,7 +1,13 @@
 body::-webkit-scrollbar {
   display: none;
 }
-
+.hideScroll{
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hideScroll::-webkit-scrollbar{
+  display: none;
+}
 body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */

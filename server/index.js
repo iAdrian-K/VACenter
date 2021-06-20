@@ -1,9 +1,12 @@
+let currentBranch = "beta";
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 require('dotenv').config()
 const sanitize = require("sanitize-filename");
 const package = require('./../package.json')
-const cv = require('./../package.json').version;
+const addition2 = currentBranch == "beta" ? "B" : ""
+const cv = require('./../package.json').version + addition2;
+
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
     console.log([method, url, headers, query, data])
@@ -325,6 +328,40 @@ function isAdminUser(tokens) {
         }
     })
 }
+function compareTime(a, b) {
+    if (new Date(a.timeStamp).getTime() < new Date(b.timeStamp).getTime()) {
+        return 1;
+    }
+    if (new Date(a.timeStamp).getTime() > new Date(b.timeStamp).getTime()) {
+        return -1;
+    }
+    return 0;
+}
+async function notifyUser(user, event){
+    if(user == "all"){
+        console.log(users)
+        users.forEach(async user =>{
+            console.log(1)
+            const uid = user.username;
+            const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
+            userData.notifications.push(event);
+            userData.notifications.sort(compareTime);
+            if (userData.notifications.length > 7) {
+                userData.notifications.pop();
+            }
+            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(userData, null, 2));
+        })
+    }else{
+        const userExists = await FileExists(`${usersPath}/` + sanitize(user) + '.json');
+        if(userExists){
+            const userData = JSON.parse(await FileRead(`${usersPath}/${user}.json`));
+            userData.notifications.push(event);
+            FileWrite(`${usersPath}/${user}.json`, JSON.stringify(userData, null, 2));
+        }else{
+            console.error("No user found to notify! " + user);
+        }
+    }
+}
 
 function isNormalUser(tokens) {
     return new Promise(resolve => {
@@ -606,7 +643,7 @@ app.get('*', async (req, res) => {
                     }
                     break;
                 case "/admin/settings":
-                    res.redirect("/admin/settings");
+                    res.redirect("/admin/vacenter");
                 break;
                 case "/admin/vacenter":
                     if (await isNormalUser(cookies)) {
@@ -876,6 +913,13 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
                         if (event.server != req.body.server) {
                             event.server = req.body.server
                         }
+                        notifyUser("all", {
+                            title: `Event Updated!`,
+                            desc: `The ${event.title} event has been updated.`,
+                            icon: `calendar`,
+                            link: "/events",
+                            timeStamp: new Date()
+                        })
                         /*const vanetSubmission = await URLReq("PUT", `https://api.vanet.app/airline/v1/events/`, { "X-Api-Key": config.key, "Content-Type": "application/x-www-form-urlencoded" }, null, {
                             name: event.title,
                             description: event.body,
@@ -960,6 +1004,13 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
                     if (await FileExists(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`) == true){
                         FileRemove(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`)
                         reloadData()
+                        notifyUser("all", {
+                            title: `Event Removed!`,
+                            desc: `An event has been cancelled.`,
+                            icon: `calendar`,
+                            link: "/events",
+                            timeStamp: new Date()
+                        })
                         setTimeout(function () {
                             res.redirect("/admin/events")
                         }, 1500)
@@ -1052,11 +1103,10 @@ app.post("/newPirep", async function (req, res){
                         pilotId: author.VANETID,
                         departureIcao: pirepObj.depICAO,
                         arrivalIcao: pirepObj.arrICAO,
-                        date: pirepObj.departureT + "T00:00:00z",
+                        date: pirepObj.departureT + "T00:00:00Z",
                         fuelUsed: pirepObj.fuel,
                         flightTime: pirepObj.flightTime,
                         aircraftLiveryId: pirepObj.vehicle
-
                     })
                     console.log({
                         pilotId: author.VANETID,
@@ -1096,7 +1146,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
-                if (req.body.title && req.body.desc && req.body.arrAir && req.body.depAir && req.body.depTime && req.body.aircraft && req.body.server) {
+                if (req.body.title && req.body.gates && req.body.desc && req.body.arrAir && req.body.depAir && req.body.depTime && req.body.aircraft && req.body.server) {
                         const event = {
                             id: uniqueString(),
                             title: req.body.title,
@@ -1106,40 +1156,45 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                             depTime: req.body.depTime + "z",
                             air: req.body.aircraft,
                             server: req.body.server,
+                            gates: req.body.gates.split(","),
+                            VANET: true
                         }
                         const options = {
                             method: 'GET',
                             url: `https://api.vanet.app/public/v1/aircraft/livery/${req.body.aircraft}`,
                             headers: { 'X-Api-Key': 'ace5aa2b-74d3-483d-8df7-bc29028e8300' }
                         };
-
-                        request(options, function (error, response, body) {
+                    notifyUser("all", {
+                        title: `Event Created!`,
+                        desc: `The ${event.title} event has been created.`,
+                        icon: `calendar`,
+                        link: "/events",
+                        timeStamp: new Date()
+                    })
+                        request(options, async function (error, response, body) {
                         if (error) throw new Error(error);
                         if(response.statusCode == 200){
                             const pbody = JSON.parse(body).result;
                             event.airName = pbody.liveryName + " - " + pbody.aircraftName;
+                            const vanetSubmission = await JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json" }, null, {
+                                name: event.title,
+                                description: event.body,
+                                date: event.depTime.slice(0, event.depTime.length - 1) + "Z",
+                                departureIcao: event.depAir,
+                                arrivalIcao: event.arrAir,
+                                aircraftLiveryId: event.air,
+                                server: event.server,
+                                gateNames: event.gates
+                            })
                             FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
                             reloadData()
-                            setTimeout(function () {
-                                res.redirect("/admin/events")
-                            }, 1500)
+                            res.redirect("/admin/events")
                         }else{
                             res.sendStatus(response.statusCode);
                             console.error(`${response.statusCode} - ${response.body}`)
                         }
                             
                         });
-                    /*const vanetSubmission = await JSONReq("POST", "https://api.vanet.app/airline/v1/events", { "X-Api-Key": config.key, "Content-Type": "application/json"}, null, {
-                            name: event.title,
-                            description: event.body,
-                            date: event.depTime,
-                            departureIcao: event.depAir,
-                            arrivalIcao: event.arrAir,
-                            aircraftLiveryId: event.air,
-                            server: event.server,
-                            gateNames: ["null"]
-                        })*/
-                        
                 } else {
                     res.sendStatus(400);
                 }
@@ -1168,6 +1223,13 @@ app.post("/admin/reqs/newNews", async function (req, res) {
                         body: req.body.body,
                         author: req.body.author,
                     }
+                    notifyUser("all", {
+                        title: `New News!`,
+                        desc: `New Headline: ${item.title}`,
+                        icon: `newspaper`,
+                        link: "/news",
+                        timeStamp: new Date()
+                    })
                     FileWrite(`${dataPath}/news/${item.id}.json`, JSON.stringify(item, null, 2))
                     reloadData()
                     setTimeout(function () {
@@ -1474,6 +1536,12 @@ async function addHoursToPilot(uid, amount){
         for(const rank of ranksSorted){
             if(user.hours > rank[1]){
                 user.rank = rank[0];
+                notifyUser("all", {
+                    title: `Ranking!`,
+                    desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
+                    icon: `arrow-up-circle`,
+                    timeStamp: new Date()
+                })
                 break;
             }
         }
@@ -1666,6 +1734,12 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                             },
                             revoked: false
                         }
+                        notifyUser("all", {
+                            title: `New Pilot!`,
+                            desc: `${config.code}${atob(newUser.username)} has joined!`,
+                            icon: `person-circle`,
+                            timeStamp: new Date()
+                        })
                         FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
                         reloadUsers()
                         res.redirect("/admin/accounts")
@@ -1725,6 +1799,7 @@ app.post("/setupData", async function (req, res) {
                         config.other.toldVACenter = true,
                         FileWrite((path.join(__dirname, "/../") + "config.json"), JSON.stringify(config, null, 2))
                     }
+                    reloadVANETData()
                     const options2 = {
                         method: 'POST',
                         url: 'https://admin.va-center.com/stats/regInstance',
@@ -1917,8 +1992,10 @@ return new Promise(resolve => {
         if (error) throw new Error(error);
 
         const returned = JSON.parse(body);
-        if (cv != returned.branches.master.current) {
-            resolve([true, returned.branches.master.current]);
+        const cvnum = cv.split("B")[0];
+        console.log(cvnum)
+        if (cvnum != returned.branches[currentBranch].current) {
+            resolve([true, returned.branches[currentBranch].current]);
 
         } else {
             resolve([false, null])
@@ -1939,11 +2016,17 @@ async function update(version){
             console.log(package)
             fs.writeFileSync(`${path.join(__dirname, "/../") + "package.json"}`, JSON.stringify(package, null, 2))
             let proccessed = 0;
-            console.log(json.branches.master.releases[version])
-            console.log(json.branches.master.releses)
+            console.log(json.branches[currentBranch].releases[version])
+            console.log(json.branches[currentBranch].releses)
             console.log(version)
-            json.branches.master.releases[version].FilesChanged.forEach(file =>{
-                const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/master/${file}`;
+            notifyUser("all", {
+                title: `VACenter Updated!`,
+                desc: `VACenter ${version} has been installed!`,
+                icon: `cloud-arrow-down-fill`,
+                timeStamp: new Date()
+            })
+            json.branches[currentBranch].releases[version].FilesChanged.forEach(file =>{
+                const gitPath = `https://raw.githubusercontent.com/VACenter/VACenter/${currentBranch}/${file}`;
                 const filePath = path.join(__dirname, '/../', file)
                 
                 console.log(filePath)
@@ -1957,12 +2040,13 @@ async function update(version){
                     if (error) throw new Error(error);
                     fs.writeFileSync(`${filePath}`, body)
                     proccessed++;
-                    if (proccessed === json.branches.master.releases[version].FilesChanged.length) {
+                    if (proccessed === json.branches[currentBranch].releases[version].FilesChanged.length) {
                         if(config.other.toldVACenter == true){
+                            const addition = currentBranch == "beta" ? "B": ""
                         const options2 = {
                             method: 'POST',
                             url: 'https://admin.va-center.com/stats/updateInstance',
-                            form: { id: config.other.ident, version: `${version}`}
+                            form: { id: config.other.ident, version: `${version}${addition}`}
                         };
 
                         request(options2, function (error2, response2, body2) {
@@ -1983,6 +2067,7 @@ async function update(version){
             
         });
 }
+
 
 app.post("/update", async function (req, res){
     const cookies = getAppCookies(req)
