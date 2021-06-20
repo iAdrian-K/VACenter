@@ -1,4 +1,4 @@
-let currentBranch = "beta";
+let currentBranch = "master";
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 require('dotenv').config()
