@@ -1,4 +1,4 @@
-let currentBranch = "master";
+let currentBranch = "beta";
 const express = require('express');
 const RateLimit = require('express-rate-limit');
 require('dotenv').config()
@@ -1570,13 +1570,15 @@ async function addHoursToPilot(uid, amount){
         const ranksSorted = new Map([...tempMap.entries()].sort((a, b) => b[1] - a[1]));
         for(const rank of ranksSorted){
             if(user.hours > rank[1]){
+                if(user.rank != rank[0]){
+                    notifyUser("all", {
+                        title: `Ranking!`,
+                        desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
+                        icon: `arrow-up-circle`,
+                        timeStamp: new Date()
+                    })
+                }
                 user.rank = rank[0];
-                notifyUser("all", {
-                    title: `Ranking!`,
-                    desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
-                    icon: `arrow-up-circle`,
-                    timeStamp: new Date()
-                })
                 break;
             }
         }
