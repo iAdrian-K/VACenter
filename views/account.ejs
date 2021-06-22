@@ -26,6 +26,12 @@
                 <hr>
                 <h1>You are unable to fully interact with VANet.</h1>
                 <p>You account was created prior to Version 2.1, this means that your IFC account is not linked, and by extension you are unable to access certain features. A fix for this will come at a later time.</p>
+                <form class="form-control w-100 bg-danger text-light px-5 py-3" method="POST" action="/addIFCAcc">
+                    <h3>Add IFC Account</h3>
+                    <p>This is your username, this must be case sensitive. Eg: <strong>Sammy_Neale</strong></p>
+                    <input class="form-control w-25" name="ifc_name" type="text"><br>
+                    <button class="btn btn-light">Allow</button>
+                </form>
             </div>
         <%}%>
         <div class="px-3 py-1 w-100 text-start">
