@@ -1323,6 +1323,41 @@ app.post("/admin/reqs/updateUser", async function (req, res){
         res.send(`${error}`)
     }
 })
+
+app.post('/addIFCAcc', async (req,res) => {
+    try{
+        const cookies = getAppCookies(req);
+        if (await isNormalUser(cookies)) {
+            if(req.body.ifc_name){
+                const UserData = await getUserData(cookies);
+                const pilotIDReq = await JSONReq("GET", `https://api.vanet.app/airline/v1/user/id/${req.body.ifc_name}`, { "X-Api-Key": config.key }, null, null)
+                if(pilotIDReq[1].statusCode == 200){
+                    const pilotID = pilotIDReq[2].result;
+                    let vanetid = {
+                        status: pilotIDReq[2].status == 0 ? true : false,
+                        id: pilotIDReq[2].result != false ? pilotIDReq[2].result : null,
+                    }
+                    UserData.ifcCapable = true;
+                    UserData.IFC = req.body.ifc_name;
+                    UserData.VANETID = vanetid.id;
+                    await FileWrite(`${usersPath}/${UserData.username}.json`, JSON.stringify(UserData, null, 2));
+                    res.redirect("/account")
+                }else{
+                    res.sendStatus(pilotIDReq[1].statusCode)
+                }
+                
+            }else{
+                res.sendStatus(400);
+            }
+            
+        }else{
+            res.sendStatus(403);
+        }
+    }catch(err){
+        res.sendStatus(500);
+    }
+})
+
 app.post("/admin/reqs/resetPWD", async function (req, res){
     try{
         const cookies = getAppCookies(req);
