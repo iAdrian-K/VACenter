@@ -12,24 +12,23 @@
     <link rel="stylesheet" href="assets/styles/main.css">
 </head>
 
-<body class="text-center text-light py-5 h-auto"
-    style="background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://webcdn.infiniteflight.com/blog/content/images/2019/08/Facebook.jpg'); background-position: center; background-size: cover;">
-        <h1 class="mt-5">Report a bug!</h1>
-        <h2>We are sorry to hear that you had an issue with VACenter.</h2>
-        <p>It would be greatly valued if you could please report the error below with as much detail as possible, and a method to contact you.</p>
-        <form action="https://va-center.com/report" method="POST" class="mt-5 p-5 halfBgFullSm m-auto bg-dark" id="reportForm">
+<body class="text-center text-light py-0 py-md-5 h-auto"
+    style="background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('<%= config.other.bg%>'); background-position: center; background-size: cover;">
+    <div class="bg-light py-3 px-2 p-md-5 w-50 h-auto text-dark mx-auto rounded fullTransparent">
+        <h2>Report a bug</h2>
+        <p>This is the form to report a bug, for feature suggestions, please see the VACenter official <a href="https://discord.gg/5UAA4thShN" target="_blank" class="btn btn-blurple"><i class="bi bi-discord"></i> Discord</a>.</p>
+        <form action="https://admin.va-center.com/report" method="POST" class="p-3 text-start">
             <h2>Title</h2>
-            <input class="form-control" required type="text" name="Title"><br><br>
-            <h3>Body</h3>
-            <textarea class="w-100 p-3" required name="Body"></textarea>
-            <p>Please join the VACenter <a href="https://www.guilded.gg/i/Kk5XZd42" target="_blank" class="text-warning">Guilded</a> to send images.</p><br>
-            <h2>Contact</h2>
-            <h3>Name</h3>
-            <input required class="w-100 form-control" type="text" name="Name"><br><br>
-            <h3>Email</h3>
-            <input class="w-100 form-control" type="text" email" name="Email"><br><br>
-            <button required class="btn btn-primary">Submit Report</button>
+            <input class="form-control mb-3" type="text" name="title">
+            <h2>Body</h2>
+            <textarea class="form-text mb-3 p-1 w-100 rounded" name="body" style="border-color: #ced4da;"></textarea>
+            <h2>Contact Methods</h2>
+            <textarea class="form-text mb-3 p-1 w-100 rounded" name="contact" placeholder="No format required." style="border-color: #ced4da;"></textarea>
+            <div class="w-100 text-center">
+            <button class="btn btn-primary mx-auto text-center">Submit</button>
+            </div>
         </form>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
         crossorigin="anonymous"></script>

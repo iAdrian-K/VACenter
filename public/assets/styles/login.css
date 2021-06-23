@@ -1,10 +1,3 @@
 form input{
     border: 1px solid black !important;
 }
-@media only screen and (max-width: 900px){
-    #wideme{
-        width: 100vw !important;
-        background-color: rgba(248, 249, 250, 0.75) !important;
-        height: 100% !important;
-    }
-}

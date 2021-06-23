@@ -493,7 +493,9 @@ app.get('*', async (req, res) => {
                     }
                     break;
                 case "/report":
-                    res.render("report")
+                    res.render("report", {
+                        config: clientConfig
+                    })
                     break;
                 case "/home":
                     if (await isNormalUser(cookies)) {
