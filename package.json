@@ -1,6 +1,6 @@
 {
   "name": "vacenter",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A Crew Center for IF.",
   "main": "server/index.js",
   "auto-updater": {
