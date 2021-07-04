@@ -1140,7 +1140,8 @@ app.post("/newPirep", async function (req, res){
                 reloadUsers();
                 FileWrite(`${dataPath}/pireps/${pirepObj.id}.json`, JSON.stringify(pirepObj, null, 2))
                 reloadData();
-                res.redirect("/home")
+                setTimeout(()=>{updateUserStats(author.username)}, 1500);
+                res.redirect("/home");
             }else{
                 res.sendStatus(400);
             }
@@ -1501,6 +1502,10 @@ app.delete("/admin/reqs/remData", async function (req, res){
                                 FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
                                 res.sendStatus(200)
+                                setTimeout(() => {
+                                    updateUserStats(pirep.author)
+                                }, 1500);
+                                
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1596,6 +1601,57 @@ async function updatePIREPRaw(UID, PID, status){
     }
 }
 
+function mode(array) {
+    if (array.length == 0)
+        return null;
+    var modeMap = {};
+    var maxEl = array[0], maxCount = 1;
+    for (var i = 0; i < array.length; i++) {
+        var el = array[i];
+        if (modeMap[el] == null)
+            modeMap[el] = 1;
+        else
+            modeMap[el]++;
+        if (modeMap[el] > maxCount) {
+            maxEl = el;
+            maxCount = modeMap[el];
+        }
+    }
+    return maxEl;
+}
+
+async function updateUserStats(uid){
+    if(await FileExists(`${usersPath}/${uid}.json`)){
+        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
+        if(user.stats == undefined){
+            user.stats = {
+                popular: {
+                    route: "None",
+                    aircraft: "None"
+                }
+            }
+        }
+        
+        let routes = [];
+        let craft = [];
+        user.pirepsRaw.forEach(pirep =>{
+            //Top Route
+            routes.push(pirep.route);
+
+            //Top Craft
+            craft.push(pirep.vehiclePublic)
+        })
+        user.stats.popular.route = mode(routes);
+        user.stats.popular.aircraft = mode(craft);
+
+        setTimeout(()=>{
+            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user,null, 2))
+        }, 1500)
+    }else{
+        console.error("NO USER TO UPDATE STATS")
+    }
+}
+
 async function addHoursToPilot(uid, amount){
     if(await FileExists(`${usersPath}/${uid}.json`)){
         const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
@@ -1642,7 +1698,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 setTimeout(() => {
                                     reloadData();
                                     res.sendStatus(200)
-                                }, 500);
+                                    updateUserStats(pirep.author)
+                                }, 1500);
                                 
                                 
                             }else{
@@ -1807,6 +1864,12 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                                 created: new Date(),
                                 llogin: null,
                                 cp: true
+                            },
+                            stats:{
+                                popular:{
+                                    aircraft: "None",
+                                    route: "None"
+                                }
                             },
                             revoked: false
                         }
