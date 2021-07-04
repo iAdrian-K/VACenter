@@ -14,13 +14,32 @@
 </head>
 <body class="w-100 h-auto">
     <%- include("./components/nav.ejs")%>
-    <div class="w-100 h-auto p-5 text-center" id="content">
-        <i class="display-1 text-warning bi bi-sun-fill" id="header-icon"></i>
-        <h1 class="display-1">Welcome <%= user.name %></h1>
-        <p id="date" class="fs-3"></p>
-
-        <h2 class="mt-5 text-start">We are constantly working to make VACenter better, so expect this dashboard to change.</h2>
-        <h4 class="text-muted text-start">-VACenter Devs</h4>
+    <div class="w-100 h-auto p-5 text-start" id="content">
+        <h1 class="fw-bold">Welcome <%= user.name %>,</h1>
+        <h2>Your PIREPS</h2>
+        <hr>
+        <% if(user.pirepsRaw == undefined){%><p>We are still waiting for you to file a PIREP head over to the PIREP page to see this table populated.</p><%}else{%>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Submission Date</th>
+                    <th scope="col">Route</th>
+                    <th scope="col">Aircraft</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% user.pirepsRaw.forEach(pirep =>{%>
+                    <tr>
+                        <th scope="row"><%= new Date(pirep.filed).toLocaleString() + " " + new Date(pirep.filed).toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4)  %></th>
+                        <td><%= pirep.route%></td>
+                        <td><%= pirep.vehiclePublic%></td>
+                        <td><%if(pirep.status == "n"){%>Awaiting Approval<%}else if(pirep.status == "a"){%><span class="text-success">Approved</span><%}else{%><span class="text-danger">Denied</span><%}%></td>
+                    </tr>
+                <%})%>
+            </tbody>
+        </table>
+        <%}%>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
@@ -29,96 +48,5 @@
         integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <%- include("./components/dark.ejs")%>
-    <script>
-        setInterval(function() {
-            document.getElementById("date").innerHTML = "It's " + new Date().toLocaleString();
-        }, 500)
-        function getLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(showPosition);
-                } else {
-                    x.innerHTML = "Geolocation is not supported by this browser.";
-                }
-            }
-            function getKeyByValue(object, value) {
-                    return Object.keys(object).find(key => object[key] === value);
-                }
-            function showPosition(position) {
-                let time = SunCalc.getTimes(new Date(), position.coords.latitude, position.coords.longitude, 0);
-                let timeStrings = {}
-                let dates = []
-                Object.keys(time).forEach(key => {
-                    const data = time[key]
-                    dates.push(data.toString())
-                    timeStrings[key] = data.toString()
-                })
-                var temp = dates.map(d => Math.abs(new Date() - new Date(d).getTime()));
-                var idx = temp.indexOf(Math.min(...temp));
-                const key = getKeyByValue(timeStrings, dates[idx]);
-                console.log(time)
-                switch (key){
-                    case "dawn":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sunrise-fill"
-                        break;
-                    case "sunrise":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sunrise-fill"
-                        break;
-                    case "sunriseEnd":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                    case "nightEnd":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sunrise-fill"
-                        break;
-                    case "nauticalDawn":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sunrise-fill"
-                        break;
-                    case "goldenHour":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                    case "goldenHourEnd":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                    case "solarNoon":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                    case "sunset":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                    case "dusk":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sunset-fill"
-                        break;
-                    case "sunsetStart":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sunset-fill"
-                        break;
-                    case "solarNoon":
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                    case "night":
-                        document.getElementById("header-icon").className = "display-1 text-dark bi bi-moon-stars-fill"
-                        break;
-                    case "nadir":
-                        document.getElementById("header-icon").className = "display-1 text-dark bi bi-moon-stars-fill"
-                        break;
-                    case "nightEnd":
-                        document.getElementById("header-icon").className = "display-1 text-dark bi bi-moon-stars-fill"
-                        break;
-                    case "nauticalDusk":
-                        document.getElementById("header-icon").className = "display-1 text-dark bi bi-moon-stars-fill"
-                        break;
-                    case "night":
-                        document.getElementById("header-icon").className = "display-1 text-dark bi bi-moon-stars-fill"
-                        break;
-                    default:
-                        document.getElementById("header-icon").className = "display-1 text-warning bi bi-sun-fill"
-                        break;
-                }
-                console.log(key)
-                //display-1 text-warning bi bi-sun-fill
-            }
-        setInterval(() => {
-            getLocation()
-        }, 900000);
-        getLocation()
-    </script>
 </body>
 </html>

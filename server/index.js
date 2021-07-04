@@ -1094,7 +1094,8 @@ app.post("/newPirep", async function (req, res){
                     flightTime: parseInt((parseInt(req.body.flightTimeH)*60)) + parseInt(req.body.flightTimeM),
                     comments: req.body.comments,
                     status: "n",
-                    fuel: req.body.fuel
+                    fuel: req.body.fuel,
+                    filed: new Date()
                 }
                 const reqVANETRaw = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.vehicle}`, { "X-Api-Key": config.key }, null, null)
                 const reqVANET = JSON.parse(reqVANETRaw[2]).result
@@ -1122,7 +1123,19 @@ app.post("/newPirep", async function (req, res){
                     console.log(reqVANETRaw2[2])
                 }
                 author.pireps.push(pirepObj.id)
-
+                if(author.pirepsRaw == undefined){
+                    author.pirepsRaw = [];
+                }
+                author.pirepsRaw.push(pirepObj)
+                author.pirepsRaw.sort((a, b) => {
+                    if (new Date(a.filed).getTime() < new Date(b.filed).getTime()) {
+                        return 1;
+                    }
+                    if (new Date(a.filed).getTime() > new Date(b.filed).getTime()) {
+                        return -1;
+                    }
+                    return 0;
+                })
                 FileWrite(`${usersPath}/${sanitize(pirepObj.author)}.json`, JSON.stringify(author, null, 2))
                 reloadUsers();
                 FileWrite(`${dataPath}/pireps/${pirepObj.id}.json`, JSON.stringify(pirepObj, null, 2))
@@ -1484,6 +1497,7 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             if (await FileExists(`${dataPath}/pireps/${sanitize(req.body.id)}.json`)) {
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "d";
+                                updatePIREPRaw(pirep.author, pirep.id, "d")
                                 FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 reloadData();
                                 res.sendStatus(200)
@@ -1561,6 +1575,27 @@ app.delete("/admin/reqs/remData", async function (req, res){
     }
 })
 
+async function updatePIREPRaw(UID, PID, status){
+    if(await FileExists(`${usersPath}/${UID}.json`)){
+        const user = JSON.parse(await FileRead(`${usersPath}/${UID}.json`))
+        user.pirepsRaw.forEach(pirep =>{
+            if(pirep.id == PID){
+                pirep.status = status;
+                console.log(user)
+                setTimeout(() =>{
+                    console.log(JSON.stringify(user, null, 2))
+                    FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
+                }, 1500)
+                console.log("Adjusted PIREP " + PID)
+            }else{
+                console.log("Not PIREP " + PID + ", It was " + pirep.id)
+            }
+        })
+    }else{
+        console.error("NO USER FOUND TO UPDATE PIREP")
+    }
+}
+
 async function addHoursToPilot(uid, amount){
     if(await FileExists(`${usersPath}/${uid}.json`)){
         const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
@@ -1601,7 +1636,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                             if (await FileExists(`${dataPath}/pireps/${sanitize(req.body.id)}.json`)) {
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "a";
-                                addHoursToPilot(pirep.author, (pirep.flightTime / 60))
+                                addHoursToPilot(pirep.author, (pirep.flightTime / 60));
+                                updatePIREPRaw(pirep.author, pirep.id, "a")
                                 FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 setTimeout(() => {
                                     reloadData();
@@ -1764,6 +1800,7 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                             password: bcrypt.hashSync(req.body.password, 10),
                             notifications: [],
                             pireps: [],
+                            pirepsRaw: [],
                             name: req.body.Name,
                             hours: 0,
                             meta: {

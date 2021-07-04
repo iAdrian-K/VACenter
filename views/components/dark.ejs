@@ -26,10 +26,11 @@
         
         document.getElementById("darkFlag").setAttribute('onclick', `setMode(${(darkMode == true) ? false : true})`)
         let bodySettings = (darkMode == true) ? "bg-black text-light" : "text-dark";
-        let contentSettings = (darkMode == true) ? "w-100 h-auto p-lg-5 mt-3 text-light text-center" : "w-100 h-auto p-lg-5 mt-3 text-center text-dark";
+        let page = "<%=active%>"
+        let contentSettings = (page == "/home") ? (darkMode == true) ? "w-100 h-auto p-lg-5 mt-3 text-light text-start" : "w-100 h-auto p-lg-5 mt-3 text-start text-dark" : (darkMode == true) ? "w-100 h-auto p-lg-5 mt-3 text-light text-center" : "w-100 h-auto p-lg-5 mt-3 text-center text-dark";
         document.body.className = `h-auto w-100 ${bodySettings}`
         document.getElementById("content").className = contentSettings;
-        let page = "<%=active%>"
+        
         if(darkMode == true){
             
             [...document.getElementsByClassName("form-control")].forEach(el =>{
