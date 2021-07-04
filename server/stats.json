@@ -1,0 +1,15 @@
+{
+  "raw": {
+    "routes": [
+      "DELETE0001"
+    ],
+    "aircraft": [
+      "Generic - Boeing 737-800"
+    ]
+  },
+  "popular": {
+    "route": "DELETE0001",
+    "aircraft": "Generic - Boeing 737-800"
+  },
+  "totalHours": 143
+}

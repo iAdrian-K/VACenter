@@ -1,0 +1,19 @@
+{
+  "id": "35526b48444e63dc9046948bcbb422aa",
+  "vehicle": "02a8c821-2105-4b3d-99eb-1d8223076bb0",
+  "vehiclePublic": "Generic - Boeing 737-800",
+  "author": "QURNSU4x",
+  "airline": "VANet Virtual Airlines",
+  "depICAO": "IDGA",
+  "arrICAO": "FAYY",
+  "pilot": {
+    "name": "Administrator"
+  },
+  "route": "DELETE0001",
+  "departureT": "2021-07-05",
+  "flightTime": 143,
+  "comments": "Test3",
+  "status": "a",
+  "fuel": "12345",
+  "filed": "2021-07-04T12:04:17.822Z"
+}

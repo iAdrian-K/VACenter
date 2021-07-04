@@ -7,6 +7,8 @@ const package = require('./../package.json')
 const addition2 = currentBranch == "beta" ? "B" : ""
 const cv = require('./../package.json').version + addition2;
 
+
+
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
     console.log([method, url, headers, query, data])
@@ -131,6 +133,17 @@ let routes = new Map();
 let news = new Map();
 let ranks = new Map();
 let vanetCraft = new Map();
+let vaData = {
+    raw: {
+        routes: [],
+        aircraft: []
+    },
+    popular: {
+        route: "None",
+        aircraft: "None"
+    },
+    totalHours: 0
+}
 
 app.use(urlEncodedParser)
 app.use(cors())
@@ -187,6 +200,9 @@ function reloadData(){
                 let pushedRoute = JSON.parse(pushedRouteRaw)
                 routes.set(pushedRoute.id, pushedRoute)
             })
+            FileRead(`${__dirname}/stats.json`).then(data =>{
+                vaData = JSON.parse(data);
+            });
         }
         catch (error) {
             console.log(error)
@@ -195,6 +211,16 @@ function reloadData(){
     }, 500);
 }
 reloadData()
+
+function setVAStats(){
+    FileWrite(`${__dirname}/stats.json`, JSON.stringify(vaData, null, 2));
+}
+
+function updateVAStats(){
+    vaData.popular.route = mode(vaData.raw.routes);
+    vaData.popular.aircraft = mode(vaData.raw.aircraft);
+}
+
 function reloadUsers() {
     setTimeout(() => {
         try {
@@ -508,7 +534,8 @@ app.get('*', async (req, res) => {
                             res.render('home', {
                                 config: clientConfig,
                                 user: userInfo,
-                                active: req.path
+                                active: req.path,
+                                stats: vaData
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -1694,11 +1721,16 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 pirep.status = "a";
                                 addHoursToPilot(pirep.author, (pirep.flightTime / 60));
                                 updatePIREPRaw(pirep.author, pirep.id, "a")
+                                vaData.raw.routes.push(pirep.route);
+                                vaData.raw.aircraft.push(pirep.vehiclePublic);
+                                vaData.totalHours = vaData.totalHours + pirep.flightTime;
+                                updateVAStats()
                                 FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 setTimeout(() => {
                                     reloadData();
                                     res.sendStatus(200)
                                     updateUserStats(pirep.author)
+                                    setVAStats();
                                 }, 1500);
                                 
                                 
