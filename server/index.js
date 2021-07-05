@@ -372,7 +372,7 @@ async function notifyUser(user, event){
             const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
             userData.notifications.push(event);
             userData.notifications.sort(compareTime);
-            if (userData.notifications.length > 7) {
+            if (userData.notifications.length > 5) {
                 userData.notifications.pop();
             }
             FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(userData, null, 2));
@@ -382,6 +382,10 @@ async function notifyUser(user, event){
         if(userExists){
             const userData = JSON.parse(await FileRead(`${usersPath}/${user}.json`));
             userData.notifications.push(event);
+            userData.notifications.sort(compareTime);
+            if (userData.notifications.length > 5) {
+                userData.notifications.pop();
+            }
             FileWrite(`${usersPath}/${user}.json`, JSON.stringify(userData, null, 2));
         }else{
             console.error("No user found to notify! " + user);
