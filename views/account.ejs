@@ -39,6 +39,9 @@
         <form action="/updateUser" method="post" class="form-control p-3 mt-3">
             <label>Name: 
             <input class="form-control" type="text" name="name" value="<%= user.name %>">
+            </label><br><br>
+            <label>Profile Picture URL:
+                <input class="form-control" type="url" name="ppurl" required value="<%= user.ppurl %>" style="object-fit: cover;">
             </label><br>
             <button class="btn mt-3 btn-primary">Submit Changes</button>
         </form>

@@ -1,9 +1,11 @@
 {
   "raw": {
     "routes": [
+      "DELETE0001",
       "DELETE0001"
     ],
     "aircraft": [
+      "Generic - Boeing 737-800",
       "Generic - Boeing 737-800"
     ]
   },
@@ -11,5 +13,5 @@
     "route": "DELETE0001",
     "aircraft": "Generic - Boeing 737-800"
   },
-  "totalHours": 143
+  "totalHours": 276
 }

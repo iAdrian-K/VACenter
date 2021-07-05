@@ -1114,7 +1114,8 @@ app.post("/newPirep", async function (req, res){
                     depICAO: req.body.dICAO,
                     arrICAO: req.body.aICAO,
                     pilot: {
-                        name: author.name
+                        name: author.name,
+                        ppurl: author.ppurl
                     },
                     route: req.body.route,
                     departureT: req.body.departureT,
@@ -1318,6 +1319,11 @@ app.post("/updateUser", async function (req, res){
             if(req.body.name){
                 if(req.body.name!= user.name){
                      user.name = req.body.name
+                }    
+            }
+            if(req.body.ppurl){
+                if(req.body.ppurl!= user.ppurl){
+                     user.ppurl = req.body.ppurl
                 }    
             }
             FileWrite(`${usersPath}/${sanitize(user.username)}.json`, JSON.stringify(user, null, 2))

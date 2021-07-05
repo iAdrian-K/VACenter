@@ -73,6 +73,7 @@
                         <thead>
                             <tr>
                                 <th scope="col">Pilot</th>
+                                <th scope="col">Icon</th>
                                 <th scope="col">Aircraft</th>
                                 <th scope="col">Airline</th>
                                 <th scope="col">Route</th>
@@ -89,6 +90,9 @@
                                     class="pirepRow <% if(pirep.status == 'a'){%>bg-success text-light<%}%> <%if(pirep.status == 'd'){%> bg-danger text-light<%}%>">
                                     <td>
                                         <%= pirep.pilot.name %>
+                                    </td>
+                                    <td>
+                                        <img src="<%= pirep.pilot.ppurl %>" class="rounded" style="object-fit: cover;" height="24" width="24">
                                     </td>
                                     <td>
                                         <%= pirep.vehiclePublic %>

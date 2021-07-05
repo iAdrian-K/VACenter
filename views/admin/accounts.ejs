@@ -56,6 +56,7 @@
                 <table class="table table-striped rounded border-0 text-center">
                     <thead>
                         <tr>
+                            <th scope="col">Profile Picture</th>
                             <th scope="col">Username</th>
                             <th scope="col">Name</th>
                             <th scope="col">View</th>
@@ -65,7 +66,8 @@
                     <tbody>
                         <% users.forEach(LUser =>{ %>
                             <tr class="accountRows <%if(LUser.revoked){%>disabled" disabled style="background-color: rgba(255, 0,0, 0.3);"<% }else{%>"<%}%> >
-                                <th scope="row"><%= Buffer.from(LUser.username, 'base64').toString(); %></th>
+                                <th scope="row"><img style="object-fit: cover;" height="30" width="30" class="rounded" src="<%= user.ppurl%>"></th>
+                                <td><%= Buffer.from(LUser.username, 'base64').toString(); %></td>
                                 <td><%= LUser.name %></td>
                                 
                                 <td><a href="/admin/viewUser?u=<%=LUser.username%>" class="btn btn-primary"><i class="bi bi-folder2-open"></i></a></td>

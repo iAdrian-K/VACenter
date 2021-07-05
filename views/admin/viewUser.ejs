@@ -17,7 +17,7 @@
 <body class="w-100 h-auto">
     <%- include("./../components/nav.ejs")%>
     <div class="w-100 h-auto py-5 px-3 text-center" id="content">
-        <i class="display-1 bi bi-person-circle"></i>
+        <img class="display-1 rounded mb-1" src="<%= user.ppurl%>" style="object-fit: cover; width: 15vh; height: 15vh;">
         <h1 class="display-2 mt-1">User <%= config.code + Buffer.from(targetUser.username, 'base64' ).toString(); %></h1>
         <br>
         <form class="halfBgFullSm form-control mx-auto py-2 my-3" action="/admin/reqs/updateUser" method="POST" onsubmit="document.getElementsByName('uid')[0].removeAttribute('disabled');">
