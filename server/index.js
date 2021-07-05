@@ -1886,6 +1886,7 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                         }
                         const newUser = {
                             username: btoa(req.body.username),
+                            ppurl: "https://icons.getbootstrap.com/assets/icons/person.svg",
                             rank: "None",
                             admin: admin,
                             ifcCapable: vanetid.status,
