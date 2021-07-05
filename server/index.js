@@ -11,7 +11,6 @@ const cv = require('./../package.json').version + addition2;
 
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
-    console.log([method, url, headers, query, data])
     return new Promise(resolve => {
         const options = {
             method: method,
@@ -365,9 +364,7 @@ function compareTime(a, b) {
 }
 async function notifyUser(user, event){
     if(user == "all"){
-        console.log(users)
         users.forEach(async user =>{
-            console.log(1)
             const uid = user.username;
             const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
             userData.notifications.push(event);
@@ -890,9 +887,7 @@ app.get('*', async (req, res) => {
 app.post("/reqs/remUser", async function (req, res){
     try{
         const cookies = getAppCookies(req);
-        console.log(cookies)
         if(cookies.authToken){
-            console.log(await getUserID(cookies.authToken))
         if (await isNormalUser(cookies)) {
             if(await FileExists(`${usersPath}/${await getUserID(cookies)}.json`)){
                 fs.unlink(`${usersPath}/${await getUserID(cookies)}.json`, (err) =>{
@@ -1143,16 +1138,6 @@ app.post("/newPirep", async function (req, res){
                         flightTime: pirepObj.flightTime,
                         aircraftLiveryId: pirepObj.vehicle
                     })
-                    console.log({
-                        pilotId: author.VANETID,
-                        departureIcao: pirepObj.depICAO,
-                        arrivalIcao: pirepObj.arrICAO,
-                        date: pirepObj.departureT + "T00:00:00Z",
-                        fuelUsed: pirepObj.fuel,
-                        flightTime: pirepObj.flightTime,
-                        aircraftLiveryId: pirepObj.vehicle
-                    })
-                    console.log(reqVANETRaw2[2])
                 }
                 author.pireps.push(pirepObj.id)
                 if(author.pirepsRaw == undefined){
@@ -1623,9 +1608,7 @@ async function updatePIREPRaw(UID, PID, status){
         user.pirepsRaw.forEach(pirep =>{
             if(pirep.id == PID){
                 pirep.status = status;
-                console.log(user)
                 setTimeout(() =>{
-                    console.log(JSON.stringify(user, null, 2))
                     FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
                 }, 1500)
                 console.log("Adjusted PIREP " + PID)
@@ -1730,6 +1713,13 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "a";
                                 addHoursToPilot(pirep.author, (pirep.flightTime / 60));
+                                console.log("AITH: " + pirep.author)
+                                notifyUser(pirep.author, {
+                                    title: `PIREP Approved`,
+                                    desc: `Your PIREP has been approved and ${(pirep.flightTime / 60).toFixed(2)} hours have been added.`,
+                                    icon: `check2-circle`,
+                                    timeStamp: new Date()
+                                })
                                 updatePIREPRaw(pirep.author, pirep.id, "a")
                                 vaData.raw.routes.push(pirep.route);
                                 vaData.raw.aircraft.push(pirep.vehiclePublic);
@@ -1740,12 +1730,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                     reloadData();
                                     res.sendStatus(200)
                                     updateUserStats(pirep.author)
-                                    notifyUser(pirep.author, {
-                                        title: `PIREP Approved`,
-                                        desc: `Your PIREP has been aprooved and ${(pirep.flightTime / 60).toFixed(2)} hours have been added.`,
-                                        icon: `check2-circle`,
-                                        timeStamp: new Date()
-                                    })
+                                    
                                     setVAStats();
                                 }, 1500);
                                 
@@ -1848,7 +1833,6 @@ app.post("/admin/reqs/newData", async function (req, res){
                         }
                         break;
                     case "s":
-                        console.log(req.body)
                         if (req.body.bg && req.body.rates && req.body.navBarColor) {
                             config.other.bg = req.body.bg;
                             config.other.rates = req.body.rates;
