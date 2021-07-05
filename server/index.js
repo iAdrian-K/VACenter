@@ -1736,6 +1736,12 @@ app.post("/admin/reqs/newData", async function (req, res){
                                     reloadData();
                                     res.sendStatus(200)
                                     updateUserStats(pirep.author)
+                                    notifyUser(pirep.author, {
+                                        title: `PIREP Approved`,
+                                        desc: `Your PIREP has been aprooved and ${(pirep.flightTime / 60).toFixed(2)} hours have been added.`,
+                                        icon: `check2-circle`,
+                                        timeStamp: new Date()
+                                    })
                                     setVAStats();
                                 }, 1500);
                                 
