@@ -91,6 +91,11 @@ app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs')
 app.listen(process.env.port)
 
+//Paths
+const publicPath = path.join(__dirname + '/../public')
+const dataPath = path.join(__dirname + '/../data')
+const usersPath = path.join(__dirname + '/../data/users')
+
 //VAData
 let stats = {userCount: 0}
 let users = new Map()
@@ -115,7 +120,7 @@ let vaData = {
 }
 
 function reloadData() {
-    setTimeout(() => {
+    return new Promise(async resolve => {
         try {
             events = new Map();
             crafts = new Map();
@@ -124,76 +129,75 @@ function reloadData() {
             pireps = new Map();
             routes = new Map();
             news = new Map();
-            fs.readdirSync(dataPath + "/events").forEach(event => {
-                let pushedEventRaw = fs.readFileSync(dataPath + "/events" + "/" + event)
+            fs.readdirSync(dataPath + "/events").forEach(async event => {
+                let pushedEventRaw = await FileRead(dataPath + "/events" + "/" + event)
                 let pushedEvent = JSON.parse(pushedEventRaw)
                 events.set(pushedEvent.id, pushedEvent)
             })
-            fs.readdirSync(dataPath + "/ranks").forEach(rank => {
-                let pushedRankRaw = fs.readFileSync(dataPath + "/ranks" + "/" + rank)
+            fs.readdirSync(dataPath + "/ranks").forEach(async rank => {
+                let pushedRankRaw = await FileRead(dataPath + "/ranks" + "/" + rank)
                 let pushedRank = JSON.parse(pushedRankRaw)
                 ranks.set(pushedRank.name, pushedRank)
             })
-            fs.readdirSync(dataPath + "/aircraft").forEach(craft => {
-                let pushedCraftRaw = fs.readFileSync(dataPath + "/aircraft" + "/" + craft)
+            fs.readdirSync(dataPath + "/aircraft").forEach(async craft => {
+                let pushedCraftRaw = await FileRead(dataPath + "/aircraft" + "/" + craft)
                 let pushedCraft = JSON.parse(pushedCraftRaw)
                 crafts.set(pushedCraft.livID, pushedCraft)
             })
-            fs.readdirSync(dataPath + "/news").forEach(item => {
-                let pushedItemRaw = fs.readFileSync(dataPath + "/news/" + item)
+            fs.readdirSync(dataPath + "/news").forEach(async item => {
+                let pushedItemRaw = await FileRead(dataPath + "/news/" + item)
                 let pushedItem = JSON.parse(pushedItemRaw)
                 news.set(pushedItem.id, pushedItem)
             })
-            fs.readdirSync(dataPath + "/operators").forEach(airline => {
-                let pushedAirlineRaw = fs.readFileSync(dataPath + "/operators" + "/" + airline)
+            fs.readdirSync(dataPath + "/operators").forEach(async airline => {
+                let pushedAirlineRaw = await FileRead(dataPath + "/operators" + "/" + airline)
                 let pushedAirline = JSON.parse(pushedAirlineRaw)
                 ops.set(pushedAirline.id, pushedAirline)
             })
-            fs.readdirSync(dataPath + "/pireps").forEach(pirep => {
-                let pushedPirepRaw = fs.readFileSync(dataPath + "/pireps" + "/" + pirep)
+            fs.readdirSync(dataPath + "/pireps").forEach(async pirep => {
+                let pushedPirepRaw = await FileRead(dataPath + "/pireps" + "/" + pirep)
                 let pushedPirep = JSON.parse(pushedPirepRaw)
                 pireps.set(pushedPirep.id, pushedPirep)
             })
-            fs.readdirSync(dataPath + "/routes").forEach(route => {
-                let pushedRouteRaw = fs.readFileSync(dataPath + "/routes" + "/" + route)
+            fs.readdirSync(dataPath + "/routes").forEach(async route => {
+                let pushedRouteRaw = await FileRead(dataPath + "/routes" + "/" + route)
                 let pushedRoute = JSON.parse(pushedRouteRaw)
                 routes.set(pushedRoute.id, pushedRoute)
             })
-            FileRead(`${__dirname}/stats.json`).then(data => {
-                vaData = JSON.parse(data);
-            });
+            vaData = JSON.parse(await FileRead(`${__dirname}/stats.json`))
+            resolve(true)
         }
         catch (error) {
             console.log(error)
             console.log("!!!!")
+            resolve(false)
         }
-    }, 500);
+    })
 }
 reloadData()
 
 function reloadUsers() {
-    setTimeout(() => {
+    return new Promise(resolve => {
         try {
             stats.userCount = 0;
-            fs.readdirSync(usersPath).forEach(user => {
+            fs.readdirSync(usersPath).forEach(async user => {
                 stats.userCount = stats.userCount + 1
-                let pushedUserRaw = fs.readFileSync(usersPath + "/" + user)
+                let pushedUserRaw = await FileRead(usersPath + "/" + user)
                 let pushedUser = JSON.parse(pushedUserRaw)
                 pushedUser.usernameAtob = atob(pushedUser.username)
                 delete pushedUser['password']
                 delete pushedUser['tokens']
                 users.set(pushedUser.username, pushedUser)
             })
+            resolve(true);
         }
         catch (error) {
             console.log(error)
             console.log("!!!!")
-            fs.writeFileSync(`${usersPath}/test.json`, fs.readFileSync(`${usersPath}/QURNSU4x.json`))
+            resolve(false)
         }
-    }, 500);
-
+    })
 }
-
 reloadUsers()
 
 async function reloadVANETData() {
@@ -234,31 +238,24 @@ function updateVAStats() {
     vaData.popular.aircraft = mode(vaData.raw.aircraft);
 }
 
-//Paths
-const publicPath = path.join(__dirname + '/../public')
-const dataPath = path.join(__dirname + '/../data')
-const usersPath = path.join(__dirname + '/../data/users')
 
 //User Utils
 
-function remToken(tokens) {
+async function remToken(tokens) {
     const unBased = atob(tokens.authToken)
     const userID = unBased.split(":")[0];
     const realTokenPreAdjust = unBased.split(":")[1];
     if (realTokenPreAdjust) {
         const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length)
-        const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
-            if (exists) {
-                FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
-                    const user = JSON.parse(rawUser)
-                    if (user.tokens.includes(realToken)) {
-                        user.tokens = arrayRemove(user.tokens, realToken);
-                        FileWrite(`${usersPath}/` + sanitize(userID) + '.json', JSON.stringify(user, null, 2))
-                        reloadUsers()
-                    }
-                })
-            }
-        })
+        const userExists = await FileExists(`${usersPath}/` + sanitize(userID) + '.json')
+        if (exists) {
+                const user = JSON.parse(await FileRead(`${usersPath}/` + sanitize(userID) + '.json'))
+                if (user.tokens.includes(realToken)) {
+                    user.tokens = arrayRemove(user.tokens, realToken);
+                    await FileWrite(`${usersPath}/` + sanitize(userID) + '.json', JSON.stringify(user, null, 2))
+                    reloadUsers()
+                }
+        }
     }
 }
 
@@ -303,7 +300,7 @@ function getUserID(tokens){
 }
 
 function getUserData(tokens){
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
         if (tokens.authToken != undefined) {
 
             const unBased = atob(tokens.authToken)
@@ -311,19 +308,13 @@ function getUserData(tokens){
             const realTokenPreAdjust = unBased.split(":")[1];
             if (realTokenPreAdjust) {
                 const realToken = realTokenPreAdjust.length == 33 ? realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1) : realTokenPreAdjust
-                const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
+                const exists = await FileExists(`${usersPath}/` + sanitize(userID) + '.json')
                     if (exists) {
-                        FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
-                            const user = JSON.parse(rawUser)
-                            resolve(user);
-                        })
-
-
+                        const user = JSON.parse(await FileRead(`${usersPath}/` + sanitize(userID) + '.json'))
+                        resolve(user);
                     } else {
                         resolve(false);
                     }
-                })
-
             } else {
                 resolve(false)
             }
@@ -828,11 +819,9 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
                             gateNames: ["null"]
 
                         })*/
-                        FileWrite(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`, JSON.stringify(event, null, 2))
-                        reloadData()
-                        setTimeout(function () {
-                            res.redirect("/admin/events")
-                        }, 1500)
+                        await FileWrite(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`, JSON.stringify(event, null, 2))
+                        await reloadData()
+                        res.redirect("/admin/events")
                     } else {
                         res.sendStatus(404)
                     }
@@ -867,11 +856,9 @@ app.post("/admin/reqs/updateNews", async (req, res) => {
                         if (item.body != req.body.body) {
                             item.body = req.body.body
                         }
-                        FileWrite(`${dataPath}/news/${sanitize(req.body.id)}.json`, JSON.stringify(item, null, 2))
-                        reloadData()
-                        setTimeout(function () {
-                            res.redirect("/admin/news")
-                        }, 1500)
+                        await FileWrite(`${dataPath}/news/${sanitize(req.body.id)}.json`, JSON.stringify(item, null, 2))
+                        await reloadData()
+                        res.redirect("/admin/news")
                     } else {
                         res.sendStatus(404)
                     }
@@ -899,8 +886,8 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
             if (await isAdminUser(cookies)) {
                 if (req.body.id) {
                     if (await FileExists(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`) == true){
-                        FileRemove(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`)
-                        reloadData()
+                        await FileRemove(`${dataPath}/events/${sanitize(atob(req.body.id))}.json`)
+                        await reloadData()
                         notifyUser("all", {
                             title: `Event Removed!`,
                             desc: `An event has been cancelled.`,
@@ -914,7 +901,7 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
                     }else{
                         res.sendStatus(404)
                     }
-                    reloadData()
+                    await reloadData()
                     
                 } else {
                     res.sendStatus(400);
@@ -939,18 +926,12 @@ app.delete("/admin/reqs/remNews", async function (req, res) {
             if (await isAdminUser(cookies)) {
                 if (req.body.id) {
                     if (await FileExists(`${dataPath}/news/${sanitize(req.body.id)}.json`) == true) {
-                        FileRemove(`${dataPath}/news/${sanitize(req.body.id)}.json`)
-                        setTimeout(function () {
-                            reloadData()
-                            setTimeout(() => {
-                                res.redirect("/admin/news")
-                            }, 1500);
-                        }, 1000)
+                        await FileRemove(`${dataPath}/news/${sanitize(req.body.id)}.json`)
+                        await reloadData()
+                        res.redirect("/admin/news")
                     } else {
                         res.sendStatus(404)
                     }
-                    reloadData()
-
                 } else {
                     res.sendStatus(400);
                 }
@@ -1022,11 +1003,11 @@ app.post("/newPirep", async function (req, res){
                     }
                     return 0;
                 })
-                FileWrite(`${usersPath}/${sanitize(pirepObj.author)}.json`, JSON.stringify(author, null, 2))
-                reloadUsers();
-                FileWrite(`${dataPath}/pireps/${pirepObj.id}.json`, JSON.stringify(pirepObj, null, 2))
-                reloadData();
-                setTimeout(()=>{updateUserStats(author.username)}, 1500);
+                await FileWrite(`${usersPath}/${sanitize(pirepObj.author)}.json`, JSON.stringify(author, null, 2))
+                await reloadUsers();
+                await FileWrite(`${dataPath}/pireps/${pirepObj.id}.json`, JSON.stringify(pirepObj, null, 2))
+                await reloadData();
+                updateUserStats(author.username)
                 res.redirect("/home");
             }else{
                 res.sendStatus(400);
@@ -1086,8 +1067,8 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                                 server: event.server,
                                 gateNames: event.gates
                             })
-                            FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
-                            reloadData()
+                            await FileWrite(`${dataPath}/events/${event.id}.json`, JSON.stringify(event, null, 2))
+                            await reloadData()
                             res.redirect("/admin/events")
                         }else{
                             res.sendStatus(response.statusCode);
@@ -1130,11 +1111,9 @@ app.post("/admin/reqs/newNews", async function (req, res) {
                         link: "/news",
                         timeStamp: new Date()
                     })
-                    FileWrite(`${dataPath}/news/${item.id}.json`, JSON.stringify(item, null, 2))
-                    reloadData()
-                    setTimeout(function () {
-                        res.redirect("/admin/news")
-                    }, 1500)
+                    await FileWrite(`${dataPath}/news/${item.id}.json`, JSON.stringify(item, null, 2))
+                    await reloadData()
+                    res.redirect("/admin/news")
                 } else {
                     res.sendStatus(400);
                 }
@@ -1182,7 +1161,7 @@ app.post("/updateUser", async function (req, res){
                      user.ppurl = req.body.ppurl
                 }    
             }
-            FileWrite(`${usersPath}/${sanitize(user.username)}.json`, JSON.stringify(user, null, 2))
+            await FileWrite(`${usersPath}/${sanitize(user.username)}.json`, JSON.stringify(user, null, 2))
             res.redirect("/account")
         }
     }catch (error){
@@ -1204,11 +1183,9 @@ app.post("/admin/reqs/updateUser", async function (req, res){
                             user.name = req.body.name
                         }
                         user.tokens = [];
-                        FileWrite(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`, JSON.stringify(user, null, 2))
-                        reloadUsers()
-                        setTimeout(function() {
-                            res.redirect("/admin/accounts")
-                        }, 1500)
+                        await FileWrite(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`, JSON.stringify(user, null, 2))
+                        await reloadUsers()
+                        res.redirect("/admin/accounts")
                     } else {
                         res.sendStatus(404)
                     }
@@ -1274,8 +1251,8 @@ app.post("/admin/reqs/resetPWD", async function (req, res){
                         user.password = bcrypt.hashSync("VACENTERBACKUP1", 10)
                         user.tokens = [];
                         user.meta.cp = true;
-                        FileWrite(`${usersPath}/${sanitize(req.body.targetUID)}.json`, JSON.stringify(user, null, 2))
-                        reloadUsers()
+                        await FileWrite(`${usersPath}/${sanitize(req.body.targetUID)}.json`, JSON.stringify(user, null, 2))
+                        await reloadUsers()
                         res.redirect(`/admin/viewUser?u=${req.body.targetUID}`)
                     } else {
                         res.sendStatus(404)
@@ -1306,8 +1283,8 @@ app.put("/admin/reqs/unremUser", async function (req, res){
                         const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`))
                         user.revoked = false;
                         user.tokens = [];
-                        FileWrite(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`, JSON.stringify(user, null, 2))
-                        reloadUsers()
+                        await FileWrite(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`, JSON.stringify(user, null, 2))
+                        await reloadUsers()
                         res.redirect("/admin/accounts")
                     } else {
                         res.sendStatus(404)
@@ -1339,8 +1316,8 @@ app.delete("/admin/reqs/remUser", async function (req, res){
                         const user = JSON.parse(await FileRead(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`))
                         user.revoked = true;
                         user.tokens = [];
-                        FileWrite(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`, JSON.stringify(user, null, 2))
-                        reloadUsers()
+                        await FileWrite(`${usersPath}/${sanitize(decodeURIComponent(req.body.uid))}.json`, JSON.stringify(user, null, 2))
+                        await reloadUsers()
                         res.redirect("/admin/accounts")
                     } else {
                         res.sendStatus(404)
@@ -1372,10 +1349,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                         if (req.body.id) {
                             if (await FileExists(`${dataPath}/ranks/${sanitize(btoa(req.body.id))}.json`)) {
                                 await FileRemove(`${dataPath}/ranks/${sanitize(btoa(req.body.id))}.json`);
-                                reloadData();
-                                setTimeout(() => {
-                                    res.redirect("/admin/pireps#ranks")
-                                }, 1000)
+                                await reloadData();
+                                res.redirect("/admin/pireps#ranks")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1389,12 +1364,10 @@ app.delete("/admin/reqs/remData", async function (req, res){
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "d";
                                 updatePIREPRaw(pirep.author, pirep.id, "d")
-                                FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
-                                reloadData();
+                                await FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
+                                await reloadData();
                                 res.sendStatus(200)
-                                setTimeout(() => {
-                                    updateUserStats(pirep.author)
-                                }, 1500);
+                                updateUserStats(pirep.author)
                                 
                             } else {
                                 res.sendStatus(404)
@@ -1407,10 +1380,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                         if (req.body.id) {
                                 if (await FileExists(`${dataPath}/routes/${sanitize(req.body.id)}.json`)) {
                                     await FileRemove(`${dataPath}/routes/${sanitize(req.body.id)}.json`);
-                                    reloadData();
-                                    setTimeout(() => {
-                                        res.redirect("/admin/pireps")
-                                    }, 1000)
+                                    await reloadData();
+                                    res.redirect("/admin/pireps")
                                 } else {
                                     res.sendStatus(404)
                                 }
@@ -1423,10 +1394,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             if(req.body.id != "MAIN"){
                             if (await FileExists(`${dataPath}/operators/${sanitize(req.body.id)}.json`)) {
                                 await FileRemove(`${dataPath}/operators/${sanitize(req.body.id)}.json`);
-                                reloadData();
-                                setTimeout(() => {
-                                    res.redirect("/admin/pireps")
-                                }, 1000)
+                                await reloadData();
+                                res.redirect("/admin/pireps")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1441,10 +1410,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
                         if (req.body.id) {
                             if (await FileExists(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`)) {
                                 await FileRemove(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`);
-                                reloadData();
-                                setTimeout(() => {
-                                    res.redirect("/admin/pireps")
-                                }, 1000)
+                                await reloadData();
+                                res.redirect("/admin/pireps")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1494,16 +1461,11 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 vaData.raw.aircraft.push(pirep.vehiclePublic);
                                 vaData.totalHours = vaData.totalHours + pirep.flightTime;
                                 updateVAStats()
-                                FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
-                                setTimeout(() => {
-                                    reloadData();
-                                    res.sendStatus(200)
-                                    updateUserStats(pirep.author)
-                                    
-                                    setVAStats();
-                                }, 1500);
-                                
-                                
+                                await FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
+                                await reloadData();
+                                res.sendStatus(200)
+                                updateUserStats(pirep.author)
+                                setVAStats();
                             }else{
                                 res.sendStatus(404)
                             }
@@ -1519,10 +1481,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 };
                                 if (await FileExists(`${dataPath}/ranks/${sanitize(btoa(newObj.name))}.json`) == false) {
                                     await FileWrite(`${dataPath}/ranks/${sanitize(btoa(newObj.name))}.json`, JSON.stringify(newObj, null, 2));
-                                    reloadData();
-                                    setTimeout(() => {
-                                        res.redirect("/admin/pireps#ranks")
-                                    }, 1000)
+                                    await reloadData();
+                                    res.redirect("/admin/pireps#ranks")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1545,10 +1505,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 newObj.publicName = `${newObj.livName} - ${newObj.airName}`
                                 if (await FileExists(`${dataPath}/aircraft/${sanitize(newObj.livID)}.json`) == false) {
                                     await FileWrite(`${dataPath}/aircraft/${sanitize(newObj.livID)}.json`, JSON.stringify(newObj, null, 2));
-                                    reloadData();
-                                    setTimeout(() => {
-                                        res.redirect("/admin/pireps")
-                                    }, 1000)
+                                    await reloadData();
+                                    res.redirect("/admin/pireps")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1569,10 +1527,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 };
                                 if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false) {
                                     await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
-                                    reloadData();
-                                    setTimeout(() => {
-                                        res.redirect("/admin/pireps")
-                                    }, 1000)
+                                    await reloadData();
+                                    res.redirect("/admin/pireps")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1589,10 +1545,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                             };
                             if (await FileExists(`${dataPath}/operators/${sanitize(newObj.id)}.json`) == false) {
                                 await FileWrite(`${dataPath}/operators/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
-                                reloadData();
-                                setTimeout(() => {
-                                    res.redirect("/admin/pireps")
-                                }, 1000)
+                                await reloadData();
+                                res.redirect("/admin/pireps")
                             } else {
                                 res.sendStatus(409)
                             }
@@ -1681,8 +1635,8 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                             icon: `person-circle`,
                             timeStamp: new Date()
                         })
-                        FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
-                        reloadUsers()
+                        await FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
+                        await reloadUsers()
                         res.redirect("/admin/accounts")
                     } else {
                         res.sendStatus(409)
@@ -1781,7 +1735,7 @@ app.post("/login2", async function (req, res) {
                 if (user.tokens.includes(token)) {
                     res.send('/home')
                     user.meta.llogin = new Date();
-                    FileWrite(`${usersPath}/` + sanitize(uid) + '.json', JSON.stringify(user, null, 2))
+                    await FileWrite(`${usersPath}/` + sanitize(uid) + '.json', JSON.stringify(user, null, 2))
                     reloadUsers()
                 } else {
                     res.clearCookie('authToken').send('/?r=ii')
@@ -1814,7 +1768,7 @@ app.post("/login", async function (req, res) {
                         await user.tokens.push(token);
                         user.meta.llogin = new Date();
                         await FileWrite(`${usersPath}/` + btoa(sanitize(req.body.uidI)) + '.json', JSON.stringify(user, null, 2));
-                        reloadUsers()
+                        await reloadUsers()
                         res.cookie('authToken', clientToken, { maxAge: new Date().getTime() + (10 * 365 * 24 * 60 * 60) }).redirect('/home')
                     } else {
                         res.redirect('/?r=ii')
@@ -1846,8 +1800,8 @@ app.post("/CPWD", async (req, res) => {
                     userData.password = bcrypt.hashSync(req.body.pwd, 10)
                     userData.tokens = [];
                     delete userData.meta['cp']
-                    FileWrite(`${usersPath}/` + sanitize(uid) + '.json', JSON.stringify(userData, null, 2));
-                    reloadUsers()
+                    await FileWrite(`${usersPath}/` + sanitize(uid) + '.json', JSON.stringify(userData, null, 2));
+                    await reloadUsers()
                     res.clearCookie('authToken').redirect("/");
                 } else {
                     res.sendStatus(400)
@@ -1870,9 +1824,7 @@ async function updatePIREPRaw(UID, PID, status) {
         user.pirepsRaw.forEach(pirep => {
             if (pirep.id == PID) {
                 pirep.status = status;
-                setTimeout(() => {
-                    FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
-                }, 1500)
+                FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
                 console.log("Adjusted PIREP " + PID)
             } else {
                 console.log("Not PIREP " + PID + ", It was " + pirep.id)
@@ -1906,10 +1858,7 @@ async function updateUserStats(uid) {
         })
         user.stats.popular.route = mode(routes);
         user.stats.popular.aircraft = mode(craft);
-
-        setTimeout(() => {
-            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
-        }, 1500)
+        FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
     } else {
         console.error("NO USER TO UPDATE STATS")
     }
