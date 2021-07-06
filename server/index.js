@@ -6,46 +6,6 @@ const sanitize = require("sanitize-filename");
 const package = require('./../package.json')
 const addition2 = currentBranch == "beta" ? "B" : ""
 const cv = require('./../package.json').version + addition2;
-
-//Parts
-const {FileRead, FileWrite, FileExists, FileRemove} = require("./fileFunctions");
-
-console.log(cv)
-function URLReq(method, url, headers, query, data) {
-    return new Promise(resolve => {
-        const options = {
-            method: method,
-            url: url,
-            headers: headers,
-            qs: query,
-            form: data,
-        };
-
-        request(options, function (error, response, body) {
-            if (error) throw new Error(error)
-            resolve([error, response, body]);
-        });
-    })
-    
-}
-function JSONReq(method, url, headers, query, data) {
-    return new Promise(resolve => {
-        const options = {
-            method: method,
-            url: url,
-            headers: headers,
-            qs: query,
-            body: data,
-            json: true
-        };
-
-        request(options, function (error, response, body) {
-            if (error) throw new Error(error)
-            resolve([error, response, body]);
-        });
-    })
-
-}
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -57,11 +17,14 @@ const atob = require('atob')
 const uniqueString = require('unique-string');
 const request = require("request");
 
-const app = express();
-const urlEncodedParser = bodyParser.urlencoded({ extended: false })
+//Parts
+const {FileRead, FileWrite, FileExists, FileRemove} = require("./fileFunctions");
+const { URLReq, JSONReq } = require("./urlReqs");
+const {isAdminUser, isNormalUser} = require("./userAuth")
+const {mode, compareTime, arrayRemove, getAppCookies} = require("./util")
 
+//VACenter Config
 let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../") + "config.json"))
-
 let clientConfig = config
 let defaultLimits = 100;
 let limiter;
@@ -100,8 +63,6 @@ if(config.other){
         message: "<h1>Oh no!</h1><p>Your Rate Limits have been exceded, check with you system admin if you think this is an error."
     })
 }
-
-
 function reloadConfig(){
     config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../") + "config.json"))
     clientConfig = config
@@ -120,10 +81,18 @@ function reloadConfig(){
     }
 }
 
-let stats = {
-    userCount: 0
-}
+//Express App
+const app = express();
+const urlEncodedParser = bodyParser.urlencoded({ extended: false })
+app.use(urlEncodedParser)
+app.use(cors())
+app.use(limiter)
+app.set('views', path.join(__dirname, '../views'));
+app.set('view engine', 'ejs')
+app.listen(process.env.port)
 
+//VAData
+let stats = {userCount: 0}
 let users = new Map()
 let events = new Map();
 let crafts = new Map();
@@ -145,17 +114,7 @@ let vaData = {
     totalHours: 0
 }
 
-app.use(urlEncodedParser)
-app.use(cors())
-app.use(limiter)
-
-app.set('views', path.join(__dirname, '../views'));
-app.set('view engine', 'ejs')
-const publicPath = path.join(__dirname + '/../public')
-const dataPath = path.join(__dirname + '/../data')
-const usersPath = path.join(__dirname + '/../data/users')
-
-function reloadData(){
+function reloadData() {
     setTimeout(() => {
         try {
             events = new Map();
@@ -200,7 +159,7 @@ function reloadData(){
                 let pushedRoute = JSON.parse(pushedRouteRaw)
                 routes.set(pushedRoute.id, pushedRoute)
             })
-            FileRead(`${__dirname}/stats.json`).then(data =>{
+            FileRead(`${__dirname}/stats.json`).then(data => {
                 vaData = JSON.parse(data);
             });
         }
@@ -211,15 +170,6 @@ function reloadData(){
     }, 500);
 }
 reloadData()
-
-function setVAStats(){
-    FileWrite(`${__dirname}/stats.json`, JSON.stringify(vaData, null, 2));
-}
-
-function updateVAStats(){
-    vaData.popular.route = mode(vaData.raw.routes);
-    vaData.popular.aircraft = mode(vaData.raw.aircraft);
-}
 
 function reloadUsers() {
     setTimeout(() => {
@@ -246,57 +196,51 @@ function reloadUsers() {
 
 reloadUsers()
 
-async function reloadVANETData(){
-    if(config.key){
-    //aircraft
-    const aircraftRaw = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", {"X-Api-Key": config.key },null, null)
-    const aircraft = JSON.parse(aircraftRaw[2]).result; 
-    aircraft.forEach(aircraft=>{
-        if(!vanetCraft.has(aircraft.aircraftID)){
-            const rawAirData = aircraft;
-            delete rawAirData["liveryID"]
-            delete rawAirData["liveryName"]
-            vanetCraft.set(aircraft.aircraftID, {
-                id: aircraft.aircraftID,
-                name: aircraft.aircraftName,
-                livery: [],
-                raw: rawAirData
-            })
-            const updated = vanetCraft.get(aircraft.aircraftID)
-            updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
-            vanetCraft.set(aircraft.aircraftID, updated)
-        }else{
-            const updated = vanetCraft.get(aircraft.aircraftID)
-            updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
-            vanetCraft.set(aircraft.aircraftID, updated)
-        }
-    })
+async function reloadVANETData() {
+    if (config.key) {
+        //aircraft
+        const aircraftRaw = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", { "X-Api-Key": config.key }, null, null)
+        const aircraft = JSON.parse(aircraftRaw[2]).result;
+        aircraft.forEach(aircraft => {
+            if (!vanetCraft.has(aircraft.aircraftID)) {
+                const rawAirData = aircraft;
+                delete rawAirData["liveryID"]
+                delete rawAirData["liveryName"]
+                vanetCraft.set(aircraft.aircraftID, {
+                    id: aircraft.aircraftID,
+                    name: aircraft.aircraftName,
+                    livery: [],
+                    raw: rawAirData
+                })
+                const updated = vanetCraft.get(aircraft.aircraftID)
+                updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
+                vanetCraft.set(aircraft.aircraftID, updated)
+            } else {
+                const updated = vanetCraft.get(aircraft.aircraftID)
+                updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
+                vanetCraft.set(aircraft.aircraftID, updated)
+            }
+        })
     }
 }
 reloadVANETData()
-const getAppCookies = (req) => {
-    if (req.headers.cookie) {
-        // We extract the raw cookies from the request headers
-        const rawCookies = req.headers.cookie.split('; ');
-        // rawCookies = ['myapp=secretcookie, 'analytics_cookie=beacon;']
 
-        const parsedCookies = {};
-        rawCookies.forEach(rawCookie => {
-            const parsedCookie = rawCookie.split('=');
-            // parsedCookie = ['myapp', 'secretcookie'], ['analytics_cookie', 'beacon']
-            parsedCookies[parsedCookie[0]] = parsedCookie[1];
-        });
-        return parsedCookies;
-    } else {
-        return {};
-    }
-};
-function arrayRemove(arr, value) {
-
-    return arr.filter(function (ele) {
-        return ele != value;
-    });
+function setVAStats() {
+    FileWrite(`${__dirname}/stats.json`, JSON.stringify(vaData, null, 2));
 }
+
+function updateVAStats() {
+    vaData.popular.route = mode(vaData.raw.routes);
+    vaData.popular.aircraft = mode(vaData.raw.aircraft);
+}
+
+//Paths
+const publicPath = path.join(__dirname + '/../public')
+const dataPath = path.join(__dirname + '/../data')
+const usersPath = path.join(__dirname + '/../data/users')
+
+//User Utils
+
 function remToken(tokens) {
     const unBased = atob(tokens.authToken)
     const userID = unBased.split(":")[0];
@@ -318,51 +262,6 @@ function remToken(tokens) {
     }
 }
 
-function isAdminUser(tokens) {
-    return new Promise(resolve => {
-        if (tokens.authToken != undefined) {
-
-            const unBased = atob(tokens.authToken)
-            const userID = unBased.split(":")[0];
-            const realTokenPreAdjust = unBased.split(":")[1];
-            if (realTokenPreAdjust) {
-                const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1)
-                const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {
-                    if (exists) {
-                        FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
-                            const user = JSON.parse(rawUser)
-                            const correctToken = user.tokens.includes(realToken);
-                            if (correctToken) {
-                                resolve(user.admin)
-                            } else {
-                                resolve(false)
-                            }
-
-                        })
-
-
-                    } else {
-                        resolve(false);
-                    }
-                })
-
-            } else {
-                resolve(false)
-            }
-        } else {
-            resolve(false)
-        }
-    })
-}
-function compareTime(a, b) {
-    if (new Date(a.timeStamp).getTime() < new Date(b.timeStamp).getTime()) {
-        return 1;
-    }
-    if (new Date(a.timeStamp).getTime() > new Date(b.timeStamp).getTime()) {
-        return -1;
-    }
-    return 0;
-}
 async function notifyUser(user, event){
     if(user == "all"){
         users.forEach(async user =>{
@@ -389,39 +288,6 @@ async function notifyUser(user, event){
             console.error("No user found to notify! " + user);
         }
     }
-}
-
-function isNormalUser(tokens) {
-    return new Promise(resolve => {
-        if (tokens.authToken != undefined) {
-
-            const unBased = atob(tokens.authToken)
-            const userID = unBased.split(":")[0];
-            const realTokenPreAdjust = unBased.split(":")[1];
-            if (realTokenPreAdjust) {
-                const realToken = realTokenPreAdjust.length == 33 ? realTokenPreAdjust.slice(0, realTokenPreAdjust.length - 1) : realTokenPreAdjust
-                const userExists = FileExists(`${usersPath}/` + sanitize(userID) + '.json').then(exists => {  
-                    if (exists) {
-                        FileRead(`${usersPath}/` + sanitize(userID) + '.json').then(rawUser => {
-                            const user = JSON.parse(rawUser)
-                            const correctToken = (user.tokens.includes(realToken) && user.revoked == false);
-                            resolve(correctToken);
-                        })
-
-
-                    } else {
-                        resolve(false);
-                    }
-                })
-
-            } else {
-                resolve(false)
-            }
-        } else {
-            resolve(false)
-        }
-    })
-
 }
 
 function getUserID(tokens){
@@ -466,6 +332,8 @@ function getUserData(tokens){
         }
     })
 }
+
+//App Reqs
 
 app.get('*', async (req, res) => {
     const cookies = getAppCookies(req)
@@ -1173,8 +1041,6 @@ app.post("/newPirep", async function (req, res){
     }
 })
 
-
-
 app.post("/admin/reqs/newEvent", async function (req, res){
     try {
         const cookies = getAppCookies(req);
@@ -1429,6 +1295,7 @@ app.post("/admin/reqs/resetPWD", async function (req, res){
         res.send(`${error}`)
     }
 })
+
 app.put("/admin/reqs/unremUser", async function (req, res){
     try {
         const cookies = getAppCookies(req);
@@ -1602,105 +1469,6 @@ app.delete("/admin/reqs/remData", async function (req, res){
         res.send(`${error}`)
     }
 })
-
-async function updatePIREPRaw(UID, PID, status){
-    if(await FileExists(`${usersPath}/${UID}.json`)){
-        const user = JSON.parse(await FileRead(`${usersPath}/${UID}.json`))
-        user.pirepsRaw.forEach(pirep =>{
-            if(pirep.id == PID){
-                pirep.status = status;
-                setTimeout(() =>{
-                    FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
-                }, 1500)
-                console.log("Adjusted PIREP " + PID)
-            }else{
-                console.log("Not PIREP " + PID + ", It was " + pirep.id)
-            }
-        })
-    }else{
-        console.error("NO USER FOUND TO UPDATE PIREP")
-    }
-}
-
-function mode(array) {
-    if (array.length == 0)
-        return null;
-    var modeMap = {};
-    var maxEl = array[0], maxCount = 1;
-    for (var i = 0; i < array.length; i++) {
-        var el = array[i];
-        if (modeMap[el] == null)
-            modeMap[el] = 1;
-        else
-            modeMap[el]++;
-        if (modeMap[el] > maxCount) {
-            maxEl = el;
-            maxCount = modeMap[el];
-        }
-    }
-    return maxEl;
-}
-
-async function updateUserStats(uid){
-    if(await FileExists(`${usersPath}/${uid}.json`)){
-        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
-        if(user.stats == undefined){
-            user.stats = {
-                popular: {
-                    route: "None",
-                    aircraft: "None"
-                }
-            }
-        }
-        
-        let routes = [];
-        let craft = [];
-        user.pirepsRaw.forEach(pirep =>{
-            //Top Route
-            routes.push(pirep.route);
-
-            //Top Craft
-            craft.push(pirep.vehiclePublic)
-        })
-        user.stats.popular.route = mode(routes);
-        user.stats.popular.aircraft = mode(craft);
-
-        setTimeout(()=>{
-            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user,null, 2))
-        }, 1500)
-    }else{
-        console.error("NO USER TO UPDATE STATS")
-    }
-}
-
-async function addHoursToPilot(uid, amount){
-    if(await FileExists(`${usersPath}/${uid}.json`)){
-        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
-        user.hours = user.hours + amount
-        let tempMap = new Map();
-        for(const rank of ranks){
-            tempMap.set(rank[0], parseInt(rank[1].minH))
-        }
-        const ranksSorted = new Map([...tempMap.entries()].sort((a, b) => b[1] - a[1]));
-        for(const rank of ranksSorted){
-            if(user.hours > rank[1]){
-                if(user.rank != rank[0]){
-                    notifyUser("all", {
-                        title: `Ranking!`,
-                        desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
-                        icon: `arrow-up-circle`,
-                        timeStamp: new Date()
-                    })
-                }
-                user.rank = rank[0];
-                break;
-            }
-        }
-        FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
-    }else{
-        console.error("NO USER FOUND TO ADD TIME")
-    }
-}
 
 app.post("/admin/reqs/newData", async function (req, res){
     try{
@@ -2001,8 +1769,6 @@ app.post("/setupData", async function (req, res) {
     }
 })
 
-
-
 app.post("/login2", async function (req, res) {
     if (req.body.token) {
         const clientToken = req.body.token
@@ -2030,8 +1796,6 @@ app.post("/login2", async function (req, res) {
         res.clearCookie('authToken').send('/?r=mi')
     }
 })
-
-
 
 app.post("/login", async function (req, res) {
     if (req.body.uidI && req.body.pwdI) {
@@ -2100,10 +1864,89 @@ app.post("/CPWD", async (req, res) => {
     }
 })
 
-app.listen(process.env.port)
+async function updatePIREPRaw(UID, PID, status) {
+    if (await FileExists(`${usersPath}/${UID}.json`)) {
+        const user = JSON.parse(await FileRead(`${usersPath}/${UID}.json`))
+        user.pirepsRaw.forEach(pirep => {
+            if (pirep.id == PID) {
+                pirep.status = status;
+                setTimeout(() => {
+                    FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
+                }, 1500)
+                console.log("Adjusted PIREP " + PID)
+            } else {
+                console.log("Not PIREP " + PID + ", It was " + pirep.id)
+            }
+        })
+    } else {
+        console.error("NO USER FOUND TO UPDATE PIREP")
+    }
+}
+
+async function updateUserStats(uid) {
+    if (await FileExists(`${usersPath}/${uid}.json`)) {
+        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
+        if (user.stats == undefined) {
+            user.stats = {
+                popular: {
+                    route: "None",
+                    aircraft: "None"
+                }
+            }
+        }
+
+        let routes = [];
+        let craft = [];
+        user.pirepsRaw.forEach(pirep => {
+            //Top Route
+            routes.push(pirep.route);
+
+            //Top Craft
+            craft.push(pirep.vehiclePublic)
+        })
+        user.stats.popular.route = mode(routes);
+        user.stats.popular.aircraft = mode(craft);
+
+        setTimeout(() => {
+            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
+        }, 1500)
+    } else {
+        console.error("NO USER TO UPDATE STATS")
+    }
+}
+
+async function addHoursToPilot(uid, amount) {
+    if (await FileExists(`${usersPath}/${uid}.json`)) {
+        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
+        user.hours = user.hours + amount
+        let tempMap = new Map();
+        for (const rank of ranks) {
+            tempMap.set(rank[0], parseInt(rank[1].minH))
+        }
+        const ranksSorted = new Map([...tempMap.entries()].sort((a, b) => b[1] - a[1]));
+        for (const rank of ranksSorted) {
+            if (user.hours > rank[1]) {
+                if (user.rank != rank[0]) {
+                    notifyUser("all", {
+                        title: `Ranking!`,
+                        desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
+                        icon: `arrow-up-circle`,
+                        timeStamp: new Date()
+                    })
+                }
+                user.rank = rank[0];
+                break;
+            }
+        }
+        FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
+    } else {
+        console.error("NO USER FOUND TO ADD TIME")
+    }
+}
 
 console.log(uniqueString())
 
+//Updater
 const fetch = require('node-fetch');
 
 function checkForNewVersion(){
@@ -2195,7 +2038,6 @@ async function update(version){
         });
 }
 
-
 app.post("/update", async function (req, res){
     const cookies = getAppCookies(req)
     if(await isNormalUser(cookies)){
@@ -2222,4 +2064,5 @@ async function updater(){
     }
     return updateRequired[0]
 }
+
 updater()
