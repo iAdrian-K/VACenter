@@ -1382,6 +1382,12 @@ app.delete("/admin/reqs/remData", async function (req, res){
                                 updatePIREPRaw(pirep.author, pirep.id, "d")
                                 await FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 await reloadData();
+                                await notifyUser(pirep.author, {
+                                    title: `PIREP Denied`,
+                                    desc: `Your PIREP for flight ${pirep.route}, has been denied.`,
+                                    icon: `x-circle`,
+                                    timeStamp: new Date()
+                                })
                                 res.sendStatus(200)
                                 updateUserStats(pirep.author)
                                 
@@ -1552,6 +1558,12 @@ app.post("/admin/reqs/newData", async function (req, res){
                                     await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
                                     res.redirect("/admin/pireps")
+                                    await notifyUser('all', {
+                                        title: `New Route`,
+                                        desc: `Your VA has launched a new route (${newObj.name}), why not give a shot?`,
+                                        icon: `box-arrow-up-right`,
+                                        timeStamp: new Date()
+                                    })
                                 } else {
                                     res.sendStatus(409)
                                 }
