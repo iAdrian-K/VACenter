@@ -7,7 +7,8 @@ const package = require('./../package.json')
 const addition2 = currentBranch == "beta" ? "B" : ""
 const cv = require('./../package.json').version + addition2;
 
-
+//Parts
+const {FileRead, FileWrite, FileExists, FileRemove} = require("./fileFunctions");
 
 console.log(cv)
 function URLReq(method, url, headers, query, data) {
@@ -2100,53 +2101,7 @@ app.post("/CPWD", async (req, res) => {
 })
 
 app.listen(process.env.port)
-function FileWrite(path, data) {
-    return new Promise(resolve => {
-        fs.writeFile(path, data, function (err) {
-            if (err) {
-                console.error(err)
-                resolve(false)
-            } else {
-                resolve(true)
-            }
-        })
-    })
 
-}
-function FileExists(path) {
-    return new Promise(resolve => {
-        fs.stat(path, function (err, stat) {
-            if (stat != undefined) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        })
-    })
-
-}
-
-function FileRemove(path){
-    return new Promise(resolve => {
-        fs.unlink(path, function(err, data){
-            resolve(err ? false: data);
-            if(err){
-                console.error(err)
-            }
-        })
-    })
-}
-
-function FileRead(path) {
-    return new Promise(resolve => {
-        fs.readFile(path, function (err, data) {
-            resolve(err ? false : data);
-            if (err) {
-                console.error(err)
-            }
-        })
-    })
-}
 console.log(uniqueString())
 
 const fetch = require('node-fetch');
