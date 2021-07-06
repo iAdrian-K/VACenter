@@ -1527,6 +1527,12 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 } else {
                                     res.sendStatus(409)
                                 }
+                                await notifyUser('all', {
+                                    title: `New Aircraft`,
+                                    desc: `A new aircraft was added to our fleet, the ${newObj.livName} - ${newObj.airName}.`,
+                                    icon: `exclude`,
+                                    timeStamp: new Date()
+                                })
                             }else{
                                 res.sendStatus(livery[1].statusCode)
                             }
