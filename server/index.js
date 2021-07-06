@@ -271,31 +271,36 @@ async function remToken(tokens) {
 }
 
 async function notifyUser(user, event){
-    if(user == "all"){
-        users.forEach(async user =>{
-            const uid = user.username;
-            const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
-            userData.notifications.push(event);
-            userData.notifications.sort(compareTime);
-            if (userData.notifications.length > 5) {
-                userData.notifications.pop();
+    return new Promise(async resolve => {
+        if (user == "all") {
+            users.forEach(async user => {
+                const uid = user.username;
+                const userData = JSON.parse(await FileRead(`${usersPath}/${uid}.json`));
+                userData.notifications.push(event);
+                userData.notifications.sort(compareTime);
+                if (userData.notifications.length > 5) {
+                    userData.notifications.pop();
+                }
+                await FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(userData, null, 2));
+            })
+            resolve(true);
+        } else {
+            const userExists = await FileExists(`${usersPath}/` + sanitize(user) + '.json');
+            if (userExists) {
+                const userData = JSON.parse(await FileRead(`${usersPath}/${user}.json`));
+                userData.notifications.push(event);
+                userData.notifications.sort(compareTime);
+                if (userData.notifications.length > 5) {
+                    userData.notifications.pop();
+                }
+                await FileWrite(`${usersPath}/${user}.json`, JSON.stringify(userData, null, 2));
+                resolve(true)
+            } else {
+                console.error("No user found to notify! " + user);
+                resolve(false)
             }
-            FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(userData, null, 2));
-        })
-    }else{
-        const userExists = await FileExists(`${usersPath}/` + sanitize(user) + '.json');
-        if(userExists){
-            const userData = JSON.parse(await FileRead(`${usersPath}/${user}.json`));
-            userData.notifications.push(event);
-            userData.notifications.sort(compareTime);
-            if (userData.notifications.length > 5) {
-                userData.notifications.pop();
-            }
-            FileWrite(`${usersPath}/${user}.json`, JSON.stringify(userData, null, 2));
-        }else{
-            console.error("No user found to notify! " + user);
         }
-    }
+    })
 }
 
 function getUserID(tokens){
@@ -1459,24 +1464,25 @@ app.post("/admin/reqs/newData", async function (req, res){
                             if (await FileExists(`${dataPath}/pireps/${sanitize(req.body.id)}.json`)) {
                                 const pirep = JSON.parse(await FileRead(`${dataPath}/pireps/${sanitize(req.body.id)}.json`))
                                 pirep.status = "a";
-                                addHoursToPilot(pirep.author, (pirep.flightTime / 60));
+                                await addHoursToPilot(pirep.author, (pirep.flightTime / 60));
                                 console.log("AITH: " + pirep.author)
-                                notifyUser(pirep.author, {
+                                await notifyUser(pirep.author, {
                                     title: `PIREP Approved`,
                                     desc: `Your PIREP has been approved and ${(pirep.flightTime / 60).toFixed(2)} hours have been added.`,
                                     icon: `check2-circle`,
                                     timeStamp: new Date()
                                 })
-                                updatePIREPRaw(pirep.author, pirep.id, "a")
+                                await updatePIREPRaw(pirep.author, pirep.id, "a")
                                 vaData.raw.routes.push(pirep.route);
                                 vaData.raw.aircraft.push(pirep.vehiclePublic);
                                 vaData.totalHours = vaData.totalHours + pirep.flightTime;
-                                updateVAStats()
+                                console.log(vaData)
+                                await setVAStats()
                                 await FileWrite(`${dataPath}/pireps/${sanitize(req.body.id)}.json`, JSON.stringify(pirep, null, 2))
                                 await reloadData();
                                 res.sendStatus(200)
                                 updateUserStats(pirep.author)
-                                setVAStats();
+                                updateVAStats();
                             }else{
                                 res.sendStatus(404)
                             }
@@ -1830,20 +1836,24 @@ app.post("/CPWD", async (req, res) => {
 })
 
 async function updatePIREPRaw(UID, PID, status) {
-    if (await FileExists(`${usersPath}/${UID}.json`)) {
-        const user = JSON.parse(await FileRead(`${usersPath}/${UID}.json`))
-        user.pirepsRaw.forEach(pirep => {
-            if (pirep.id == PID) {
-                pirep.status = status;
-                FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
-                console.log("Adjusted PIREP " + PID)
-            } else {
-                console.log("Not PIREP " + PID + ", It was " + pirep.id)
-            }
-        })
-    } else {
-        console.error("NO USER FOUND TO UPDATE PIREP")
-    }
+    return new Promise(async resolve =>{
+        if (await FileExists(`${usersPath}/${UID}.json`)) {
+            const user = JSON.parse(await FileRead(`${usersPath}/${UID}.json`))
+            user.pirepsRaw.forEach(async pirep => {
+                if (pirep.id == PID) {
+                    pirep.status = status;
+                    await FileWrite(`${usersPath}/${UID}.json`, JSON.stringify(user, null, 2));
+                    console.log("Adjusted PIREP " + PID)
+                    resolve(true)
+                } else {
+                    console.log("Not PIREP " + PID + ", It was " + pirep.id)
+                }
+            })
+        } else {
+            console.error("NO USER FOUND TO UPDATE PIREP")
+            resolve(false)
+        }
+    })
 }
 
 async function updateUserStats(uid) {
@@ -1876,32 +1886,36 @@ async function updateUserStats(uid) {
 }
 
 async function addHoursToPilot(uid, amount) {
-    if (await FileExists(`${usersPath}/${uid}.json`)) {
-        const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
-        user.hours = user.hours + amount
-        let tempMap = new Map();
-        for (const rank of ranks) {
-            tempMap.set(rank[0], parseInt(rank[1].minH))
-        }
-        const ranksSorted = new Map([...tempMap.entries()].sort((a, b) => b[1] - a[1]));
-        for (const rank of ranksSorted) {
-            if (user.hours > rank[1]) {
-                if (user.rank != rank[0]) {
-                    notifyUser("all", {
-                        title: `Ranking!`,
-                        desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
-                        icon: `arrow-up-circle`,
-                        timeStamp: new Date()
-                    })
-                }
-                user.rank = rank[0];
-                break;
+    return new Promise(async resolve =>{
+        if (await FileExists(`${usersPath}/${uid}.json`)) {
+            const user = JSON.parse(await FileRead(`${usersPath}/${uid}.json`))
+            user.hours = user.hours + amount
+            let tempMap = new Map();
+            for (const rank of ranks) {
+                tempMap.set(rank[0], parseInt(rank[1].minH))
             }
+            const ranksSorted = new Map([...tempMap.entries()].sort((a, b) => b[1] - a[1]));
+            for (const rank of ranksSorted) {
+                if (user.hours > rank[1]) {
+                    if (user.rank != rank[0]) {
+                        notifyUser("all", {
+                            title: `Ranking!`,
+                            desc: `${config.code}${atob(user.username)} is now ${rank[0]}!`,
+                            icon: `arrow-up-circle`,
+                            timeStamp: new Date()
+                        })
+                    }
+                    user.rank = rank[0];
+                    break;
+                }
+            }
+            await FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
+            resolve(true)
+        } else {
+            console.error("NO USER FOUND TO ADD TIME")
+            resolve(false)
         }
-        FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
-    } else {
-        console.error("NO USER FOUND TO ADD TIME")
-    }
+    })
 }
 
 console.log(uniqueString())
