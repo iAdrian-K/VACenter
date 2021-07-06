@@ -23,6 +23,21 @@ const { URLReq, JSONReq } = require("./urlReqs");
 const {isAdminUser, isNormalUser} = require("./userAuth")
 const {mode, compareTime, arrayRemove, getAppCookies} = require("./util")
 
+//Stats Utils
+function setVAStats() {
+    return new Promise(async resolve =>{
+        console.log(vaData)
+        await FileWrite(`${__dirname}/stats.json`, JSON.stringify(vaData, null, 2));
+        resolve(true)
+    })
+    
+}
+
+function updateVAStats() {
+    vaData.popular.route = mode(vaData.raw.routes);
+    vaData.popular.aircraft = mode(vaData.raw.aircraft);
+}
+
 //VACenter Config
 let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../") + "config.json"))
 let clientConfig = config
@@ -118,6 +133,12 @@ let vaData = {
     },
     totalHours: 0
 }
+FileExists(`${__dirname}/stats.json`).then(async value=>{
+    if(value == false){
+        await setVAStats()
+        process.exit(11)
+    }
+})
 
 function reloadData() {
     return new Promise(async resolve => {
@@ -228,16 +249,6 @@ async function reloadVANETData() {
     }
 }
 reloadVANETData()
-
-function setVAStats() {
-    FileWrite(`${__dirname}/stats.json`, JSON.stringify(vaData, null, 2));
-}
-
-function updateVAStats() {
-    vaData.popular.route = mode(vaData.raw.routes);
-    vaData.popular.aircraft = mode(vaData.raw.aircraft);
-}
-
 
 //User Utils
 
@@ -1970,13 +1981,13 @@ async function update(version){
 
                         request(options2, function (error2, response2, body2) {
                             if (response2.statusCode == 200) {
-                                process.exit(1);
+                                process.exit(11);
                             } else {
                                 console.error([response2.statusCode, response2.body])
                             }
                         })
                         }else{
-                            process.exit(1);
+                            process.exit(11);
                         }
                         
                     }
