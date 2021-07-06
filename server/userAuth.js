@@ -1,3 +1,15 @@
+const atob = require("atob");
+const btoa = require("btoa");
+const path = require("path");
+const sanitize = require("sanitize-filename");
+const { FileRead, FileWrite, FileExists, FileRemove } = require("./fileFunctions");
+const { URLReq, JSONReq } = require("./urlReqs");
+const { mode, compareTime, arrayRemove, getAppCookies } = require("./util")
+const publicPath = path.join(__dirname + '/../public')
+const dataPath = path.join(__dirname + '/../data')
+const usersPath = path.join(__dirname + '/../data/users')
+
+
 function isAdminUser(tokens) {
     return new Promise(resolve => {
         if (tokens.authToken != undefined) {
