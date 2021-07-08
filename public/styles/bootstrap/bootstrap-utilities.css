@@ -80,6 +80,13 @@
   .link-black:hover, .link-black:focus {
     color: black; }
 
+/* line 2, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+.link-blurple {
+  color: #5865F2; }
+  /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+  .link-blurple:hover, .link-blurple:focus {
+    color: #4651c2; }
+
 /* line 3, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_ratio.scss */
 .ratio {
   position: relative;
@@ -466,6 +473,10 @@
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-black {
   border-color: #000 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.border-blurple {
+  border-color: #5865F2 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-white {
@@ -1305,6 +1316,10 @@
   color: #000 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.text-blurple {
+  color: #5865F2 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .text-white {
   color: #fff !important; }
 
@@ -1367,6 +1382,10 @@
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-black {
   background-color: #000 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.bg-blurple {
+  background-color: #5865F2 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-body {

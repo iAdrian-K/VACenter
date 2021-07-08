@@ -20,6 +20,7 @@
   --bs-gray: #6c757d;
   --bs-gray-dark: #343a40;
   --bs-black: #000;
+  --bs-blurple: blurple;
   --bs-primary: #0d6efd;
   --bs-secondary: #6c757d;
   --bs-success: #198754;
@@ -30,6 +31,7 @@
   --bs-light: #f8f9fa;
   --bs-dark: #212529;
   --bs-black: #000;
+  --bs-blurple: #5865F2;
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0)); }
@@ -3009,6 +3011,40 @@ textarea.form-control-lg {
     background-color: #000;
     border-color: #000; }
 
+/* line 60, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
+.btn-blurple {
+  color: #fff;
+  background-color: #5865F2;
+  border-color: #5865F2; }
+  /* line 26, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-blurple:hover {
+    color: #fff;
+    background-color: #4b56ce;
+    border-color: #4651c2; }
+  /* line 32, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:focus + .btn-blurple, .btn-blurple:focus {
+    color: #fff;
+    background-color: #4b56ce;
+    border-color: #4651c2;
+    box-shadow: 0 0 0 0.25rem rgba(113, 124, 244, 0.5); }
+  /* line 45, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:checked + .btn-blurple,
+  .btn-check:active + .btn-blurple, .btn-blurple:active, .btn-blurple.active,
+  .show > .btn-blurple.dropdown-toggle {
+    color: #fff;
+    background-color: #4651c2;
+    border-color: #424cb6; }
+    /* line 56, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+    .btn-check:checked + .btn-blurple:focus,
+    .btn-check:active + .btn-blurple:focus, .btn-blurple:active:focus, .btn-blurple.active:focus,
+    .show > .btn-blurple.dropdown-toggle:focus {
+      box-shadow: 0 0 0 0.25rem rgba(113, 124, 244, 0.5); }
+  /* line 66, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-blurple:disabled, .btn-blurple.disabled {
+    color: #fff;
+    background-color: #5865F2;
+    border-color: #5865F2; }
+
 /* line 66, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
 .btn-outline-primary {
   color: #0d6efd;
@@ -3277,6 +3313,33 @@ textarea.form-control-lg {
   /* line 118, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
   .btn-outline-black:disabled, .btn-outline-black.disabled {
     color: #000;
+    background-color: transparent; }
+
+/* line 66, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
+.btn-outline-blurple {
+  color: #5865F2;
+  border-color: #5865F2; }
+  /* line 88, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-outline-blurple:hover {
+    color: #fff;
+    background-color: #5865F2;
+    border-color: #5865F2; }
+  /* line 94, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:focus + .btn-outline-blurple, .btn-outline-blurple:focus {
+    box-shadow: 0 0 0 0.25rem rgba(88, 101, 242, 0.5); }
+  /* line 99, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:checked + .btn-outline-blurple,
+  .btn-check:active + .btn-outline-blurple, .btn-outline-blurple:active, .btn-outline-blurple.active, .btn-outline-blurple.dropdown-toggle.show {
+    color: #fff;
+    background-color: #5865F2;
+    border-color: #5865F2; }
+    /* line 108, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+    .btn-check:checked + .btn-outline-blurple:focus,
+    .btn-check:active + .btn-outline-blurple:focus, .btn-outline-blurple:active:focus, .btn-outline-blurple.active:focus, .btn-outline-blurple.dropdown-toggle.show:focus {
+      box-shadow: 0 0 0 0.25rem rgba(88, 101, 242, 0.5); }
+  /* line 118, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-outline-blurple:disabled, .btn-outline-blurple.disabled {
+    color: #5865F2;
     background-color: transparent; }
 
 /* line 78, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
@@ -4684,6 +4747,15 @@ textarea.form-control-lg {
   .alert-black .alert-link {
     color: black; }
 
+/* line 53, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_alert.scss */
+.alert-blurple {
+  color: #353d91;
+  background-color: #dee0fc;
+  border-color: #cdd1fb; }
+  /* line 7, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_alert.scss */
+  .alert-blurple .alert-link {
+    color: #2a3174; }
+
 @keyframes progress-bar-stripes {
   0% {
     background-position-x: 1rem; } }
@@ -5087,6 +5159,20 @@ textarea.form-control-lg {
     color: #fff;
     background-color: black;
     border-color: black; }
+
+/* line 5, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
+.list-group-item-blurple {
+  color: #353d91;
+  background-color: #dee0fc; }
+  /* line 10, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
+  .list-group-item-blurple.list-group-item-action:hover, .list-group-item-blurple.list-group-item-action:focus {
+    color: #353d91;
+    background-color: #c8cae3; }
+  /* line 16, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
+  .list-group-item-blurple.list-group-item-action.active {
+    color: #fff;
+    background-color: #353d91;
+    border-color: #353d91; }
 
 /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_close.scss */
 .btn-close {
@@ -6089,6 +6175,13 @@ textarea.form-control-lg {
   .link-black:hover, .link-black:focus {
     color: black; }
 
+/* line 2, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+.link-blurple {
+  color: #5865F2; }
+  /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+  .link-blurple:hover, .link-blurple:focus {
+    color: #4651c2; }
+
 /* line 3, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_ratio.scss */
 .ratio {
   position: relative;
@@ -6475,6 +6568,10 @@ textarea.form-control-lg {
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-black {
   border-color: #000 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.border-blurple {
+  border-color: #5865F2 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-white {
@@ -7314,6 +7411,10 @@ textarea.form-control-lg {
   color: #000 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.text-blurple {
+  color: #5865F2 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .text-white {
   color: #fff !important; }
 
@@ -7376,6 +7477,10 @@ textarea.form-control-lg {
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-black {
   background-color: #000 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.bg-blurple {
+  background-color: #5865F2 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-body {
