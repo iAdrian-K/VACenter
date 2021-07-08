@@ -13,7 +13,7 @@
 </head>
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-    <div class="float-end content bg-light-light ps-5 pt-5" style="width: 80%;">
+    <div class="float-end content bg-light-light ps-5 pt-3" style="width: 80%;">
         <div class="container">
             <h2>Recent Activity</h2>
             <div class="row mt-2 w-100">
@@ -22,7 +22,7 @@
                             <h4><i class="bi bi-<%= notif.icon%>"></i> <%= notif.title%></h4>
                             <p class="mb-5"><%= notif.desc%></p>
                             <p class="text-muted position-absolute" style="bottom: 0px;">
-                                <%= new Date(notif.timeStamp).toLocaleString('en-GB', { hour12: true })%>
+                                <%= new Date(notif.timeStamp).toLocaleString('en-AU', { hour12: true })%>
                             </p>
                         </div>
                 <%})%>
