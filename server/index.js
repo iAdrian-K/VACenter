@@ -119,7 +119,6 @@ let crafts = new Map();
 let ops = new Map();
 let pireps = new Map();
 let routes = new Map();
-let news = new Map();
 let ranks = new Map();
 let vanetCraft = new Map();
 let vaData = {
@@ -149,7 +148,6 @@ function reloadData() {
             ops = new Map();
             pireps = new Map();
             routes = new Map();
-            news = new Map();
             fs.readdirSync(dataPath + "/events").forEach(async event => {
                 let pushedEventRaw = await FileRead(dataPath + "/events" + "/" + event)
                 let pushedEvent = JSON.parse(pushedEventRaw)
@@ -164,11 +162,6 @@ function reloadData() {
                 let pushedCraftRaw = await FileRead(dataPath + "/aircraft" + "/" + craft)
                 let pushedCraft = JSON.parse(pushedCraftRaw)
                 crafts.set(pushedCraft.livID, pushedCraft)
-            })
-            fs.readdirSync(dataPath + "/news").forEach(async item => {
-                let pushedItemRaw = await FileRead(dataPath + "/news/" + item)
-                let pushedItem = JSON.parse(pushedItemRaw)
-                news.set(pushedItem.id, pushedItem)
             })
             fs.readdirSync(dataPath + "/operators").forEach(async airline => {
                 let pushedAirlineRaw = await FileRead(dataPath + "/operators" + "/" + airline)
@@ -394,6 +387,28 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
+                case "/newPirep":
+                    if (await isNormalUser(cookies)) {
+                        const uid = atob(cookies.authToken).split(":")[0];
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                        if (!userInfo.meta.cp) {
+                            delete userInfo['password']
+                            delete userInfo['tokens']
+                            //userInfo.apiKey
+                            res.render('npirep', {
+                                config: clientConfig,
+                                user: userInfo,
+                                active: req.path,
+                                stats: vaData,
+                                title: "New Flight"
+                            })
+                        } else {
+                            res.redirect("/changePWD")
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
                 case "/events":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -452,35 +467,6 @@ app.get('*', async (req, res) => {
                                         targetEvent: targetEvent,
                                         active: req.path,
                                         craft: crafts
-                                    })
-                                } else {
-                                    res.sendStatus(400)
-                                }
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/viewNews":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                if (await FileExists(`${dataPath}/news/` + sanitize(req.query.id) + '.json')) {
-                                    const targetNews = JSON.parse(await FileRead(`${dataPath}/news/` + sanitize(req.query.id) + '.json'));
-                                    res.render('admin/viewNews', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        target: targetNews,
-                                        active: req.path
                                     })
                                 } else {
                                     res.sendStatus(400)
@@ -789,43 +775,6 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
     }
 })
 
-app.post("/admin/reqs/updateNews", async (req, res) => {
-    try {
-        const cookies = getAppCookies(req);
-        if (await isNormalUser(cookies)) {
-            if (await isAdminUser(cookies)) {
-                if (req.body.id && req.body.title && req.body.body) {
-                    if (await FileExists(`${dataPath}/news/${sanitize(req.body.id)}.json`)) {
-                        const item = JSON.parse(await FileRead(`${dataPath}/news/${sanitize(req.body.id)}.json`))
-                        if (item.title != req.body.title) {
-                            item.title = req.body.title
-                        }
-                        if (item.body != req.body.body) {
-                            item.body = req.body.body
-                        }
-                        await FileWrite(`${dataPath}/news/${sanitize(req.body.id)}.json`, JSON.stringify(item, null, 2))
-                        await reloadData()
-                        res.redirect("/admin/news")
-                    } else {
-                        res.sendStatus(404)
-                    }
-
-                } else {
-                    res.sendStatus(400);
-                }
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
-    }
-})
-
 app.delete("/admin/reqs/remEvent", async function (req, res){
     try {
         const cookies = getAppCookies(req);
@@ -850,35 +799,6 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
                     }
                     await reloadData()
                     
-                } else {
-                    res.sendStatus(400);
-                }
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
-    }
-})
-
-app.delete("/admin/reqs/remNews", async function (req, res) {
-    try {
-        const cookies = getAppCookies(req);
-        if (await isNormalUser(cookies)) {
-            if (await isAdminUser(cookies)) {
-                if (req.body.id) {
-                    if (await FileExists(`${dataPath}/news/${sanitize(req.body.id)}.json`) == true) {
-                        await FileRemove(`${dataPath}/news/${sanitize(req.body.id)}.json`)
-                        await reloadData()
-                        res.redirect("/admin/news")
-                    } else {
-                        res.sendStatus(404)
-                    }
                 } else {
                     res.sendStatus(400);
                 }
@@ -1023,44 +943,6 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                         }
                             
                         });
-                } else {
-                    res.sendStatus(400);
-                }
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
-    }
-})
-
-app.post("/admin/reqs/newNews", async function (req, res) {
-    try {
-        const cookies = getAppCookies(req);
-        if (await isNormalUser(cookies)) {
-            if (await isAdminUser(cookies)) {
-                if (req.body.title && req.body.body && req.body.author) {
-                    const item = {
-                        id: uniqueString(),
-                        title: req.body.title,
-                        body: req.body.body,
-                        author: req.body.author,
-                    }
-                    notifyUser("all", {
-                        title: `New News!`,
-                        desc: `New Headline: ${item.title}`,
-                        icon: `newspaper`,
-                        link: "/news",
-                        timeStamp: new Date()
-                    })
-                    await FileWrite(`${dataPath}/news/${item.id}.json`, JSON.stringify(item, null, 2))
-                    await reloadData()
-                    res.redirect("/admin/news")
                 } else {
                     res.sendStatus(400);
                 }
