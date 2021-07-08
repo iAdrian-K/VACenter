@@ -412,7 +412,8 @@ app.get('*', async (req, res) => {
                                 config: clientConfig,
                                 user: userInfo,
                                 active: req.path,
-                                stats: vaData
+                                stats: vaData,
+                                title: "Dashboard"
                             })
                         } else {
                             res.redirect("/changePWD")

@@ -36,3 +36,20 @@
     <%}%>
 </div>
 </nav>
+<nav class="float-end pt-4 pb-2 px-5 text-start text-dark bg-light-light" style="width: 80%;">
+    <h1 class="display-5 fw-bold float-start"><%= title%></h1>
+    <div class="float-end mt-1">
+            <button class="btn btn-light-rounded shadow dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <img src="<%= user.ppurl%>" class="rounded-circle" style="height: 3vh; width: 3vh; object-fit: cover;">
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="/account">Account</a></li>
+                <li><a class="dropdown-item text-danger fw-bold" href="/report">Report a bug</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            </ul>
+    </div>
+</nav>
