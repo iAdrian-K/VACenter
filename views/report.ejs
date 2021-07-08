@@ -8,16 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/styles/scroll.css">
-    <link rel="stylesheet" href="assets/styles/main.css">
+    <%- include('components/head')%>
 </head>
 
 <body class="text-center text-light py-0 py-md-5 h-auto"
     style="background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('<%= config.other.bg%>'); background-position: center; background-size: cover;">
     <div class="bg-light py-3 px-2 p-md-5 w-50 h-auto text-dark mx-auto rounded fullTransparent">
         <h2>Report a bug</h2>
-        <p>This is the form to report a bug, for feature suggestions, please see the VACenter official <a href="https://discord.gg/5UAA4thShN" target="_blank" class="btn btn-blurple"><i class="bi bi-discord"></i> Discord</a>.</p>
-        <form action="https://admin.va-center.com/report" method="POST" class="p-3 text-start">
+        <p>This is the form to report a bug, for feature suggestions, please see the VACenter official <br><a href="https://discord.gg/5UAA4thShN" target="_blank" class="text-decoration-none link-blurple"><i class="bi bi-discord"></i> Discord</a>.</p>
+        <form action="https://error.va-center.com/report" method="POST" class="p-3 text-start">
             <h2>Title</h2>
             <input class="form-control mb-3" type="text" name="title">
             <h2>Body</h2>
