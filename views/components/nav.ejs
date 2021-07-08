@@ -7,25 +7,32 @@
 <div class="px-2">
 <h5 class="">Menu</h5>
 <hr>
-    <a class="link-dark btn-light-light btn w-100 my-2 text-decoration-none <%if(active == '/home'){%>nav-active-btn<%}%>">
-        <i class="bi bi-columns-gap"></i>
+    <a class="link-dark btn-light-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/home'){%>nav-active-btn text-dark<%}else{%>text-muted<%}%>" href="/home">
+        <i class="bi bi-columns-gap me-2"></i>
         Dashboard
     </a>
-    <a class="link-dark btn-light-light btn w-100 my-2 text-decoration-none <%if(active == '/newPirep'){%>nav-active-btn<%}%>">
-        <i class="fa fa-plane"></i>
+    <a class="link-dark btn-light-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/newPirep'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/newPirep">
+        <i class="fa fa-plane me-2"></i>
         New Flight
     </a>
-    <a class="link-dark btn-light-light btn w-100 my-2 text-decoration-none <%if(active == '/oldPirep'){%>nav-active-btn<%}%>">
-        <i class="bi bi-list-view"></i>
+    <a class="link-dark btn-light-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/oldPirep'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/oldPirep">
+        <i class="bi bi-view-list me-2"></i>
         My Flights
     </a>
-    <a class="link-dark btn-light-light btn w-100 my-2 text-decoration-none <%if(active == '/newPirep'){%>nav-active-btn<%}%>">
-        <i class="bi bi-calendar2"></i>
+    <a class="link-dark btn-light-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/events'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/events">
+        <i class="bi bi-calendar2 me-2"></i>
         Events
     </a>
-    <a class="link-dark btn-light-light btn w-100 my-2 text-decoration-none <%if(active == '/newPirep'){%>nav-active-btn<%}%>">
-        <i class="bi bi-question-circle"></i>
+    <a class="link-dark btn-light-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/aboutVA'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/aboutVA">
+        <i class="bi bi-question-circle me-2"></i>
         About <%= config.code%>
     </a>
+    <%if(user.admin == true){%>
+        <a
+            class="link-light btn-light-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/admin'){%> nav-active-btn<%}else{%>text-muted<%}%>" href="/admin">
+            <i class="bi bi-shield-shaded me-2"></i>
+            Admin
+        </a>
+    <%}%>
 </div>
 </nav>
