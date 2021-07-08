@@ -371,35 +371,6 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
-                case "/getLivData":
-                    res.send((await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/${req.query.liv}`, {"X-Api-Key": config.key}, null, null))[2])
-                    break;
-                case "/news":
-                    if (await isNormalUser(cookies)) {
-                        const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                        if (!userInfo.meta.cp) {
-                            delete userInfo['password']
-                            delete userInfo['tokens']
-                            //userInfo.apiKey
-                            res.render('news', {
-                                config: clientConfig,
-                                user: userInfo,
-                                news: news,
-                                active: req.path
-                            })
-                        } else {
-                            res.redirect("/changePWD")
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/report":
-                    res.render("report", {
-                        config: clientConfig
-                    })
-                    break;
                 case "/home":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -423,52 +394,6 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
-                case "/account":
-                    if (await isNormalUser(cookies)) {
-                        const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                        if (!userInfo.meta.cp) {
-                            delete userInfo['password']
-                            delete userInfo['tokens']
-                            //userInfo.apiKey
-                            res.render('account', {
-                                config: clientConfig,
-                                user: userInfo,
-                                active: req.path
-                            })
-                        } else {
-                            res.redirect("/changePWD")
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-
-                    break;
-                case "/pirep":
-                    if (await isNormalUser(cookies)) {
-                        const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                        if (!userInfo.meta.cp) {
-                            delete userInfo['password']
-                            delete userInfo['tokens']
-                            //userInfo.apiKey
-                            res.render('pirep', {
-                                config: clientConfig,
-                                user: userInfo,
-                                active: req.path,
-                                data: {
-                                    ops: ops,
-                                    crafts: crafts,
-                                    routes: routes
-                                }
-                            })
-                        } else {
-                            res.redirect("/changePWD")
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
                 case "/events":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -489,6 +414,27 @@ app.get('*', async (req, res) => {
                     } else {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
+                    break;
+                case "/account":
+                    if (await isNormalUser(cookies)) {
+                        const uid = atob(cookies.authToken).split(":")[0];
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                        if (!userInfo.meta.cp) {
+                            delete userInfo['password']
+                            delete userInfo['tokens']
+                            //userInfo.apiKey
+                            res.render('account', {
+                                config: clientConfig,
+                                user: userInfo,
+                                active: req.path
+                            })
+                        } else {
+                            res.redirect("/changePWD")
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+
                     break;
                 case "/admin/viewEvent":
                     if (await isNormalUser(cookies)) {
@@ -576,30 +522,6 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                    break;
-                case "/admin/news":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                    res.render('admin/news', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        active: req.path,
-                                        news: news
-                                    })
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
                     break;
                 case "/admin/viewUser":
                     if (await isNormalUser(cookies)) {
@@ -711,6 +633,11 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/report":
+                    res.render("report", {
+                        config: clientConfig
+                    })
+                    break;
                 case "/changePWD":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -724,6 +651,9 @@ app.get('*', async (req, res) => {
                     } else {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
+                    break;
+                case "/getLivData":
+                    res.send((await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/${req.query.liv}`, { "X-Api-Key": config.key }, null, null))[2])
                     break;
                 case "/setup":
                     if (clientConfig.id == undefined) {
