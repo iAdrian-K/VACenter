@@ -53,6 +53,13 @@
     color: #b02a37; }
 
 /* line 2, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+.link-light-light {
+  color: #f3f4f9; }
+  /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+  .link-light-light:hover, .link-light-light:focus {
+    color: #f5f6fa; }
+
+/* line 2, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
 .link-light {
   color: #f8f9fa; }
   /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
@@ -443,6 +450,10 @@
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-danger {
   border-color: #dc3545 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.border-light-light {
+  border-color: #f3f4f9 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-light {
@@ -1278,6 +1289,10 @@
   color: #dc3545 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.text-light-light {
+  color: #f3f4f9 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .text-light {
   color: #f8f9fa !important; }
 
@@ -1336,6 +1351,10 @@
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-danger {
   background-color: #dc3545 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.bg-light-light {
+  background-color: #f3f4f9 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-light {

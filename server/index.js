@@ -1709,7 +1709,7 @@ app.post("/setupData", async function (req, res) {
                     const newConfig = JSON.parse(response.body).result
                     newConfig.key = req.body.key
                     newConfig.other = {
-                        bg: "https://webcdn.infiniteflight.com/blog/content/images/2021/04/Infinite-Flight-3D-Buildings.jpg",
+                        bg: "/public/images/stockBG2.jpg",
                         logo: "https://va-center.com/assets/images/logo.webp",
                         rates: 100,
                         navColor: [],

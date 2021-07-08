@@ -26,6 +26,7 @@
   --bs-info: #0dcaf0;
   --bs-warning: #ffc107;
   --bs-danger: #dc3545;
+  --bs-light-light: #f3f4f9;
   --bs-light: #f8f9fa;
   --bs-dark: #212529;
   --bs-black: #000;
@@ -2873,6 +2874,40 @@ textarea.form-control-lg {
     border-color: #dc3545; }
 
 /* line 60, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
+.btn-light-light {
+  color: #000;
+  background-color: #f3f4f9;
+  border-color: #f3f4f9; }
+  /* line 26, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-light-light:hover {
+    color: #000;
+    background-color: #f5f6fa;
+    border-color: #f4f5fa; }
+  /* line 32, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:focus + .btn-light-light, .btn-light-light:focus {
+    color: #000;
+    background-color: #f5f6fa;
+    border-color: #f4f5fa;
+    box-shadow: 0 0 0 0.25rem rgba(207, 207, 212, 0.5); }
+  /* line 45, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:checked + .btn-light-light,
+  .btn-check:active + .btn-light-light, .btn-light-light:active, .btn-light-light.active,
+  .show > .btn-light-light.dropdown-toggle {
+    color: #000;
+    background-color: #f5f6fa;
+    border-color: #f4f5fa; }
+    /* line 56, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+    .btn-check:checked + .btn-light-light:focus,
+    .btn-check:active + .btn-light-light:focus, .btn-light-light:active:focus, .btn-light-light.active:focus,
+    .show > .btn-light-light.dropdown-toggle:focus {
+      box-shadow: 0 0 0 0.25rem rgba(207, 207, 212, 0.5); }
+  /* line 66, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-light-light:disabled, .btn-light-light.disabled {
+    color: #000;
+    background-color: #f3f4f9;
+    border-color: #f3f4f9; }
+
+/* line 60, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
 .btn-light {
   color: #000;
   background-color: #f8f9fa;
@@ -3134,6 +3169,33 @@ textarea.form-control-lg {
   /* line 118, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
   .btn-outline-danger:disabled, .btn-outline-danger.disabled {
     color: #dc3545;
+    background-color: transparent; }
+
+/* line 66, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
+.btn-outline-light-light {
+  color: #f3f4f9;
+  border-color: #f3f4f9; }
+  /* line 88, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-outline-light-light:hover {
+    color: #000;
+    background-color: #f3f4f9;
+    border-color: #f3f4f9; }
+  /* line 94, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:focus + .btn-outline-light-light, .btn-outline-light-light:focus {
+    box-shadow: 0 0 0 0.25rem rgba(243, 244, 249, 0.5); }
+  /* line 99, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-check:checked + .btn-outline-light-light,
+  .btn-check:active + .btn-outline-light-light, .btn-outline-light-light:active, .btn-outline-light-light.active, .btn-outline-light-light.dropdown-toggle.show {
+    color: #000;
+    background-color: #f3f4f9;
+    border-color: #f3f4f9; }
+    /* line 108, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+    .btn-check:checked + .btn-outline-light-light:focus,
+    .btn-check:active + .btn-outline-light-light:focus, .btn-outline-light-light:active:focus, .btn-outline-light-light.active:focus, .btn-outline-light-light.dropdown-toggle.show:focus {
+      box-shadow: 0 0 0 0.25rem rgba(243, 244, 249, 0.5); }
+  /* line 118, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_buttons.scss */
+  .btn-outline-light-light:disabled, .btn-outline-light-light.disabled {
+    color: #f3f4f9;
     background-color: transparent; }
 
 /* line 66, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_buttons.scss */
@@ -4587,6 +4649,15 @@ textarea.form-control-lg {
     color: #6a1a21; }
 
 /* line 53, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_alert.scss */
+.alert-light-light {
+  color: #616264;
+  background-color: #fdfdfe;
+  border-color: #fbfcfd; }
+  /* line 7, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_alert.scss */
+  .alert-light-light .alert-link {
+    color: #4e4e50; }
+
+/* line 53, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/_alert.scss */
 .alert-light {
   color: #636464;
   background-color: #fefefe;
@@ -4960,6 +5031,20 @@ textarea.form-control-lg {
     color: #fff;
     background-color: #842029;
     border-color: #842029; }
+
+/* line 5, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
+.list-group-item-light-light {
+  color: #616264;
+  background-color: #fdfdfe; }
+  /* line 10, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
+  .list-group-item-light-light.list-group-item-action:hover, .list-group-item-light-light.list-group-item-action:focus {
+    color: #616264;
+    background-color: #e4e4e5; }
+  /* line 16, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
+  .list-group-item-light-light.list-group-item-action.active {
+    color: #fff;
+    background-color: #616264;
+    border-color: #616264; }
 
 /* line 5, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_list-group.scss */
 .list-group-item-light {
@@ -5977,6 +6062,13 @@ textarea.form-control-lg {
     color: #b02a37; }
 
 /* line 2, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+.link-light-light {
+  color: #f3f4f9; }
+  /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
+  .link-light-light:hover, .link-light-light:focus {
+    color: #f5f6fa; }
+
+/* line 2, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
 .link-light {
   color: #f8f9fa; }
   /* line 6, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/helpers/_colored-links.scss */
@@ -6367,6 +6459,10 @@ textarea.form-control-lg {
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-danger {
   border-color: #dc3545 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.border-light-light {
+  border-color: #f3f4f9 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .border-light {
@@ -7202,6 +7298,10 @@ textarea.form-control-lg {
   color: #dc3545 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.text-light-light {
+  color: #f3f4f9 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .text-light {
   color: #f8f9fa !important; }
 
@@ -7260,6 +7360,10 @@ textarea.form-control-lg {
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-danger {
   background-color: #dc3545 !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.bg-light-light {
+  background-color: #f3f4f9 !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .bg-light {
