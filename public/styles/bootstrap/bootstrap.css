@@ -7330,6 +7330,10 @@ textarea.form-control-lg {
   border-radius: 0.3rem !important; }
 
 /* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
+.rounded-4 {
+  border-radius: 15px !important; }
+
+/* line 50, ../../../../../Users/samneale/Documents/codeProjects.nosync/VACenterAll/VACenter/scss/mixins/_utilities.scss */
 .rounded-circle {
   border-radius: 50% !important; }
 
