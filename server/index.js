@@ -107,7 +107,7 @@ app.set('view engine', 'ejs')
 app.listen(process.env.port)
 
 //Paths
-const publicPath = path.join(__dirname + '/../public')
+const publicPath = path.join(__dirname + '/../')
 const dataPath = path.join(__dirname + '/../data')
 const usersPath = path.join(__dirname + '/../data/users')
 
@@ -346,7 +346,7 @@ app.get('*', async (req, res) => {
     const cookies = getAppCookies(req)
     const fp = req.path.slice(0, 8)
     const fp2 = req.path.slice(0, 12)
-    if (fp == "/assets/") {
+    if (fp == "/public/") {
         if (fs.existsSync(publicPath + req.path)) {
             res.sendFile(publicPath + req.path)
         } else {
