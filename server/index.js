@@ -499,6 +499,30 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
+                case "/admin":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                    res.render('admin/selector', {
+                                        config: clientConfig,
+                                        user: userInfo,
+                                        active: req.path,
+                                        title: "Admin Page Selector"
+                                    })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
                 case "/admin/viewEvent":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
