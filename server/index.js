@@ -759,7 +759,9 @@ app.get('*', async (req, res) => {
                     res.clearCookie('authToken').redirect('/')
                     break;
                 default:
-                    res.render("404")
+                    res.render("404", {
+                        config: config
+                    })
                     break;
             }
         }
