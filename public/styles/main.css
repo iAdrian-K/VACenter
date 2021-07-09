@@ -13,6 +13,6 @@ border-color: rgb(208, 207, 253) !important;
   transition: 0.5s !important;
 }
 .navItemHolder .btn-light:hover{
-  background-color: rgb(209, 209, 209) !important;
-  border-color: rgb(209, 209, 209) !important;
+  background-color: rgb(209, 209, 209);
+  border-color: rgb(209, 209, 209);
 }
