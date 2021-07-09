@@ -629,6 +629,32 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/admin/users":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/users', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Users",
+                                    users: users
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
                 case "/report":
                     res.render("report", {
                         config: clientConfig
@@ -1023,10 +1049,9 @@ app.post("/admin/reqs/updateUser", async function (req, res){
                         if(user.name != req.body.name){
                             user.name = req.body.name
                         }
-                        user.tokens = [];
                         await FileWrite(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`, JSON.stringify(user, null, 2))
                         await reloadUsers()
-                        res.redirect("/admin/accounts")
+                        res.redirect("/admin/users")
                     } else {
                         res.sendStatus(404)
                     }
@@ -1094,7 +1119,7 @@ app.post("/admin/reqs/resetPWD", async function (req, res){
                         user.meta.cp = true;
                         await FileWrite(`${usersPath}/${sanitize(req.body.targetUID)}.json`, JSON.stringify(user, null, 2))
                         await reloadUsers()
-                        res.redirect(`/admin/viewUser?u=${req.body.targetUID}`)
+                        res.redirect(`/admin/users`)
                     } else {
                         res.sendStatus(404)
                     }
@@ -1449,7 +1474,8 @@ app.post("/admin/reqs/newUser", async (req, res) => {
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
-                if (req.body.username && req.body.password && req.body.Name && req.body.CPW && req.body.IFC) {
+                console.log(req.body)
+                if (req.body.username && req.body.password && req.body.Name && req.body.IFC) {
                     if (await FileExists(`${usersPath}/${btoa(sanitize(req.body.username))}.json`) == false) {
                         const admin = req.body.admin ? true : false;
                         const pilotIDReq = await JSONReq("GET", `https://api.vanet.app/airline/v1/user/id/${req.body.IFC}`, {"X-Api-Key": config.key}, null, null)
@@ -1497,7 +1523,7 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                         })
                         await FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
                         await reloadUsers()
-                        res.redirect("/admin/accounts")
+                        res.redirect("/admin/users")
                     } else {
                         res.sendStatus(409)
                     }
