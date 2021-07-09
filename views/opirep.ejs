@@ -18,6 +18,7 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
         <div class="float-end content bg-light-light ps-3 pt-3" style="width: 80%;">
+            <p class="text-muted">Click on a pirep to see more.</p>
             <div class="container">
                 <table class="table table-hover">
                     <thead>
@@ -30,7 +31,7 @@
                     </thead>
                     <tbody>
                         <% user.pirepsRaw.forEach(pirep =>{%>
-                            <tr  data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
+                            <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
                                 <th scope="row"><%= pirep.route %></th>
                                 <td><%= new Date(pirep.filed).toLocaleString("EN-AU", {Hour12: true}) %></td>
                                 <td><%= pirep.vehiclePublic %></td>
