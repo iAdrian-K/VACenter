@@ -28,7 +28,7 @@
                     </thead>
                     <tbody>
                         <% users.forEach(target=>{%>
-                            <tr style="<% if(target.revoked){%>background-color:rgba(255, 0, 0, 0.2) !important;<%}%> cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=target.username.split("=")[0]%>" <%= target.revoked%> <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
+                            <tr style="<% if(target.revoked){%>background-color:rgba(255, 0, 0, 0.2) !important;<%}%> cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=target.username.split("=")[0]%>" <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
                                 <th scope="row">
                                     <%= Buffer.from(target.username, 'base64').toString() %>
                                 </th>
