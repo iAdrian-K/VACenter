@@ -677,7 +677,9 @@ app.get('*', async (req, res) => {
                         const uid = atob(cookies.authToken).split(":")[0];
                         const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (userInfo.meta.cp) {
-                            res.render("changePWD")
+                            res.render("changePWD",{
+                                config: config
+                            })
                         } else {
                             res.redirect("/")
                         }
