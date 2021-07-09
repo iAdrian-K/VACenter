@@ -43,7 +43,7 @@
                 <img src="<%= user.ppurl%>" class="rounded-circle" style="height: 3vh; width: 3vh; object-fit: cover;">
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="/account">Account</a></li>
+                <li><a class="dropdown-item <% if(active == '/account'){%>active<%}%>" href="/account">Account</a></li>
                 <li><a class="dropdown-item text-danger fw-bold" href="/report">Report a bug</a></li>
                 <li>
                     <hr class="dropdown-divider">

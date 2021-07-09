@@ -488,7 +488,8 @@ app.get('*', async (req, res) => {
                             res.render('account', {
                                 config: clientConfig,
                                 user: userInfo,
-                                active: req.path
+                                active: req.path,
+                                title: "My Account - " + userInfo.name
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -1027,7 +1028,7 @@ app.post("/updateUser", async function (req, res){
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
             const user = await getUserData(cookies);
-            if(req.body.name){
+            if(req.body.name && req.body.ppurl){
                 if(req.body.name!= user.name){
                      user.name = req.body.name
                 }    
@@ -1687,10 +1688,12 @@ app.post("/CPWD", async (req, res) => {
         const uid = atob(clientToken).split(":")[0]
         const token = atob(clientToken).split(":")[1]
         const userExists = await FileExists(`${usersPath}/` + sanitize(uid) + '.json')
+        
         if (userExists) {
             const userData = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
             const realToken = token.length == 33 ? token.slice(0, token.length - 1) : token
             if (userData.tokens.includes(realToken)) {
+                
                 if (req.body.pwd) {
                     userData.password = bcrypt.hashSync(req.body.pwd, 10)
                     userData.tokens = [];
