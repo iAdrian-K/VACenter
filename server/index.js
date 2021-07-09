@@ -465,7 +465,9 @@ app.get('*', async (req, res) => {
                                 user: userInfo,
                                 active: req.path,
                                 stats: vaData,
-                                title: "About " + config.name
+                                title: "About " + config.name,
+                                fleet: crafts,
+                                route: routes
                             })
                         } else {
                             res.redirect("/changePWD")

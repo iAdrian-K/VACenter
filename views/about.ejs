@@ -16,25 +16,74 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
         <div class="float-end content bg-light-light ps-3 pt-3" style="width: 80%;">
-            <div class="container">
-                <h2>Recent Activity</h2>
-                <div class="row mt-2 w-100">
-                    <% user.notifications.forEach(notif=>{%>
-                        <div class="col position-relative rounded bg-light p-3 shadow m-3"
+            <h2>VA Stats</h2><br>
+                <div class="row my-2 pe-3 w-100">
+                        <div class="col text-center position-relative rounded text-light p-3 mx-3 shadow tm-3 bg-blurple"
                             style="min-width: 15vw; max-width: 25vw;">
-                            <h4><i class="bi bi-<%= notif.icon%>"></i>
-                                <%= notif.title%>
-                            </h4>
-                            <p class="mb-5">
-                                <%= notif.desc%>
-                            </p>
-                            <p class="text-muted position-absolute" style="bottom: 0px;">
-                                <%= new Date(notif.timeStamp).toLocaleString('en-AU', { hour12: true })%>
-                            </p>
+                            <label class="w-100 text-light-light"><i class="bi bi-clock"></i> Total Flight Hours</label><br><br>
+                            <h1><%= (stats.totalHours / 60).toFixed(2) %> hours</h1>
                         </div>
-                        <%})%>
+                        <div class="col text-center position-relative rounded text-light p-3 mx-3 shadow tm-3 bg-blurple"
+                            style="min-width: 15vw; max-width: 25vw;">
+                            <label class="w-100 text-light-light"><i class="bi bi-plus-circle"></i> Most Popular Route</label><br><br>
+                            <h1>
+                                <%= stats.popular.route %>
+                            </h1>
+                        </div>
+                        <div class="col text-center position-relative rounded text-light p-3 mx-3 shadow tm-3 bg-blurple"
+                            style="min-width: 15vw; max-width: 25vw;">
+                            <label class="w-100 text-light-light"><i class="bi bi-plus-circle"></i> Most Popular Aircraft</label><br><br>
+                            <h1>
+                                <%= stats.popular.aircraft %>
+                            </h1>
+                        </div>
                 </div>
-            </div>
+            <h2 class="mt-5">VA Fleet</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Vehicle</th>
+                        <th scope="col">Livery</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% fleet.forEach(craft=>{%>
+                        <tr>
+                            <th scope="row">
+                                <%= craft.airName %>
+                            </th>
+                            <td>
+                                <%= craft.livName %>
+                            </td>
+                        </tr>
+                        <%})%>
+                </tbody>
+            </table>
+            <h2 class="mt-5">VA Routes</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Suggested Aircraft</th>
+                        <th scope="col">Operator</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% route.forEach(route=>{%>
+                        <tr>
+                            <th scope="row">
+                                <%= route.name %>
+                            </th>
+                            <td>
+                                <strong>COMING SOON</strong>
+                            </td>
+                            <td>
+                                <strong>COMING SOON</strong>
+                            </td>
+                        </tr>
+                        <%})%>
+                </tbody>
+            </table>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
