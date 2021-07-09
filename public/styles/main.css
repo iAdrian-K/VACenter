@@ -6,5 +6,13 @@
 .nav-active-btn{
   color: rgb(0, 31, 134) !important;
 background-color: rgb(208, 207, 253) !important;
-border-color: #e0e0e0 !important;
+border-color: rgb(208, 207, 253) !important;
+}
+
+.navItemHolder .btn-light-light{
+  transition: 0.5s !important;
+}
+.navItemHolder .btn-light-light:hover{
+  background-color: rgb(209, 209, 209) !important;
+  border-color: rgb(209, 209, 209) !important;
 }
