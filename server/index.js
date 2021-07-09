@@ -681,6 +681,31 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/admin/settings":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/settings', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Settings",
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
                 case "/report":
                     res.render("report", {
                         config: clientConfig
@@ -1467,13 +1492,16 @@ app.post("/admin/reqs/newData", async function (req, res){
                         }
                         break;
                     case "s":
-                        if (req.body.bg && req.body.rates && req.body.navBarColor) {
-                            config.other.bg = req.body.bg;
-                            config.other.rates = req.body.rates;
-                            config.other.color = [req.body.navBarColor == "light" ? "light" : "dark", req.body.navBarColor]
+                        if (req.body.bgurl && req.body.rate) {
+                            if(config.other.bg != req.body.bgurl){
+                                config.other.bg = req.body.bgurl;
+                            }
+                            if(config.other.rates != req.body.rate){
+                                config.other.rates = req.body.rate;
+                            }
                             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2))
                             reloadConfig();
-                            res.redirect("/admin/vacenter")
+                            res.redirect("/admin/settings")
                         }else{
                             res.sendStatus(400)
                         }

@@ -1,0 +1,96 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Admin || <%= config.name %>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <%- include("./../components/head.ejs")%>
+</head>
+
+<body class="w-100 bg-light-light h-auto">
+    <%- include("./../components/nav.ejs")%>
+        <div class="float-end content bg-light-light ps-3 py-3" style="width: 80%;">
+            <h2>Updates</h2>
+            <hr>
+            <button class="btn btn-primary" onclick="update()">Check for updates</button><br><br>
+            <p id="updaterStatus"></p>
+            <h2>Customisation</h2>
+            <hr>
+            <form action="/admin/reqs/newData?t=s" method="post">
+            <div class="form-control shadow p-3 my-3">
+                <h4 class="text-muted">Accent Color</h4>
+                <p><strong class="text-muted">COMING SOON</strong></p>
+            </div>
+            <div class="form-control shadow p-3 my-3">
+                <h4>Background URL</h4>
+                <input class="form-control" type="url" name="bgurl" id="fill1" value="<%= config.other.bg%>"><br>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+            <div class="form-control shadow p-3 my-3">
+                <h4>Rate Limiter Amounts</h4>
+                <input class="form-control" type="number" name="rate" value="<%= config.other.rates%>"><br>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+            </form>
+
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
+            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+            function isValidHttpUrl(string) {
+                    let url;
+
+                    try {
+                        url = new URL(string);
+                    } catch (_) {
+                        return false;
+                    }
+
+                    return url.protocol === "http:" || url.protocol === "https:";
+                }
+            if(isValidHttpUrl(document.getElementById("fill1").value) == false){
+            document.getElementById("fill1").value = window.location.protocol + "//" + window.location.host + document.getElementById("fill1").value
+            }
+            function update() {
+                    const data = null;
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.addEventListener("readystatechange", function () {
+                        console.log(this)
+                        if (this.readyState === this.DONE) {
+                            if (this.status == 202) {
+                                document.getElementById("updaterStatus").innerHTML = "Status: <span class='text-success'> An update was detected, installing now.</span> Please standby"
+                                setTimeout(() => {
+                                    document.getElementById("updaterStatus").innerHTML = "Reloading. <span class='text-success'> The update has been installed. </span>"
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 2500);
+                                }, 10000);
+                            } else if (this.status == 204) {
+                                document.getElementById("updaterStatus").innerHTML = "Status: <span class='text-secondary'>No update available.</span>"
+                                setTimeout(() => {
+                                    document.getElementById("updaterStatus").innerHTML = ""
+                                }, 2500);
+                            }
+                        }
+                    });
+                    xhr.open("POST", `/update`);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(data);
+                    document.getElementById("updaterStatus").innerHTML = "Checking, please don't reload. <span class='text-muted'> this should take around 10 seconds </span>"
+
+                }
+        </script>
+</body>
+
+</html>
