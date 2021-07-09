@@ -149,34 +149,46 @@ function reloadData() {
             pireps = new Map();
             routes = new Map();
             fs.readdirSync(dataPath + "/events").forEach(async event => {
+                if(event != ".DS_Store"){
                 let pushedEventRaw = await FileRead(dataPath + "/events" + "/" + event)
                 let pushedEvent = JSON.parse(pushedEventRaw)
                 events.set(pushedEvent.id, pushedEvent)
+                }
             })
             fs.readdirSync(dataPath + "/ranks").forEach(async rank => {
+                if(rank != ".DS_Store"){
                 let pushedRankRaw = await FileRead(dataPath + "/ranks" + "/" + rank)
                 let pushedRank = JSON.parse(pushedRankRaw)
                 ranks.set(pushedRank.name, pushedRank)
+                }
             })
             fs.readdirSync(dataPath + "/aircraft").forEach(async craft => {
+                if (craft != ".DS_Store") {
                 let pushedCraftRaw = await FileRead(dataPath + "/aircraft" + "/" + craft)
                 let pushedCraft = JSON.parse(pushedCraftRaw)
                 crafts.set(pushedCraft.livID, pushedCraft)
+                }
             })
             fs.readdirSync(dataPath + "/operators").forEach(async airline => {
+                if (airline != ".DS_Store") {
                 let pushedAirlineRaw = await FileRead(dataPath + "/operators" + "/" + airline)
                 let pushedAirline = JSON.parse(pushedAirlineRaw)
                 ops.set(pushedAirline.id, pushedAirline)
+                }
             })
             fs.readdirSync(dataPath + "/pireps").forEach(async pirep => {
+                if (pirep != ".DS_Store") {
                 let pushedPirepRaw = await FileRead(dataPath + "/pireps" + "/" + pirep)
                 let pushedPirep = JSON.parse(pushedPirepRaw)
                 pireps.set(pushedPirep.id, pushedPirep)
+                }
             })
             fs.readdirSync(dataPath + "/routes").forEach(async route => {
+                if(route != ".DS_Store"){
                 let pushedRouteRaw = await FileRead(dataPath + "/routes" + "/" + route)
                 let pushedRoute = JSON.parse(pushedRouteRaw)
                 routes.set(pushedRoute.id, pushedRoute)
+                }
             })
             vaData = JSON.parse(await FileRead(`${__dirname}/stats.json`))
             resolve(true)
@@ -252,7 +264,7 @@ async function remToken(tokens) {
     if (realTokenPreAdjust) {
         const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length)
         const userExists = await FileExists(`${usersPath}/` + sanitize(userID) + '.json')
-        if (exists) {
+        if (userExists) {
                 const user = JSON.parse(await FileRead(`${usersPath}/` + sanitize(userID) + '.json'))
                 if (user.tokens.includes(realToken)) {
                     user.tokens = arrayRemove(user.tokens, realToken);
