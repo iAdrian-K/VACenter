@@ -15,7 +15,7 @@
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
-        <div class="float-end content bg-light-light ps-3 py-3" style="width: 80%;">
+        <div class="float-end content bg-light-light px-3 py-3" id="content" style="width: 80%;">
             <h2>Updates</h2>
             <hr>
             <button class="btn btn-primary" onclick="update()">Check for updates</button><br><br>
@@ -46,6 +46,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
             integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <%- include("./../components/mobile")%>
         <script>
             function isValidHttpUrl(string) {
                     let url;
