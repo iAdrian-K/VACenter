@@ -36,7 +36,7 @@
 </div>
 </nav>
 <nav class="float-end pt-4 pb-2 ps-3 pe-5 text-start text-dark bg-light-light" style="width: 80%;">
-    <h1 class="display-5 fw-bold float-start"><%= title%></h1>
+    <h1 class="display-5 fw-bold float-start"><%= title%> <% if(active == "/admin"){%><%if(activer != "/admin"){%><a class="btn btn-primary ms-3" href="/admin">Return</a><%}}%></h1>
     <div class="float-end mt-1">
             <button class="btn btn-light-rounded shadow dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
                 aria-expanded="false">

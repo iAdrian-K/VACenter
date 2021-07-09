@@ -511,6 +511,7 @@ app.get('*', async (req, res) => {
                                         config: clientConfig,
                                         user: userInfo,
                                         active: req.path,
+                                        activer: req.path,
                                         title: "Admin Page Selector"
                                     })
                             } else {
@@ -523,7 +524,7 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                case "/admin/viewEvent":
+                case "/admin/routes":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
@@ -531,44 +532,13 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                if (await FileExists(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json')) {
-                                    const targetEvent = JSON.parse(await FileRead(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json'));
-                                    res.render('admin/viewEvent', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        targetEvent: targetEvent,
-                                        active: req.path,
-                                        craft: crafts
-                                    })
-                                } else {
-                                    res.sendStatus(400)
-                                }
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/settings":
-                    res.redirect("/admin/vacenter");
-                break;
-                case "/admin/vacenter":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin/settings', {
+                                res.render('admin/routes', {
                                     config: clientConfig,
                                     user: userInfo,
-                                    cv: cv,
-                                    active: req.path
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Routes",
+                                    routes: routes
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -580,116 +550,6 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                    break;
-                case "/admin/viewUser":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                if (await FileExists(`${usersPath}/` + sanitize(req.query.u) + '.json')) {
-                                    const targetUser = JSON.parse(await FileRead(`${usersPath}/` + sanitize(req.query.u) + '.json'));
-                                    delete targetUser['password']
-                                    delete targetUser['tokens']
-                                    targetUser.atobUsername = atob(targetUser.username)
-                                    res.render('admin/viewUser', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        targetUser: targetUser,
-                                        active: req.path
-                                    })
-                                } else {
-                                    res.sendStatus(400)
-                                }
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/accounts":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin/accounts', {
-                                    config: clientConfig,
-                                    user: userInfo,
-                                    users: users,
-                                    active: req.path
-                                })
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/pireps":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin/pireps', {
-                                    config: clientConfig,
-                                    user: userInfo,
-                                    pireps: pireps,
-                                    routes: routes,
-                                    ops: ops,
-                                    craft: crafts,
-                                    ranks: ranks,
-                                    listAircraft: vanetCraft,
-                                    active: req.path
-                                })
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/events":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin/events', {
-                                    config: clientConfig,
-                                    user: userInfo,
-                                    events: events,
-                                    craft: crafts,
-                                    active: req.path
-                                })
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
                     break;
                 case "/report":
                     res.render("report", {
