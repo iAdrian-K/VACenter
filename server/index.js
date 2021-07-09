@@ -655,6 +655,32 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/admin/events":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/events', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Events",
+                                    events: events
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
                 case "/report":
                     res.render("report", {
                         config: clientConfig
