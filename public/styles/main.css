@@ -4,7 +4,7 @@
   font-family: 'Nunito';
 }*/
 .nav-active-btn{
-  color: #000 !important;
-background-color: #e0e0e0 !important;
+  color: rgb(0, 31, 134) !important;
+background-color: rgb(208, 207, 253) !important;
 border-color: #e0e0e0 !important;
 }
