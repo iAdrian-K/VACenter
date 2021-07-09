@@ -550,6 +550,32 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/admin/aircraft":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/aircraft', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Aircraft",
+                                    aircraft: crafts,
+                                    listCraft: vanetCraft
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
                     break;
                 case "/report":
                     res.render("report", {
@@ -1113,7 +1139,7 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             if (await FileExists(`${dataPath}/ranks/${sanitize(btoa(req.body.id))}.json`)) {
                                 await FileRemove(`${dataPath}/ranks/${sanitize(btoa(req.body.id))}.json`);
                                 await reloadData();
-                                res.redirect("/admin/pireps#ranks")
+                                res.redirect("/admin/ranks")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1150,7 +1176,7 @@ app.delete("/admin/reqs/remData", async function (req, res){
                                 if (await FileExists(`${dataPath}/routes/${sanitize(req.body.id)}.json`)) {
                                     await FileRemove(`${dataPath}/routes/${sanitize(req.body.id)}.json`);
                                     await reloadData();
-                                    res.redirect("/admin/pireps")
+                                    res.redirect("/admin/routes")
                                 } else {
                                     res.sendStatus(404)
                                 }
@@ -1158,13 +1184,13 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             res.sendStatus(400)
                         }
                         break;
-                    case "a":
+                    case "o":
                         if(req.body.id){
                             if(req.body.id != "MAIN"){
                             if (await FileExists(`${dataPath}/operators/${sanitize(req.body.id)}.json`)) {
                                 await FileRemove(`${dataPath}/operators/${sanitize(req.body.id)}.json`);
                                 await reloadData();
-                                res.redirect("/admin/pireps")
+                                res.redirect("/admin/codeshare")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1175,12 +1201,12 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             res.sendStatus(400)
                         }
                         break;
-                    case "c":
+                    case "a":
                         if (req.body.id) {
                             if (await FileExists(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`)) {
                                 await FileRemove(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`);
                                 await reloadData();
-                                res.redirect("/admin/pireps")
+                                res.redirect("/admin/aircraft")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1252,7 +1278,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 if (await FileExists(`${dataPath}/ranks/${sanitize(btoa(newObj.name))}.json`) == false) {
                                     await FileWrite(`${dataPath}/ranks/${sanitize(btoa(newObj.name))}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
-                                    res.redirect("/admin/pireps#ranks")
+                                    res.redirect("/admin/ranks")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1262,7 +1288,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                             res.sendStatus(400)
                         }
                         break;
-                    case "c":
+                    case "a":
                         if(req.body.airID && req.body.livID){
                             const livery = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.livID}`, {"X-Api-Key": config.key}, null, null)
                             if(livery[1].statusCode == 200){
@@ -1276,7 +1302,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 if (await FileExists(`${dataPath}/aircraft/${sanitize(newObj.livID)}.json`) == false) {
                                     await FileWrite(`${dataPath}/aircraft/${sanitize(newObj.livID)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
-                                    res.redirect("/admin/pireps")
+                                    res.redirect("/admin/aircraft")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1304,7 +1330,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false) {
                                     await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
-                                    res.redirect("/admin/pireps")
+                                    res.redirect("/admin/routes")
                                     await notifyUser('all', {
                                         title: `New Route`,
                                         desc: `Your VA has launched a new route (${newObj.name}), why not give a shot?`,
@@ -1319,7 +1345,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 res.sendStatus(400)
                             }
                         break;
-                    case "a":
+                    case "o":
                         if (req.body.airName) {
                             let newObj = {
                                 name: req.body.airName,
@@ -1328,7 +1354,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                             if (await FileExists(`${dataPath}/operators/${sanitize(newObj.id)}.json`) == false) {
                                 await FileWrite(`${dataPath}/operators/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                 await reloadData();
-                                res.redirect("/admin/pireps")
+                                res.redirect("/admin/codeshare")
                             } else {
                                 res.sendStatus(409)
                             }
