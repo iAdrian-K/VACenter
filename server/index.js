@@ -409,7 +409,6 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-
                 case "/oldPirep":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -445,6 +444,28 @@ app.get('*', async (req, res) => {
                                 user: userInfo,
                                 events: events,
                                 active: req.path
+                            })
+                        } else {
+                            res.redirect("/changePWD")
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/aboutVA":
+                    if (await isNormalUser(cookies)) {
+                        const uid = atob(cookies.authToken).split(":")[0];
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                        if (!userInfo.meta.cp) {
+                            delete userInfo['password']
+                            delete userInfo['tokens']
+                            //userInfo.apiKey
+                            res.render('about', {
+                                config: clientConfig,
+                                user: userInfo,
+                                active: req.path,
+                                stats: vaData,
+                                title: "About " + config.name
                             })
                         } else {
                             res.redirect("/changePWD")
