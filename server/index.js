@@ -443,7 +443,8 @@ app.get('*', async (req, res) => {
                                 config: clientConfig,
                                 user: userInfo,
                                 events: events,
-                                active: req.path
+                                active: req.path,
+                                title: "Events"
                             })
                         } else {
                             res.redirect("/changePWD")
