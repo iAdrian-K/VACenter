@@ -466,7 +466,7 @@ app.get('*', async (req, res) => {
                                 user: userInfo,
                                 active: req.path,
                                 stats: vaData,
-                                title: "About " + config.name,
+                                title: "About " + config.code,
                                 fleet: crafts,
                                 route: routes
                             })
@@ -512,7 +512,7 @@ app.get('*', async (req, res) => {
                                         user: userInfo,
                                         active: req.path,
                                         activer: req.path,
-                                        title: "Admin Page Selector"
+                                        title: "Admin Pages"
                                     })
                             } else {
                                 res.redirect("/changePWD")
