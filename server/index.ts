@@ -11,6 +11,8 @@ require('dotenv').config()
 //Parts
 //@ts-ignore
 const {ReadFile, WriteFile, ExistsFile, RemoveFile} = require("./fileCommands");
+//@ts-ignore
+const {db, GetUser} = require("./db");
 
 //Paths
 const viewPath = path.join(__dirname, '/../views/')
