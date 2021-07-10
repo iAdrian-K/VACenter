@@ -1,0 +1,122 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Admin || <%= config.name %>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <%- include("./../components/head.ejs")%>
+</head>
+
+<body class="w-100 bg-light-light h-auto">
+    <%- include("./../components/nav.ejs")%>
+        <div class="float-end content bg-light-light ps-3 py-3" style="width: 80%;" id="content">
+            <h2>Current Crafts</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Vehicle</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% operators.forEach(op=>{%>
+                        <tr>
+                            <th scope="row">
+                                <%= op.name %>
+                            </th>
+                            <td>
+                                <button class="btn btn-danger" onclick="remData('o', '<%=op.id%>')"><i
+                                        class="bi bi-x-circle"></i></button>
+                            </td>
+
+                        </tr>
+                        <%})%>
+                </tbody>
+            </table>
+            <br>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Add Operator
+            </button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add Operator</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/admin/reqs/newData?t=o">
+                                <label class="form-label">Operator Name:
+                                    <input class="form-control mt-1" id="newAirAirSel" name="airName"><br>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
+            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            <%- include("./../components/mobile.ejs") %>
+        <script>
+            function loadAircraftLivData() {
+                const airID = document.getElementById("newAirAirSel").value;
+                document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
+                const data = null;
+                const xhr = new XMLHttpRequest();
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === this.DONE) {
+                        console.log(this)
+                        if (this.status == 200) {
+                            const data = JSON.parse(this.responseText).result;
+                            document.getElementById("newAirLivSel").innerHTML = "";
+                            data.forEach(liv => {
+                                const el = document.createElement("option")
+                                el.value = liv.liveryID;
+                                el.innerHTML = liv.liveryName;
+                                document.getElementById("newAirLivSel").appendChild(el)
+                            })
+                        } else {
+                            alert(this.status)
+                        }
+                    }
+                });
+                xhr.open("GET", `/getLivData?liv=${airID}`);
+                xhr.send(data);
+            }
+            loadAircraftLivData()
+            function remData(type, id) {
+                const data = `id=${id}`;
+                const xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+                xhr.addEventListener("readystatechange", function () {
+                    console.log(this)
+                    if (this.readyState === this.DONE) {
+                        console.log(this.responseText);
+                    }
+                });
+                xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send(data);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        </script>
+</body>
+
+</html>

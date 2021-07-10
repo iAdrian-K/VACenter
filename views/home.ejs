@@ -9,85 +9,24 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/styles/scroll.css">
-    <link rel="stylesheet" href="assets/styles/main.css">
+    <%- include("./components/head.ejs")%>
 </head>
-<body class="w-100 h-auto">
+<body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-    <div class="w-100 h-auto p-5 text-start" id="content">
-        <h1 class="fw-bold">Welcome <%= user.name %>,</h1>
-        <h2>Your PIREPS</h2>
-        <hr>
-        <% if(user.pirepsRaw == undefined){%><p>We are still waiting for you to file a PIREP head over to the PIREP page to see this table populated.</p><%}else{%>
-            <div class="table-responsive">
-                <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Submission Date</th>
-                        <th scope="col">Route</th>
-                        <th scope="col">Aircraft</th>
-                        <th scope="col">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                     <% user.pirepsRaw.forEach(pirep =>{%>
-                        <tr>
-                            <th scope="row"><%= new Date(pirep.filed).toLocaleString() + " " + new Date(pirep.filed).toLocaleDateString(undefined, {day:'2-digit',timeZoneName: 'long' }).substring(4)  %></th>
-                            <td><%= pirep.route%></td>
-                            <td><%= pirep.vehiclePublic%></td>
-                            <td><%if(pirep.status == "n"){%>Awaiting Approval<%}else if(pirep.status == "a"){%><span class="text-success">Approved</span><%}else{%><span class="text-danger">Denied</span><%}%></td>
-                        </tr>
-                    <%})%>
-                </tbody>
-                </table>
+    <div class="float-end content bg-light-light pt-3" id="content" style="width: 80%;">
+        <div class="container">
+            <h2>Recent Activity</h2>
+            <div class="row mt-2 ms-0 w-100">
+                <% user.notifications.forEach(notif =>{%>
+                        <div class="col position-relative rounded bg-light p-3 shadow m-3" style="min-width: 200px;">
+                            <h4><i class="bi bi-<%= notif.icon%>"></i> <%= notif.title%></h4>
+                            <p class="mb-5"><%= notif.desc%></p>
+                            <p class="text-muted position-absolute" style="bottom: 0px;">
+                                <%= new Date(notif.timeStamp).toLocaleString('en-AU', { hour12: true })%>
+                            </p>
+                        </div>
+                <%})%>
             </div>
-        <%}%>
-        <h2>About You</h2>
-        <hr>
-        <%if(user.stats == undefined){%>
-            <p>We are still collecting data on your most popular data.</p>
-        <%}else{%>
-        <div class="row">
-        <div class="form-control shadow p-3 col mx-1 d-inline-block" style="width: calc(50% - .5rem);">
-            <h3 class="fw-bold">Favourite Aircraft</h3>
-            <p>
-                <%= user.stats.popular.aircraft %>
-            </p>
-        </div>
-            <div class="w-100 d-block d-md-none my-3"></div>
-        <div class="form-control shadow col p-3 mx-1 d-inline-block" style="width: calc(50% - .5rem);">
-            <h3 class="fw-bold">Favourite Route</h3>
-            <p>
-                <%= user.stats.popular.route %>
-            </p>
-        </div>
-        </div>
-        <%}%>
-        <hr>
-        <br><br>
-        <h2>About <%= config.name %></h2>
-        <hr>
-        <div class="row">
-        <div class="col form-control shadow p-3 mx-1 d-inline-block" style="width: calc(33% - .5rem);">
-            <h3 class="fw-bold">Favourite Route</h3>
-            <p>
-                <%= stats.popular.route %>
-            </p>
-        </div>
-            <div class="w-100 d-block d-md-none my-3"></div>
-        <div class="col form-control shadow p-3 mx-1 d-inline-block" style="width: calc(33% - .5rem);">
-            <h3 class="fw-bold">Favourite Aircraft</h3>
-            <p>
-                <%= stats.popular.aircraft %>
-            </p>
-        </div>
-            <div class="w-100 d-block d-md-none my-3"></div>
-        <div class="col form-control shadow p-3 mx-1 d-inline-block" style="width: calc(33% - .5rem);">
-            <h3 class="fw-bold">Total Hours</h3>
-            <p>
-                <%= (stats.totalHours / 60).toFixed(2) %>
-            </p>
-        </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
@@ -96,6 +35,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
         integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <%- include("./components/dark.ejs")%>
+        <%- include("components/mobile.ejs") %>
 </body>
 </html>

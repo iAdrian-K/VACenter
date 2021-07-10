@@ -5,77 +5,96 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Events || <%= config.name %>
+        Home || <%= config.name %>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/styles/scroll.css">
-    <link rel="stylesheet" href="assets/styles/main.css">
+    <%- include("./components/head.ejs")%>
 </head>
 
-<body class="w-100 h-auto">
+<body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-    <div class="w-100 h-auto p-lg-5 p-2 text-center" id="content">
-        <i class="display-1 bi bi-calendar-event"></i>
-        <h1 class="display-2 mt-1">Events</h1>
-        <br>
-            <div class="h-auto w-75 w-sm-100 mx-auto" >
-                <div class="w-100 h-auto p-5 container rounded-2 bg-light" id="eventsContainer">
-                    <div class="row row-cols-1 row-cols-md-2">
-                        <% events.forEach(item=>{ %>
-                            <div class="rounded-3 col my-3">
-                                <div class="w-100 bg-dark rounded-3 pt-3 px-5 pb-5 text-start eventsItems text-light">
-                                <h1 class="text-center">
-                                    <%= item.title %>
-                                </h1>
-                                <hr color="white" class="text-light">
-                                <p class="w-100 fs-6 text-start">
-                                    <%= item.body %>
-                                </p>
-                                <h3>Event Details:</h3>
-                                <hr>
-                                <h4><i class="bi bi-arrow-up-right"></i> Departure:</h4>
-                                <p class="fw-bold ms-3"><%= item.depAir %></p>
-                                <h4><i class="bi bi-arrow-down-right"></i> Arrival:</h4>
-                                <p class="fw-bold ms-3">
-                                    <%= item.arrAir %>
-                                </p>
-                                <h4><i class="bi bi-exclude"></i> Aircraft:</h4>
-                                <p class="fw-bold ms-3"><%= item.airName %></p>
-                                <h4><i class="bi bi-globe2"></i> Server:</h4>
-                                <p class="fw-bold ms-3">
-                                    <%= item.server %>
-                                </p>
-                                <h4><i class="bi bi-clock"></i> Departure Time:</h4>
-                                <p class="fw-bold ms-3">
-                                    <%= item.depTime %>
-                                </p>
-                                <h3>Actions:</h3>
-                                <hr>
-                                <button class="btn btn-success text-start" disabled>Sign up</button>
-                                <button class="btn btn-danger text-end" disabled>Pull out</button>
-                                </div>
-                            </div>
-                            <% })%>
-                            <% if(events.size==0){%> 
-                                <h1 class="display-4">No events scheduled</h1>
-                                <%}%>
+        <div class="float-end content bg-light-light ps-3 pt-3" id="content" style="width: 80%;">
+            <p class="text-muted">Click on an event to see more.</p>
+            <div class="container">
+                <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Locations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% events.forEach(event=>{%>
+                            <tr data-bs-toggle="modal" style="cursor: pointer;" data-bs-target="#modal-<%=event.id%>">
+                                <th scope="row">
+                                    <%= event.title %>
+                                </th>
+                                <td>
+                                    <%= new Date(event.depTime).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <%= event.depAir %> <i class="bi bi-chevron-right"></i> <%= event.arrAir%>
+                                </td>
+                                
+                            </tr>
+                            
+                            <%})%>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        <% events.forEach(event =>{%>
+            <!-- Modal -->
+            <div class="modal fade modal-fullscreen-sm-down" id="modal-<%=event.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                <%= event.title%>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h4>
+                                <%= event.title%>
+                            </h4>
+                            <p>
+                                <%= event.body%>
+                            </p>
+                            <hr>
+                            <h5>Details</h5>
+                            <p>
+                                <strong><i class="fa fa-plane"></i> Aircraft:</strong>
+                                <%= event.airName%><br>
+                                    <strong><i class="fa fa-plane-departure"></i> Departure:</strong>
+                                    <%= event.depAir%><br>
+                                        <strong><i class="fa fa-plane-arrival"></i> Arrival:</strong>
+                                        <%= event.arrAir%><br>
+                                            <strong><i class="bi bi-globe2"></i> Server:</strong>
+                                            <%= event.server%><br>
+                                                <strong><i class="bi bi-calendar2"></i> Date:</strong>
+                                                <%= new Date(event.depTime).toLocaleString("EN-AU", {Hour12: true})%><br>
+                                                    <strong><i class="bi bi-card-checklist"></i> Gates:</strong>
+                                                    <%= event.gates.slice(",").join(", ") %><br>
+                                                        </p>
+                                                    </div>
+                                                    <div class=" modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
-    </div>
-    <%- include("./components/dark.ejs")%>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
-        crossorigin="anonymous"></script>
-        <script>
-            const times = Array.from(document.getElementsByClassName('loadInBTZ'));
-            times.forEach(timeEl=>{
-                const time = new Date(timeEl.innerHTML)
-                timeEl.innerHTML = time.toString();
-            })
-        </script>
+        <%})%>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+            crossorigin="anonymous"></script>
+        <%- include("components/mobile.ejs") %>
 </body>
 
 </html>

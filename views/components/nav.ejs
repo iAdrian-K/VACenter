@@ -1,93 +1,57 @@
-<nav class="navbar navbar-expand-lg navbar-<%= config.other.color[0] %> bg-<%= config.other.color[1] %>">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/home">
-            <%= config.name %>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+<nav class="float-start navmain py-4 px-2 text-start text-dark bg-light rounded-end border-end position-fixed" style="width: 15vw; z-index: 2; height: 100vh;" id="navmain">
+<div class="shadow py-3 px-2 mb-3 text-light text-center rounded-4 mx-2 border border-dark" style="background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('<%= config.other.bg%>'); background-size:cover; background-position: center; cursor: pointer;">
+    <h4>
+        <%= config.name%>
+        <button class="btn btn-light ms-2 d-inline-block d-lg-none" type="" onclick="toggleMenu()">
+        <i class="bi bi-list"></i>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link <% if (active == '/home'){%>active<%}%>" aria-current="page" href="/home"><span class="bi bi-columns-gap"></span>
-                        Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link  <% if (active == '/pirep'){%>active<%}%>" href="/pirep"><span class="bi bi-file-earmark-plus"></span> PIREP</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <% if (active == '/news'){%>active<%}%>" href="/news"><span class="bi bi-newspaper"></span> News</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <% if (active == '/events'){%>active<%}%>" href="/events"><span class="bi bi-calendar-event"></span> Events</a>
-                </li>
+    </h4>
+</div>
+<div class="px-2 navItemHolder" id="navItemHolder">
 
+    <a class="link-dark btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/home'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/home">
+        <i class="bi bi-columns-gap me-2"></i>
+        Dashboard
+    </a>
+    <a class="link-dark btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/newPirep'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/newPirep">
+        <i class="fa fa-plane me-2"></i>
+        New Flight
+    </a>
+    <a class="link-dark btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/oldPirep'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/oldPirep">
+        <i class="bi bi-view-list me-2"></i>
+        My Flights
+    </a>
+    <a class="link-dark btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/events'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/events">
+        <i class="bi bi-calendar2 me-2"></i>
+        Events
+    </a>
+    <a class="link-dark btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/aboutVA'){%>nav-active-btn<%}else{%>text-muted<%}%>" href="/aboutVA">
+        <i class="bi bi-question-circle me-2"></i>
+        About <%= config.code%>
+    </a>
+    <%if(user.admin == true){%>
+        <a
+            class="link-light btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/admin'){%> nav-active-btn<%}else{%>text-muted<%}%>" href="/admin">
+            <i class="bi bi-shield-shaded me-2"></i>
+            Admin
+        </a>
+    <%}%>
+</div>
+</nav>
+<nav class="float-end pt-4 pb-2 ps-3 pe-5 text-start text-dark bg-light-light" id="accountMenu" style="width: 80%;">
+    <h1 class="display-5 fw-bold float-start"><%= title%> <% if(active == "/admin"){%><%if(activer != "/admin"){%><a class="btn btn-primary ms-3" href="/admin">Return</a><%}}%></h1>
+    <div class="float-end">
+            <button class="btn btn-light-rounded shadow dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <img src="<%= user.ppurl%>" class="rounded-circle" style="height: 3vh; width: 3vh; min-height: 25px; min-width:25px; object-fit: cover;">
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item <% if(active == '/account'){%>active<%}%>" href="/account">Account</a></li>
+                <li><a class="dropdown-item text-danger fw-bold" href="/report">Report a bug</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
             </ul>
-            <div class="mb-2 float-lg-end me-5 d-inline-block mb-lg-0">
-                <i class="bi bi-sun fs-4" id="darkFlag" style="cursor:pointer;"></i>
-            </div>
-            <div class="mb-2 float-lg-end d-inline-block dropdown me-5 mb-lg-0">
-                        <a class="nav-link p-0 p-md-2 dropdown-toggle text-light"
-                            href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell fs-4" id="notificationsFlag" style="cursor:pointer;"></i>
-                        </a>
-                        <ul class="dropdown-menu hideScroll" style="max-height: 45vh; max-width: 75vw; z-index: 1000; overflow-y: scroll;" aria-labelledby="navbarDropdown2">
-                            <%user.notifications.forEach(note=>{%>
-                                <li style="z-index: 1000;">
-                                    <a href="<%note.link%>" class="dropdown-item border-bottom w-100" style="border-color: rgba(0,0,0,0.5)">
-                                        <h5><i class="bi fs-3 align-middle bi-<%=note.icon%>"></i> <strong><%= note.title %></strong></h5>
-                                        <hr>
-                                        <p class="w-100" style="white-space:pre-wrap;"><%= note.desc%></p>
-                                        <p class="text-muted"><%= new Date(note.timeStamp).toLocaleString("en-us", {hour12: true}) %></p>
-                                    </a>
-                                </li>
-                            <%})%>
-                            <% if(user.notifications.length == 0){ %>
-                                <li>
-                                    <div class="dropdown-item">
-                                        <h6>
-                                            No notifications
-                                        </h6>
-                                    </div>
-                                </li>
-                                <%}%>
-                        </ul>
-            </div>
-            <ul class="navbar-nav mb-2 float-lg-end me-5 mb-lg-0">
-                <% if(user.admin){%>
-                    <li class="nav-item dropdown me-5">
-                        <a class="nav-link dropdown-toggle <% if (active == '/admin/accounts' || active == '/admin/viewEvent' || active == '/admin/viewNews' || active == '/admin/viewUser' || active == '/admin/events' || active == '/admin/pireps' || active == '/admin/news' || active == '/admin/vacenter'){%>active<%}%>" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Admin
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item  <% if (active == '/admin/accounts' || active == '/admin/viewUser'){%>active<%}%>" href="/admin/accounts">Accounts</a></li>
-                            <li><a class="dropdown-item <% if (active == '/admin/events' || active == '/admin/viewEvent'){%>active<%}%>" href="/admin/events">Events</a></li>
-                            <li><a class="dropdown-item <% if (active == '/admin/pireps'){%>active<%}%>" href="/admin/pireps">PIREPS</a></li>
-                            <li><a class="dropdown-item <% if (active == '/admin/news' || active == '/admin/viewNews'){%>active<%}%>" href="/admin/news">News</a></li>
-                            <li><a class="dropdown-item <% if (active == '/admin/vacenter'){%>active<%}%>" href="/admin/vacenter">Settings</a></li>
-                        </ul>
-                    </li>
-                    <%}%>
-                        <li class="nav-item dropdown me-5">
-                            <a class="nav-link dropdown-toggle <% if (active == '/account'){%>active<%}%>" href="#" id="navbarDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="<%= user.ppurl%>" height="24" width="24" class="rounded-circle" style="object-fit: cover;">
-                                <%= user.name %>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item <% if (active == '/account'){%>active<%}%>" href="/account">Account</a></li>
-                                <li><a class="dropdown-item text-danger fw-bold" href="/report">Report a bug</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="/logout">Logout</a></li>
-                            </ul>
-                        </li>
-
-            </ul>
-
-        </div>
     </div>
 </nav>

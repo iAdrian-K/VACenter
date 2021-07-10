@@ -107,7 +107,7 @@ app.set('view engine', 'ejs')
 app.listen(process.env.port)
 
 //Paths
-const publicPath = path.join(__dirname + '/../public')
+const publicPath = path.join(__dirname + '/../')
 const dataPath = path.join(__dirname + '/../data')
 const usersPath = path.join(__dirname + '/../data/users')
 
@@ -119,7 +119,6 @@ let crafts = new Map();
 let ops = new Map();
 let pireps = new Map();
 let routes = new Map();
-let news = new Map();
 let ranks = new Map();
 let vanetCraft = new Map();
 let vaData = {
@@ -149,41 +148,47 @@ function reloadData() {
             ops = new Map();
             pireps = new Map();
             routes = new Map();
-            news = new Map();
             fs.readdirSync(dataPath + "/events").forEach(async event => {
+                if(event != ".DS_Store"){
                 let pushedEventRaw = await FileRead(dataPath + "/events" + "/" + event)
                 let pushedEvent = JSON.parse(pushedEventRaw)
                 events.set(pushedEvent.id, pushedEvent)
+                }
             })
             fs.readdirSync(dataPath + "/ranks").forEach(async rank => {
+                if(rank != ".DS_Store"){
                 let pushedRankRaw = await FileRead(dataPath + "/ranks" + "/" + rank)
                 let pushedRank = JSON.parse(pushedRankRaw)
                 ranks.set(pushedRank.name, pushedRank)
+                }
             })
             fs.readdirSync(dataPath + "/aircraft").forEach(async craft => {
+                if (craft != ".DS_Store") {
                 let pushedCraftRaw = await FileRead(dataPath + "/aircraft" + "/" + craft)
                 let pushedCraft = JSON.parse(pushedCraftRaw)
                 crafts.set(pushedCraft.livID, pushedCraft)
-            })
-            fs.readdirSync(dataPath + "/news").forEach(async item => {
-                let pushedItemRaw = await FileRead(dataPath + "/news/" + item)
-                let pushedItem = JSON.parse(pushedItemRaw)
-                news.set(pushedItem.id, pushedItem)
+                }
             })
             fs.readdirSync(dataPath + "/operators").forEach(async airline => {
+                if (airline != ".DS_Store") {
                 let pushedAirlineRaw = await FileRead(dataPath + "/operators" + "/" + airline)
                 let pushedAirline = JSON.parse(pushedAirlineRaw)
                 ops.set(pushedAirline.id, pushedAirline)
+                }
             })
             fs.readdirSync(dataPath + "/pireps").forEach(async pirep => {
+                if (pirep != ".DS_Store") {
                 let pushedPirepRaw = await FileRead(dataPath + "/pireps" + "/" + pirep)
                 let pushedPirep = JSON.parse(pushedPirepRaw)
                 pireps.set(pushedPirep.id, pushedPirep)
+                }
             })
             fs.readdirSync(dataPath + "/routes").forEach(async route => {
+                if(route != ".DS_Store"){
                 let pushedRouteRaw = await FileRead(dataPath + "/routes" + "/" + route)
                 let pushedRoute = JSON.parse(pushedRouteRaw)
                 routes.set(pushedRoute.id, pushedRoute)
+                }
             })
             vaData = JSON.parse(await FileRead(`${__dirname}/stats.json`))
             resolve(true)
@@ -259,7 +264,7 @@ async function remToken(tokens) {
     if (realTokenPreAdjust) {
         const realToken = realTokenPreAdjust.slice(0, realTokenPreAdjust.length)
         const userExists = await FileExists(`${usersPath}/` + sanitize(userID) + '.json')
-        if (exists) {
+        if (userExists) {
                 const user = JSON.parse(await FileRead(`${usersPath}/` + sanitize(userID) + '.json'))
                 if (user.tokens.includes(realToken)) {
                     user.tokens = arrayRemove(user.tokens, realToken);
@@ -346,7 +351,7 @@ app.get('*', async (req, res) => {
     const cookies = getAppCookies(req)
     const fp = req.path.slice(0, 8)
     const fp2 = req.path.slice(0, 12)
-    if (fp == "/assets/") {
+    if (fp == "/public/") {
         if (fs.existsSync(publicPath + req.path)) {
             res.sendFile(publicPath + req.path)
         } else {
@@ -371,35 +376,6 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
-                case "/getLivData":
-                    res.send((await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/${req.query.liv}`, {"X-Api-Key": config.key}, null, null))[2])
-                    break;
-                case "/news":
-                    if (await isNormalUser(cookies)) {
-                        const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                        if (!userInfo.meta.cp) {
-                            delete userInfo['password']
-                            delete userInfo['tokens']
-                            //userInfo.apiKey
-                            res.render('news', {
-                                config: clientConfig,
-                                user: userInfo,
-                                news: news,
-                                active: req.path
-                            })
-                        } else {
-                            res.redirect("/changePWD")
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/report":
-                    res.render("report", {
-                        config: clientConfig
-                    })
-                    break;
                 case "/home":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
@@ -412,7 +388,8 @@ app.get('*', async (req, res) => {
                                 config: clientConfig,
                                 user: userInfo,
                                 active: req.path,
-                                stats: vaData
+                                stats: vaData,
+                                title: "Dashboard"
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -422,7 +399,7 @@ app.get('*', async (req, res) => {
                     }
 
                     break;
-                case "/account":
+                case "/newPirep":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
                         const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
@@ -430,36 +407,34 @@ app.get('*', async (req, res) => {
                             delete userInfo['password']
                             delete userInfo['tokens']
                             //userInfo.apiKey
-                            res.render('account', {
-                                config: clientConfig,
-                                user: userInfo,
-                                active: req.path
-                            })
-                        } else {
-                            res.redirect("/changePWD")
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-
-                    break;
-                case "/pirep":
-                    if (await isNormalUser(cookies)) {
-                        const uid = atob(cookies.authToken).split(":")[0];
-                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                        if (!userInfo.meta.cp) {
-                            delete userInfo['password']
-                            delete userInfo['tokens']
-                            //userInfo.apiKey
-                            res.render('pirep', {
+                            res.render('npirep', {
                                 config: clientConfig,
                                 user: userInfo,
                                 active: req.path,
-                                data: {
-                                    ops: ops,
-                                    crafts: crafts,
-                                    routes: routes
-                                }
+                                stats: vaData,
+                                title: "New Flight"
+                            })
+                        } else {
+                            res.redirect("/changePWD")
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/oldPirep":
+                    if (await isNormalUser(cookies)) {
+                        const uid = atob(cookies.authToken).split(":")[0];
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                        if (!userInfo.meta.cp) {
+                            delete userInfo['password']
+                            delete userInfo['tokens']
+                            //userInfo.apiKey
+                            res.render('opirep', {
+                                config: clientConfig,
+                                user: userInfo,
+                                active: req.path,
+                                stats: vaData,
+                                title: "My Flights"
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -480,7 +455,8 @@ app.get('*', async (req, res) => {
                                 config: clientConfig,
                                 user: userInfo,
                                 events: events,
-                                active: req.path
+                                active: req.path,
+                                title: "Events"
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -489,7 +465,53 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                case "/admin/viewEvent":
+                case "/aboutVA":
+                    if (await isNormalUser(cookies)) {
+                        const uid = atob(cookies.authToken).split(":")[0];
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                        if (!userInfo.meta.cp) {
+                            delete userInfo['password']
+                            delete userInfo['tokens']
+                            //userInfo.apiKey
+                            res.render('about', {
+                                config: clientConfig,
+                                user: userInfo,
+                                active: req.path,
+                                stats: vaData,
+                                title: "About " + config.code,
+                                fleet: crafts,
+                                route: routes
+                            })
+                        } else {
+                            res.redirect("/changePWD")
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/account":
+                    if (await isNormalUser(cookies)) {
+                        const uid = atob(cookies.authToken).split(":")[0];
+                        const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                        if (!userInfo.meta.cp) {
+                            delete userInfo['password']
+                            delete userInfo['tokens']
+                            //userInfo.apiKey
+                            res.render('account', {
+                                config: clientConfig,
+                                user: userInfo,
+                                active: req.path,
+                                title: "My Account - " + userInfo.name
+                            })
+                        } else {
+                            res.redirect("/changePWD")
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+
+                    break;
+                case "/admin":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
@@ -497,18 +519,13 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                if (await FileExists(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json')) {
-                                    const targetEvent = JSON.parse(await FileRead(`${dataPath}/events/` + sanitize(atob(req.query.id)) + '.json'));
-                                    res.render('admin/viewEvent', {
+                                    res.render('admin/selector', {
                                         config: clientConfig,
                                         user: userInfo,
-                                        targetEvent: targetEvent,
                                         active: req.path,
-                                        craft: crafts
+                                        activer: req.path,
+                                        title: "Admin Pages"
                                     })
-                                } else {
-                                    res.sendStatus(400)
-                                }
                             } else {
                                 res.redirect("/changePWD")
                             }
@@ -519,7 +536,7 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                case "/admin/viewNews":
+                case "/admin/routes":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
@@ -527,43 +544,13 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                if (await FileExists(`${dataPath}/news/` + sanitize(req.query.id) + '.json')) {
-                                    const targetNews = JSON.parse(await FileRead(`${dataPath}/news/` + sanitize(req.query.id) + '.json'));
-                                    res.render('admin/viewNews', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        target: targetNews,
-                                        active: req.path
-                                    })
-                                } else {
-                                    res.sendStatus(400)
-                                }
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/settings":
-                    res.redirect("/admin/vacenter");
-                break;
-                case "/admin/vacenter":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin/settings', {
+                                res.render('admin/routes', {
                                     config: clientConfig,
                                     user: userInfo,
-                                    cv: cv,
-                                    active: req.path
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Routes",
+                                    routes: routes
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -575,8 +562,7 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                    break;
-                case "/admin/news":
+                case "/admin/aircraft":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
@@ -584,67 +570,14 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                    res.render('admin/news', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        active: req.path,
-                                        news: news
-                                    })
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/viewUser":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                if (await FileExists(`${usersPath}/` + sanitize(req.query.u) + '.json')) {
-                                    const targetUser = JSON.parse(await FileRead(`${usersPath}/` + sanitize(req.query.u) + '.json'));
-                                    delete targetUser['password']
-                                    delete targetUser['tokens']
-                                    targetUser.atobUsername = atob(targetUser.username)
-                                    res.render('admin/viewUser', {
-                                        config: clientConfig,
-                                        user: userInfo,
-                                        targetUser: targetUser,
-                                        active: req.path
-                                    })
-                                } else {
-                                    res.sendStatus(400)
-                                }
-                            } else {
-                                res.redirect("/changePWD")
-                            }
-                        } else {
-                            res.sendStatus(403)
-                        }
-                    } else {
-                        res.clearCookie('authToken').redirect('/?r=ii')
-                    }
-                    break;
-                case "/admin/accounts":
-                    if (await isNormalUser(cookies)) {
-                        if (await isAdminUser(cookies)) {
-                            const uid = atob(cookies.authToken).split(":")[0];
-                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
-                            if (!userInfo.meta.cp) {
-                                delete userInfo['password']
-                                delete userInfo['tokens']
-                                res.render('admin/accounts', {
+                                res.render('admin/aircraft', {
                                     config: clientConfig,
                                     user: userInfo,
-                                    users: users,
-                                    active: req.path
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Aircraft",
+                                    aircraft: crafts,
+                                    listCraft: vanetCraft
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -656,7 +589,7 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
-                case "/admin/pireps":
+                case "/admin/codeshare":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
                             const uid = atob(cookies.authToken).split(":")[0];
@@ -664,16 +597,65 @@ app.get('*', async (req, res) => {
                             if (!userInfo.meta.cp) {
                                 delete userInfo['password']
                                 delete userInfo['tokens']
-                                res.render('admin/pireps', {
+                                res.render('admin/codeshare', {
                                     config: clientConfig,
                                     user: userInfo,
-                                    pireps: pireps,
-                                    routes: routes,
-                                    ops: ops,
-                                    craft: crafts,
-                                    ranks: ranks,
-                                    listAircraft: vanetCraft,
-                                    active: req.path
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Operators",
+                                    operators: ops
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/admin/ranks":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/ranks', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Ranks",
+                                    ranks: ranks
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/admin/users":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/users', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Users",
+                                    users: users
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -696,9 +678,10 @@ app.get('*', async (req, res) => {
                                 res.render('admin/events', {
                                     config: clientConfig,
                                     user: userInfo,
-                                    events: events,
-                                    craft: crafts,
-                                    active: req.path
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Events",
+                                    events: events
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -710,12 +693,44 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/admin/settings":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/settings', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - Settings",
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/report":
+                    res.render("report", {
+                        config: clientConfig
+                    })
+                    break;
                 case "/changePWD":
                     if (await isNormalUser(cookies)) {
                         const uid = atob(cookies.authToken).split(":")[0];
                         const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
                         if (userInfo.meta.cp) {
-                            res.render("changePWD")
+                            res.render("changePWD",{
+                                config: config
+                            })
                         } else {
                             res.redirect("/")
                         }
@@ -723,6 +738,9 @@ app.get('*', async (req, res) => {
                     } else {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
+                    break;
+                case "/getLivData":
+                    res.send((await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/${req.query.liv}`, { "X-Api-Key": config.key }, null, null))[2])
                     break;
                 case "/setup":
                     if (clientConfig.id == undefined) {
@@ -753,7 +771,9 @@ app.get('*', async (req, res) => {
                     res.clearCookie('authToken').redirect('/')
                     break;
                 default:
-                    res.render("404")
+                    res.render("404", {
+                        config: config
+                    })
                     break;
             }
         }
@@ -858,43 +878,6 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
     }
 })
 
-app.post("/admin/reqs/updateNews", async (req, res) => {
-    try {
-        const cookies = getAppCookies(req);
-        if (await isNormalUser(cookies)) {
-            if (await isAdminUser(cookies)) {
-                if (req.body.id && req.body.title && req.body.body) {
-                    if (await FileExists(`${dataPath}/news/${sanitize(req.body.id)}.json`)) {
-                        const item = JSON.parse(await FileRead(`${dataPath}/news/${sanitize(req.body.id)}.json`))
-                        if (item.title != req.body.title) {
-                            item.title = req.body.title
-                        }
-                        if (item.body != req.body.body) {
-                            item.body = req.body.body
-                        }
-                        await FileWrite(`${dataPath}/news/${sanitize(req.body.id)}.json`, JSON.stringify(item, null, 2))
-                        await reloadData()
-                        res.redirect("/admin/news")
-                    } else {
-                        res.sendStatus(404)
-                    }
-
-                } else {
-                    res.sendStatus(400);
-                }
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
-    }
-})
-
 app.delete("/admin/reqs/remEvent", async function (req, res){
     try {
         const cookies = getAppCookies(req);
@@ -919,35 +902,6 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
                     }
                     await reloadData()
                     
-                } else {
-                    res.sendStatus(400);
-                }
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
-    }
-})
-
-app.delete("/admin/reqs/remNews", async function (req, res) {
-    try {
-        const cookies = getAppCookies(req);
-        if (await isNormalUser(cookies)) {
-            if (await isAdminUser(cookies)) {
-                if (req.body.id) {
-                    if (await FileExists(`${dataPath}/news/${sanitize(req.body.id)}.json`) == true) {
-                        await FileRemove(`${dataPath}/news/${sanitize(req.body.id)}.json`)
-                        await reloadData()
-                        res.redirect("/admin/news")
-                    } else {
-                        res.sendStatus(404)
-                    }
                 } else {
                     res.sendStatus(400);
                 }
@@ -1108,44 +1062,6 @@ app.post("/admin/reqs/newEvent", async function (req, res){
     }
 })
 
-app.post("/admin/reqs/newNews", async function (req, res) {
-    try {
-        const cookies = getAppCookies(req);
-        if (await isNormalUser(cookies)) {
-            if (await isAdminUser(cookies)) {
-                if (req.body.title && req.body.body && req.body.author) {
-                    const item = {
-                        id: uniqueString(),
-                        title: req.body.title,
-                        body: req.body.body,
-                        author: req.body.author,
-                    }
-                    notifyUser("all", {
-                        title: `New News!`,
-                        desc: `New Headline: ${item.title}`,
-                        icon: `newspaper`,
-                        link: "/news",
-                        timeStamp: new Date()
-                    })
-                    await FileWrite(`${dataPath}/news/${item.id}.json`, JSON.stringify(item, null, 2))
-                    await reloadData()
-                    res.redirect("/admin/news")
-                } else {
-                    res.sendStatus(400);
-                }
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-    } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
-    }
-})
-
 app.post("/OSOR", async function (req, res){
     try{
         const cookies = getAppCookies(req);
@@ -1167,7 +1083,7 @@ app.post("/updateUser", async function (req, res){
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
             const user = await getUserData(cookies);
-            if(req.body.name){
+            if(req.body.name && req.body.ppurl){
                 if(req.body.name!= user.name){
                      user.name = req.body.name
                 }    
@@ -1198,10 +1114,9 @@ app.post("/admin/reqs/updateUser", async function (req, res){
                         if(user.name != req.body.name){
                             user.name = req.body.name
                         }
-                        user.tokens = [];
                         await FileWrite(`${usersPath}/${btoa(sanitize(req.body.uid))}.json`, JSON.stringify(user, null, 2))
                         await reloadUsers()
-                        res.redirect("/admin/accounts")
+                        res.redirect("/admin/users")
                     } else {
                         res.sendStatus(404)
                     }
@@ -1269,7 +1184,7 @@ app.post("/admin/reqs/resetPWD", async function (req, res){
                         user.meta.cp = true;
                         await FileWrite(`${usersPath}/${sanitize(req.body.targetUID)}.json`, JSON.stringify(user, null, 2))
                         await reloadUsers()
-                        res.redirect(`/admin/viewUser?u=${req.body.targetUID}`)
+                        res.redirect(`/admin/users`)
                     } else {
                         res.sendStatus(404)
                     }
@@ -1366,7 +1281,7 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             if (await FileExists(`${dataPath}/ranks/${sanitize(btoa(req.body.id))}.json`)) {
                                 await FileRemove(`${dataPath}/ranks/${sanitize(btoa(req.body.id))}.json`);
                                 await reloadData();
-                                res.redirect("/admin/pireps#ranks")
+                                res.redirect("/admin/ranks")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1403,7 +1318,7 @@ app.delete("/admin/reqs/remData", async function (req, res){
                                 if (await FileExists(`${dataPath}/routes/${sanitize(req.body.id)}.json`)) {
                                     await FileRemove(`${dataPath}/routes/${sanitize(req.body.id)}.json`);
                                     await reloadData();
-                                    res.redirect("/admin/pireps")
+                                    res.redirect("/admin/routes")
                                 } else {
                                     res.sendStatus(404)
                                 }
@@ -1411,13 +1326,13 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             res.sendStatus(400)
                         }
                         break;
-                    case "a":
+                    case "o":
                         if(req.body.id){
                             if(req.body.id != "MAIN"){
                             if (await FileExists(`${dataPath}/operators/${sanitize(req.body.id)}.json`)) {
                                 await FileRemove(`${dataPath}/operators/${sanitize(req.body.id)}.json`);
                                 await reloadData();
-                                res.redirect("/admin/pireps")
+                                res.redirect("/admin/codeshare")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1428,12 +1343,12 @@ app.delete("/admin/reqs/remData", async function (req, res){
                             res.sendStatus(400)
                         }
                         break;
-                    case "c":
+                    case "a":
                         if (req.body.id) {
                             if (await FileExists(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`)) {
                                 await FileRemove(`${dataPath}/aircraft/${sanitize(req.body.id)}.json`);
                                 await reloadData();
-                                res.redirect("/admin/pireps")
+                                res.redirect("/admin/aircraft")
                             } else {
                                 res.sendStatus(404)
                             }
@@ -1505,7 +1420,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 if (await FileExists(`${dataPath}/ranks/${sanitize(btoa(newObj.name))}.json`) == false) {
                                     await FileWrite(`${dataPath}/ranks/${sanitize(btoa(newObj.name))}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
-                                    res.redirect("/admin/pireps#ranks")
+                                    res.redirect("/admin/ranks")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1515,7 +1430,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                             res.sendStatus(400)
                         }
                         break;
-                    case "c":
+                    case "a":
                         if(req.body.airID && req.body.livID){
                             const livery = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.livID}`, {"X-Api-Key": config.key}, null, null)
                             if(livery[1].statusCode == 200){
@@ -1529,7 +1444,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 if (await FileExists(`${dataPath}/aircraft/${sanitize(newObj.livID)}.json`) == false) {
                                     await FileWrite(`${dataPath}/aircraft/${sanitize(newObj.livID)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
-                                    res.redirect("/admin/pireps")
+                                    res.redirect("/admin/aircraft")
                                 } else {
                                     res.sendStatus(409)
                                 }
@@ -1557,7 +1472,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false) {
                                     await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
-                                    res.redirect("/admin/pireps")
+                                    res.redirect("/admin/routes")
                                     await notifyUser('all', {
                                         title: `New Route`,
                                         desc: `Your VA has launched a new route (${newObj.name}), why not give a shot?`,
@@ -1572,7 +1487,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                                 res.sendStatus(400)
                             }
                         break;
-                    case "a":
+                    case "o":
                         if (req.body.airName) {
                             let newObj = {
                                 name: req.body.airName,
@@ -1581,7 +1496,7 @@ app.post("/admin/reqs/newData", async function (req, res){
                             if (await FileExists(`${dataPath}/operators/${sanitize(newObj.id)}.json`) == false) {
                                 await FileWrite(`${dataPath}/operators/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                 await reloadData();
-                                res.redirect("/admin/pireps")
+                                res.redirect("/admin/codeshare")
                             } else {
                                 res.sendStatus(409)
                             }
@@ -1591,13 +1506,16 @@ app.post("/admin/reqs/newData", async function (req, res){
                         }
                         break;
                     case "s":
-                        if (req.body.bg && req.body.rates && req.body.navBarColor) {
-                            config.other.bg = req.body.bg;
-                            config.other.rates = req.body.rates;
-                            config.other.color = [req.body.navBarColor == "light" ? "light" : "dark", req.body.navBarColor]
+                        if (req.body.bgurl && req.body.rate) {
+                            if(config.other.bg != req.body.bgurl){
+                                config.other.bg = req.body.bgurl;
+                            }
+                            if(config.other.rates != req.body.rate){
+                                config.other.rates = req.body.rate;
+                            }
                             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2))
                             reloadConfig();
-                            res.redirect("/admin/vacenter")
+                            res.redirect("/admin/settings")
                         }else{
                             res.sendStatus(400)
                         }
@@ -1624,7 +1542,8 @@ app.post("/admin/reqs/newUser", async (req, res) => {
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
             if (await isAdminUser(cookies)) {
-                if (req.body.username && req.body.password && req.body.Name && req.body.CPW && req.body.IFC) {
+                console.log(req.body)
+                if (req.body.username && req.body.password && req.body.Name && req.body.IFC) {
                     if (await FileExists(`${usersPath}/${btoa(sanitize(req.body.username))}.json`) == false) {
                         const admin = req.body.admin ? true : false;
                         const pilotIDReq = await JSONReq("GET", `https://api.vanet.app/airline/v1/user/id/${req.body.IFC}`, {"X-Api-Key": config.key}, null, null)
@@ -1672,7 +1591,7 @@ app.post("/admin/reqs/newUser", async (req, res) => {
                         })
                         await FileWrite(`${usersPath}/${btoa(sanitize(req.body.username))}.json`, JSON.stringify(newUser, null, 2))
                         await reloadUsers()
-                        res.redirect("/admin/accounts")
+                        res.redirect("/admin/users")
                     } else {
                         res.sendStatus(409)
                     }
@@ -1709,7 +1628,7 @@ app.post("/setupData", async function (req, res) {
                     const newConfig = JSON.parse(response.body).result
                     newConfig.key = req.body.key
                     newConfig.other = {
-                        bg: "https://webcdn.infiniteflight.com/blog/content/images/2021/04/Infinite-Flight-3D-Buildings.jpg",
+                        bg: "/public/images/stockBG2.jpg",
                         logo: "https://va-center.com/assets/images/logo.webp",
                         rates: 100,
                         navColor: [],
@@ -1827,10 +1746,12 @@ app.post("/CPWD", async (req, res) => {
         const uid = atob(clientToken).split(":")[0]
         const token = atob(clientToken).split(":")[1]
         const userExists = await FileExists(`${usersPath}/` + sanitize(uid) + '.json')
+        
         if (userExists) {
             const userData = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
             const realToken = token.length == 33 ? token.slice(0, token.length - 1) : token
             if (userData.tokens.includes(realToken)) {
+                
                 if (req.body.pwd) {
                     userData.password = bcrypt.hashSync(req.body.pwd, 10)
                     userData.tokens = [];
@@ -2057,4 +1978,4 @@ async function updater(){
     return updateRequired[0]
 }
 
-updater()
+//updater()
