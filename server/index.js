@@ -6,6 +6,9 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
+//Parts
+//@ts-ignore
+const { ReadFile, WriteFile, ExistsFile, RemoveFile } = require("./fileCommands");
 //Paths
 const viewPath = path.join(__dirname, '/../views/');
 //Express App
@@ -15,6 +18,8 @@ app.set('views', viewPath);
 app.listen(process.env.port, () => {
     console.log("Listening on " + process.env.port);
 });
+//Config
+//const config = 
 //Get
 app.get('*', async (req, res) => {
     if (req.path.slice(0, 8) == "/public/") {
