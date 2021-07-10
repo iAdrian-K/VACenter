@@ -31,24 +31,29 @@ async function reloadConfig(){
     const rawConfig = await ReadFile(`${__dirname}/../config.json`)
     //@ts-ignore
     config = JSON.parse(rawConfig)
+    console.log(config)
 }
 reloadConfig()
 
 //Get
 app.get('*', async(req, res)=>{
     if(req.path.slice(0,8)=="/public/"){
-        if(fs.existsSync(`${__dirname}/../${req.path}`)){
-            res.sendFile(`${__dirname}/../${req.path}`)
+        if(fs.existsSync(path.join(__dirname, "..", req.path))){
+            res.sendFile(path.join(__dirname, "..", req.path))
         }else{
             res.sendStatus(404);
         }
     }else{
         switch(req.path){
             case "/":
-                res.render("login")
+                res.render("login", {
+                    config: config
+                })
                 break;
             default:
-                res.render('404');
+                res.render('404', {
+                    config: config
+                });
                 break;
         }
     }
