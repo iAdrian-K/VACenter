@@ -436,7 +436,11 @@ app.get('*', async (req, res) => {
                                 user: userInfo,
                                 active: req.path,
                                 stats: vaData,
-                                title: "New Flight"
+                                title: "New Flight",
+                                routes: routes,
+                                ops: ops,
+                                craft: crafts,
+                                ranks: ranks
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -945,29 +949,29 @@ app.post("/newPirep", async function (req, res){
     try{
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
-            if (req.body.vehicle && req.body.airline && req.body.route && req.body.departureT && req.body.flightTimeH && req.body.flightTimeM && req.body.comments && req.body.fuel && req.body.dICAO && req.body.aICAO){
+            if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.comments && req.body.depT){
                 const author = await getUserData(cookies)
                 const pirepObj = {
                     id: uniqueString(),
-                    vehicle: req.body.vehicle,
-                    vehiclePublic: null,
+                    vehicle: req.body.aircraft,
+                    vehiclePublic: crafts.get(req.body.aircraft).publicName,
                     author: author.username,
-                    airline: req.body.airline,
-                    depICAO: req.body.dICAO,
-                    arrICAO: req.body.aICAO,
+                    airline: req.body.op,
+                    depICAO: null,
+                    arrICAO: null,
                     pilot: {
                         name: author.name,
                         ppurl: author.ppurl
                     },
                     route: req.body.route,
                     departureT: req.body.departureT,
-                    flightTime: parseInt((parseInt(req.body.flightTimeH)*60)) + parseInt(req.body.flightTimeM),
+                    flightTime: req.body.ft,
                     comments: req.body.comments,
                     status: "n",
                     fuel: req.body.fuel,
                     filed: new Date()
                 }
-                const reqVANETRaw = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.vehicle}`, { "X-Api-Key": config.key }, null, null)
+                /*const reqVANETRaw = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.vehicle}`, { "X-Api-Key": config.key }, null, null)
                 const reqVANET = JSON.parse(reqVANETRaw[2]).result
                 
                 pirepObj.vehiclePublic = `${reqVANET.liveryName} - ${reqVANET.aircraftName}`;
@@ -981,7 +985,7 @@ app.post("/newPirep", async function (req, res){
                         flightTime: pirepObj.flightTime,
                         aircraftLiveryId: pirepObj.vehicle
                     })
-                }
+                }*/
                 author.pireps.push(pirepObj.id)
                 if(author.pirepsRaw == undefined){
                     author.pirepsRaw = [];
@@ -1487,6 +1491,8 @@ app.post("/admin/reqs/newData", async function (req, res){
                                     ft: req.body.ft,
                                     operator: req.body.op,
                                     aircraft: req.body.aircraft,
+                                    depICAO: req.body.depIcao,
+                                    arrICAO: req.body.arrIcao,
                                     aircraftPublic: crafts.get(req.body.aircraft).publicName,
                                     operatorPublic: ops.get(req.body.op).name,
                                     minRank: null,

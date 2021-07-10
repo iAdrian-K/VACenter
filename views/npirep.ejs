@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Home || <%= config.name %>
+        New PIREP || <%= config.name %>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
@@ -16,7 +16,65 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
         <div class="float-end content bg-light-light ps-3 pt-3 mb-4" id="content" style="width: 80%;">
-            //Can only populate back on beta
+            <h2>Scheduled Flights</h2>
+            <strong>Coming soon</strong><br>
+            <button type="button" class="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                File manual pirep
+            </button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">New PIREP</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/newPIREP">
+                                <h2>Create new PIREP</h2>
+                                <br>
+                                <label for="myBrowser">Type to search for a route:</label>
+                                <input list="routes" id="route" name="route" class="mb-3 form-control" placeholder="Route">
+                                <datalist id="routes">
+                                    <% routes.forEach(route=>{%>
+                                        <option value="<%= config.code + route.num %>">
+                                    <%})%>
+                                </datalist>
+                                <label class="form-label">Aircraft</label>
+                                <select class="form-select mb-3" name="aircraft">
+                                    <% craft.forEach(vic=>{%>
+                                        <option value="<%= vic.livID%>">
+                                            <%= vic.publicName%>
+                                        </option>
+                                        <%})%>
+                                </select>
+                                <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
+                                <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
+                                    aria-label="Flight Time" name="ft">
+                                <label class="form-label">Operator</label>
+                                <select class="form-select mb-3" name="op">
+                                    <% ops.forEach(op=>{%>
+                                        <option value="<%= op.id%>">
+                                            <%= op.name%>
+                                        </option>
+                                        <%})%>
+                                </select>
+                                <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
+                                <input type="number" class="form-control mb-3" placeholder="Fuel used (kg)" required="" aria-label="Flight Time"
+                                    name="fuel">
+                                <label class="form-label">Departure Date</label>
+                                <input type="date" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Departure Date"
+                                    name="depT">
+                                <label class="form-label">Comments</label><br>
+                                <textarea class="form-control-plaintext border border-secondary rounded mb-3 p-2" name="comments"></textarea>
+                                <button class="btn btn-primary">Create</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"

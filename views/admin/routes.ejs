@@ -78,6 +78,11 @@
                                     <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
                                     <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required="" aria-label="Flight Time"
                                         name="ft">
+                                    <label class="form-label">Departure ICAO</label>
+                                    <input type="text" class="form-control mb-3" placeholder="YSSY" required="" aria-label="ICAO Departure"
+                                        name="depIcao">
+                                    <label class="form-label">Arrival ICAO</label>
+                                    <input type="text" class="form-control mb-3" placeholder="YMML" required="" aria-label="ICAO Arrival" name="arrIcao">
                                     <label class="form-label">Operator</label>
                                     <select class="form-select mb-3" name="op">
                                         <% ops.forEach(op=>{%>
@@ -137,10 +142,10 @@
                                             </option>
                                             <%})%>
                                     </select>
-                                    <label class="form-label text-muted">Departure Slots</label>
-                                    <p class="fw-bold mb-3">Coming soon</p>
-                                    <label class="form-label text-muted">Minimum Rank</label>
-                                    <p class="fw-bold mb-3">Coming soon</p>
+                                    <label class="form-label">Departure ICAO</label>
+                                    <input type="text" class="form-control mb-3" placeholder="YSSY" required="" aria-label="ICAO Departure" name="depIcao" value="<%= route.depICAO%>">
+                                    <label class="form-label">Arrival ICAO</label>
+                                    <input type="text" class="form-control mb-3" placeholder="YMML" required="" aria-label="ICAO Arrival" name="arrIcao" value="<%= route.arrICAO%>">
                                     <input type="hidden" value="true" name="update">
                                     <button class="btn btn-primary">Update</button>
                                     <button class="btn btn-danger" type="button" onclick="remData('r','<%= route.id%>')">Remove</button>
