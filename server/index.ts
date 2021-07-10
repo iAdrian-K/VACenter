@@ -13,7 +13,27 @@ const viewPath = path.join(__dirname, '/../views/')
 //Express App
 const app = express();
 app.set('view engine', 'ejs');
-app.set('view', viewPath)
+app.set('views', viewPath)
 app.listen(process.env.port, ()=>{
     console.log("Listening on " + process.env.port);
 });
+
+//Get
+app.get('*', async(req, res)=>{
+    if(req.path.slice(0,8)=="/public/"){
+        if(fs.existsSync(`${__dirname}/../${req.path}`)){
+            res.sendFile(`${__dirname}/../${req.path}`)
+        }else{
+            res.sendStatus(404);
+        }
+    }else{
+        switch(req.path){
+            case "/":
+                res.render("login")
+                break;
+            default:
+                res.render('404');
+                break;
+        }
+    }
+})
