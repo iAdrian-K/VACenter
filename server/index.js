@@ -804,7 +804,7 @@ app.post("/reqs/remUser", async function (req, res){
             if(await FileExists(`${usersPath}/${await getUserID(cookies)}.json`)){
                 fs.unlink(`${usersPath}/${await getUserID(cookies)}.json`, (err) =>{
                     if(err){
-                        throw err;
+                        newError(err, `${config.code} - userRError`)
                     }else{
                         res.clearCookie('authToken').redirect("/")
                     }
@@ -1177,6 +1177,7 @@ app.post('/addIFCAcc', async (req,res) => {
         }
     }catch(err){
         res.sendStatus(500);
+        newError(err, `${config.code} - ifcError`)
     }
 })
 
@@ -1721,6 +1722,7 @@ app.post("/login", async function (req, res) {
             if (user.revoked == false) {
                 bcrypt.compare(req.body.pwdI, user.password, async (err, same) => {
                     if (err) {
+                        newError(err, `${config.code} - loginError`)
                         res.redirect('/?r=ue')
                     } else if (same) {
 
