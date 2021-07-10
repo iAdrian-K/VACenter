@@ -3,6 +3,7 @@ const express = require('express');
 const btoaData = require('btoa');
 const atobData = require('atob');
 const bcrypt = require('bcrypt');
+//@ts-ignore
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config()
@@ -23,7 +24,13 @@ app.listen(process.env.port, ()=>{
 });
 
 //Config
-//const config = 
+let config = {};
+async function reloadConfig(){
+    const rawConfig = await ReadFile(`${__dirname}/../config.json`)
+    //@ts-ignore
+    config = JSON.parse(rawConfig)
+}
+reloadConfig()
 
 //Get
 app.get('*', async(req, res)=>{

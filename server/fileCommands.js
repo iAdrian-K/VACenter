@@ -1,4 +1,6 @@
 //@ts-ignore
+const fs = require('fs');
+//@ts-ignore
 function ReadFile(filename) {
     return new Promise(resolve => {
         fs.readFile(filename, (err, data) => {
@@ -50,4 +52,4 @@ function RemoveFile(filename) {
         });
     });
 }
-exports = { ReadFile, WriteFile, ExistsFile, RemoveFile };
+module.exports = { ReadFile, WriteFile, ExistsFile, RemoveFile };
