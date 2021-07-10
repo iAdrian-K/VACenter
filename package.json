@@ -38,6 +38,7 @@
     "nodemon": "^2.0.7",
     "request": "^2.88.2",
     "sanitize-filename": "^1.6.3",
+    "sqlite3": "^5.0.2",
     "unique-string": "^2.0.0"
   }
 }
