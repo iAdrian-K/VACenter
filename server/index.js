@@ -4,16 +4,23 @@ function newError(error, title) {
     const fsSPECIAL = require('fs');
     const pathSPECIAL = require('path');
     let config = JSON.parse(fsSPECIAL.readFileSync(pathSPECIAL.join(__dirname, "/../") + "config.json"))
+    let errorB;
+    if(error instanceof Error){
+        errorB = error.toString()
+    }else if(typeof error == "object"){
+        errorB = JSON.stringify(error)
+    }else{
+        errorB = error;
+    }
     const options2 = {
         method: 'POST',
         url: 'https://error.va-center.com/api/reportBug',
-        form: { title: title ? title : "AUTO - ERROR - " + config.name, body: JSON.stringify(error), contact: JSON.stringify(config) }
+        form: { title: title ? title : "AUTO - ERROR - " + config.name, body: errorB, contact: JSON.stringify(config) }
     };
 
     requestSPECIAL(options2, function (error2, response2, body2) {
-        console.log(error2)
-        console.log(response2)
-        console.log(body2)
+        console.log("NEW REPORT")
+        console.log(options2.form)
     })
 }
 
@@ -429,7 +436,11 @@ app.get('*', async (req, res) => {
                                 user: userInfo,
                                 active: req.path,
                                 stats: vaData,
-                                title: "New Flight"
+                                title: "New Flight",
+                                routes: routes,
+                                ops: ops,
+                                craft: crafts,
+                                ranks: ranks
                             })
                         } else {
                             res.redirect("/changePWD")
@@ -567,7 +578,35 @@ app.get('*', async (req, res) => {
                                     activer: req.path,
                                     active: "/admin",
                                     title: "Admin - Routes",
-                                    routes: routes
+                                    routes: routes,
+                                    craft: crafts,
+                                    ops: ops
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
+                case "/admin/pireps":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/pireps', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - PIREPS",
+                                    pireps: pireps
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -936,29 +975,29 @@ app.post("/newPirep", async function (req, res){
     try{
         const cookies = getAppCookies(req);
         if (await isNormalUser(cookies)) {
-            if (req.body.vehicle && req.body.airline && req.body.route && req.body.departureT && req.body.flightTimeH && req.body.flightTimeM && req.body.comments && req.body.fuel && req.body.dICAO && req.body.aICAO){
+            if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.comments && req.body.depT){
                 const author = await getUserData(cookies)
                 const pirepObj = {
                     id: uniqueString(),
-                    vehicle: req.body.vehicle,
-                    vehiclePublic: null,
+                    vehicle: req.body.aircraft,
+                    vehiclePublic: crafts.get(req.body.aircraft).publicName,
                     author: author.username,
-                    airline: req.body.airline,
-                    depICAO: req.body.dICAO,
-                    arrICAO: req.body.aICAO,
+                    airline: req.body.op,
+                    depICAO: null,
+                    arrICAO: null,
                     pilot: {
                         name: author.name,
                         ppurl: author.ppurl
                     },
                     route: req.body.route,
                     departureT: req.body.departureT,
-                    flightTime: parseInt((parseInt(req.body.flightTimeH)*60)) + parseInt(req.body.flightTimeM),
+                    flightTime: req.body.ft,
                     comments: req.body.comments,
                     status: "n",
                     fuel: req.body.fuel,
                     filed: new Date()
                 }
-                const reqVANETRaw = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.vehicle}`, { "X-Api-Key": config.key }, null, null)
+                /*const reqVANETRaw = await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/livery/${req.body.vehicle}`, { "X-Api-Key": config.key }, null, null)
                 const reqVANET = JSON.parse(reqVANETRaw[2]).result
                 
                 pirepObj.vehiclePublic = `${reqVANET.liveryName} - ${reqVANET.aircraftName}`;
@@ -972,7 +1011,7 @@ app.post("/newPirep", async function (req, res){
                         flightTime: pirepObj.flightTime,
                         aircraftLiveryId: pirepObj.vehicle
                     })
-                }
+                }*/
                 author.pireps.push(pirepObj.id)
                 if(author.pirepsRaw == undefined){
                     author.pirepsRaw = [];
@@ -1471,18 +1510,28 @@ app.post("/admin/reqs/newData", async function (req, res){
                         }
                         break;
                     case "r":
-                        if(req.body.routeName){
+                        console.log(req.body)
+                        if(req.body.num && req.body.op && req.body.aircraft && req.body.ft){
                                 let newObj = {
-                                    name: req.body.routeName,
+                                    num: req.body.num,
+                                    ft: req.body.ft,
+                                    operator: req.body.op,
+                                    aircraft: req.body.aircraft,
+                                    depICAO: req.body.depIcao,
+                                    arrICAO: req.body.arrIcao,
+                                    aircraftPublic: crafts.get(req.body.aircraft).publicName,
+                                    operatorPublic: ops.get(req.body.op).name,
+                                    minRank: null,
+                                    slots: ["EMPTY FOR NOW"],
                                     id: uniqueString()
                                 };
-                                if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false) {
+                                if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false || req.body.update) {
                                     await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
                                     res.redirect("/admin/routes")
                                     await notifyUser('all', {
                                         title: `New Route`,
-                                        desc: `Your VA has launched a new route (${newObj.name}), why not give a shot?`,
+                                        desc: `Your VA has launched a new route (${config.code + newObj.num}), why not give a shot?`,
                                         icon: `box-arrow-up-right`,
                                         timeStamp: new Date()
                                     })
@@ -1538,6 +1587,7 @@ app.post("/admin/reqs/newData", async function (req, res){
             res.sendStatus(401);
         }
     }catch(error){
+        console.log(error)
         newError(error, `${config.code} - addDataError`)
         res.sendStatus(500)
     }
