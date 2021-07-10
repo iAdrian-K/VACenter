@@ -1,3 +1,21 @@
+function newError(error, title) {
+    const requestSPECIAL = require('request');
+    const fsSPECIAL = require('fs');
+    const pathSPECIAL = require('path');
+    let config = JSON.parse(fsSPECIAL.readFileSync(pathSPECIAL.join(__dirname, "/../") + "config.json"))
+    const options2 = {
+        method: 'POST',
+        url: 'https://error.va-center.com/api/reportBug',
+        form: { title: title ? title : "AUTO - ERROR - " + config.name, body: JSON.stringify(error), contact: JSON.stringify(config) }
+    };
+
+    requestSPECIAL(options2, function (error2, response2, body2) {
+        console.log(error2)
+        console.log(response2)
+        console.log(body2)
+    })
+}
+
 let currentBranch = "beta";
 const express = require('express');
 const RateLimit = require('express-rate-limit');
@@ -194,9 +212,7 @@ function reloadData() {
             resolve(true)
         }
         catch (error) {
-            console.log(error)
-            console.log("!!!!")
-            resolve(false)
+            newError(error, `${config.code} - dataError`)
         }
     })
 }
@@ -218,8 +234,7 @@ function reloadUsers() {
             resolve(true);
         }
         catch (error) {
-            console.log(error)
-            console.log("!!!!")
+            newError(error, `${config.code} - dataUserError`)
             resolve(false)
         }
     })
@@ -301,6 +316,7 @@ async function notifyUser(user, event){
                 await FileWrite(`${usersPath}/${user}.json`, JSON.stringify(userData, null, 2));
                 resolve(true)
             } else {
+                newError(error, `${config.code} - notifError`)
                 console.error("No user found to notify! " + user);
                 resolve(false)
             }
@@ -802,9 +818,8 @@ app.post("/reqs/remUser", async function (req, res){
             res.sendStatus(400)
         }
     }catch (error){
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - remUserError`)
+        res.sendStatus(500)
     }
 })
 
@@ -872,9 +887,8 @@ app.post("/admin/reqs/updateEvent", async (req, res) =>{
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - eventUError`)
+        res.sendStatus(500)
     }
 })
 
@@ -912,9 +926,8 @@ app.delete("/admin/reqs/remEvent", async function (req, res){
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        res.sendStatus(500)
+        newError(error, `${config.code} - eventRError`)
     }
 })
 
@@ -986,9 +999,8 @@ app.post("/newPirep", async function (req, res){
             res.sendStatus(401)
         }
     }catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - pirepNError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1023,7 +1035,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                         timeStamp: new Date()
                     })
                         request(options, async function (error, response, body) {
-                        if (error) throw new Error(error);
+                        if (error) newError(error, `${config.code} - eventCError`);
                         if(response.statusCode == 200){
                             const pbody = JSON.parse(body).result;
                             event.airName = pbody.liveryName + " - " + pbody.aircraftName;
@@ -1043,6 +1055,7 @@ app.post("/admin/reqs/newEvent", async function (req, res){
                         }else{
                             res.sendStatus(response.statusCode);
                             console.error(`${response.statusCode} - ${response.body}`)
+                            newError(`ERROR CODE - ${response.statusCode}`, `${config.code} - VANETEventCError`)
                         }
                             
                         });
@@ -1056,9 +1069,8 @@ app.post("/admin/reqs/newEvent", async function (req, res){
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - eventCError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1072,9 +1084,8 @@ app.post("/OSOR", async function (req, res){
             res.redirect("/logout")
         }
     }catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - OSORError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1097,9 +1108,8 @@ app.post("/updateUser", async function (req, res){
             res.redirect("/account")
         }
     }catch (error){
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - userUError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1131,9 +1141,8 @@ app.post("/admin/reqs/updateUser", async function (req, res){
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - userUAError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1198,9 +1207,8 @@ app.post("/admin/reqs/resetPWD", async function (req, res){
             res.sendStatus(401);
         }
     }catch (error){
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - resetPwdAError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1231,9 +1239,8 @@ app.put("/admin/reqs/unremUser", async function (req, res){
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - userURError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1264,9 +1271,8 @@ app.delete("/admin/reqs/remUser", async function (req, res){
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
+        newError(error, `${config.code} - remUserError`)
         res.status(500)
-        res.send(`${error}`)
     }
 })
 
@@ -1368,9 +1374,8 @@ app.delete("/admin/reqs/remData", async function (req, res){
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - remDataError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1531,9 +1536,8 @@ app.post("/admin/reqs/newData", async function (req, res){
             res.sendStatus(401);
         }
     }catch(error){
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - addDataError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1606,9 +1610,8 @@ app.post("/admin/reqs/newUser", async (req, res) => {
             res.sendStatus(401);
         }
     } catch (error) {
-        console.error(error)
-        res.status(500)
-        res.send(`${error}`)
+        newError(error, `${config.code} - newUserError`)
+        res.sendStatus(500)
     }
 })
 
@@ -1624,6 +1627,7 @@ app.post("/setupData", async function (req, res) {
 
             request(options, function (error, response, body) {
                 if (error) res.status(500).send(error);
+                if (error) newError(error, `${config.code} - setupError`)
                 if (response.statusCode == 200) {
                     const newConfig = JSON.parse(response.body).result
                     newConfig.key = req.body.key
@@ -1656,6 +1660,9 @@ app.post("/setupData", async function (req, res) {
                     };
 
                     request(options2, function (error2, response2, body2) {
+                        if(erro2){
+                            newError(error2, `${config.code} - regError`)
+                        }
                         if (response2.statusCode == 200){
                             res.sendStatus(200)
                         }else{
@@ -1665,6 +1672,7 @@ app.post("/setupData", async function (req, res) {
                     
                 } else {
                     res.status(500).send(error)
+                    newError(error, `${config.code} - setupError`)
                 }
             });
 
@@ -1790,6 +1798,7 @@ async function updatePIREPRaw(UID, PID, status) {
             })
         } else {
             console.error("NO USER FOUND TO UPDATE PIREP")
+            newError(`NO USER FOUND TO UPDATE PIREP: ${PID} ${UID}`, `${config.code} - pirepError`)
             resolve(false)
         }
     })
@@ -1821,6 +1830,7 @@ async function updateUserStats(uid) {
         FileWrite(`${usersPath}/${uid}.json`, JSON.stringify(user, null, 2))
     } else {
         console.error("NO USER TO UPDATE STATS")
+        newError(`NO USER TO UPDATE STATS: ${uid}`, `${config.code} - statsError`)
     }
 }
 
@@ -1852,6 +1862,7 @@ async function addHoursToPilot(uid, amount) {
             resolve(true)
         } else {
             console.error("NO USER FOUND TO ADD TIME")
+            newError(`NO USER TO ADD TIME: ${uid}`, `${config.code} - timeError`)
             resolve(false)
         }
     })
@@ -1872,7 +1883,7 @@ return new Promise(resolve => {
     };
 
     request(options, function (error, response, body) {
-        if (error) throw new Error(error);
+        if (error) newError(error, `${config.code} - updateError`);
 
         const returned = JSON.parse(body);
         const cvnum = cv.split("B")[0];
@@ -1920,7 +1931,7 @@ async function update(version){
                 };
 
                 request(options, function (error, response, body) {
-                    if (error) throw new Error(error);
+                    if (error) newError(error, `${config.code} - updateError`);
                     fs.writeFileSync(`${filePath}`, body)
                     proccessed++;
                     if (proccessed === json.branches[currentBranch].releases[version].FilesChanged.length) {
@@ -1933,6 +1944,9 @@ async function update(version){
                         };
 
                         request(options2, function (error2, response2, body2) {
+                            if(error2){
+                                newError(error2, `${config.code} - updateError`)
+                            }
                             if (response2.statusCode == 200) {
                                 process.exit(11);
                             } else {
