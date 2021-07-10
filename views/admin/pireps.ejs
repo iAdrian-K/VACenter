@@ -1,0 +1,144 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Admin || <%= config.name %>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <%- include("./../components/head.ejs")%>
+</head>
+
+<body class="w-100 bg-light-light h-auto">
+    <%- include("./../components/nav.ejs")%>
+        <div class="float-end content bg-light-light ps-3 py-3" id="content" style="width: 80%;">
+            <h2>Current PIREPS</h2>
+            <p class="text-muted">Click a PIREP to see more.</p>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Route</th>
+                        <th scope="col">Author</th>
+                        <th scope="col">Aircraft</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pireps.forEach(pirep=>{%>
+                        <tr style="cursor: pointer;"
+                                data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
+                            <th scope="row">
+                                <%= pirep.route %>
+                            </th>
+                            <td>
+                                <%= config.code + Buffer.from(pirep.author, 'base64').toString() %>
+                            </td>
+                            <td>
+                                <%= pirep.vehiclePublic %>
+                            </td>
+                            <td>
+                                <% if(pirep.status == "a"){%><span class="text-success">Approved</span><%}else if(pirep.status =="d"){%><span class="text-danger">Denied</span><%}else{%>Awaiting<%}%>
+                            </td>
+                        </tr>
+                        <%})%>
+                </tbody>
+            </table>
+            <br>
+            <% pireps.forEach(pirep=>{%>
+                <div class="modal fade" id="modal-<%=pirep.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">PIREP <%= pirep.route%></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-control mb-3">
+                                    <h2>PIREP <%= pirep.route%></h2>
+                                    <h5>Author: <%= config.code + Buffer.from(pirep.author, 'base64' ).toString() %></h5>
+                                    <hr>
+                                    <p>
+                                        <strong><i class="fa fa-plane"></i> Plane: </strong><%= pirep.vehiclePublic %><br>
+                                        <strong><i class="bi bi-shop"></i> Operator: </strong><%= pirep.airline %><br>
+                                        <strong><i class="fa fa-plane-departure"></i> Departure ICAO: </strong><%= pirep.depICAO %><br>
+                                        <strong><i class="fa fa-plane-arrival"></i> Arrival ICAO: </strong><%= pirep.arrICAO %><br>
+                                        <strong><i class="bi bi-chevron-up"></i> Route: </strong><%= pirep.route %><br>
+                                        <strong><i class="bi bi-calendar-date"></i> Departure Date: </strong><%= new Date(pirep.departureT).toLocaleDateString() %><br>
+                                        <strong><i class="bi bi-clock"></i> Flight Time: </strong><%= (pirep.flightTime / 60).toFixed(2) %> (<%= pirep.flightTime %> mins)<br>
+                                        <strong><i class="bi bi-droplet-half"></i> Fuel: </strong><%= pirep.fuel %>kg<br>
+                                        <strong><i class="bi bi-text-left"></i> Comments: </strong><br>
+                                        <p class="form-control p-2">
+                                            <%= pirep.comments %><br>
+                                        </p>
+                                    </p>
+                                </div>
+                                <% if(pirep.status == "n"){%>
+                                    <button type="button" class="btn btn-success" onclick="addData('p', '<%= pirep.id%>')">Accept</button>
+                                    <button type="button" class="btn btn-danger" onclick="remData('p', '<%= pirep.id%>')">Deny</button>
+                                <%}else if(pirep.status =="d"){%>
+                                    <button type="button" class="btn btn-danger" disabled>Already Actioned (Denied)</button>
+                                <%}else if(pirep.status =="a"){%>
+                                    <button type="button" class="btn btn-success" disabled>Already Actioned (Accepted)</button>
+                                <%}else{%>            
+                                    <button type="button" class="btn btn-dark" disabled>Already Actioned (Unknown)</button>
+                                    <%}%>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <%})%>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
+            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <%- include("./../components/mobile.ejs") %>
+            <script>
+                function addData(type, id) {
+                    const data = `id=${id}`;
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.addEventListener("readystatechange", function () {
+                        console.log(this)
+                        if (this.readyState === this.DONE) {
+                            console.log(this.responseText);
+                        }
+                    });
+                    xhr.open("POST", `/admin/reqs/newData?t=${type}`);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(data);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                }
+                function remData(type, id) {
+                    const data = `id=${id}`;
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.addEventListener("readystatechange", function () {
+                        console.log(this)
+                        if (this.readyState === this.DONE) {
+                            console.log(this.responseText);
+                        }
+                    });
+                    xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(data);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                }
+            </script>
+</body>
+
+</html>

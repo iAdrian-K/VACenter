@@ -592,6 +592,32 @@ app.get('*', async (req, res) => {
                         res.clearCookie('authToken').redirect('/?r=ii')
                     }
                     break;
+                case "/admin/pireps":
+                    if (await isNormalUser(cookies)) {
+                        if (await isAdminUser(cookies)) {
+                            const uid = atob(cookies.authToken).split(":")[0];
+                            const userInfo = JSON.parse(await FileRead(`${usersPath}/` + sanitize(uid) + '.json'))
+                            if (!userInfo.meta.cp) {
+                                delete userInfo['password']
+                                delete userInfo['tokens']
+                                res.render('admin/pireps', {
+                                    config: clientConfig,
+                                    user: userInfo,
+                                    activer: req.path,
+                                    active: "/admin",
+                                    title: "Admin - PIREPS",
+                                    pireps: pireps
+                                })
+                            } else {
+                                res.redirect("/changePWD")
+                            }
+                        } else {
+                            res.sendStatus(403)
+                        }
+                    } else {
+                        res.clearCookie('authToken').redirect('/?r=ii')
+                    }
+                    break;
                 case "/admin/aircraft":
                     if (await isNormalUser(cookies)) {
                         if (await isAdminUser(cookies)) {
