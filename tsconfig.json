@@ -1,6 +1,10 @@
 {
     "compilerOptions": {
         "watch": true,
-        "target": "ESNext"
-    }
+        "target": "ESNext",
+        "lib":[
+            "ESNext"
+        ],
+        "moduleResolution": "node"
+    },
 }
