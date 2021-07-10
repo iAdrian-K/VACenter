@@ -574,7 +574,9 @@ app.get('*', async (req, res) => {
                                     activer: req.path,
                                     active: "/admin",
                                     title: "Admin - Routes",
-                                    routes: routes
+                                    routes: routes,
+                                    craft: crafts,
+                                    ops: ops
                                 })
                             } else {
                                 res.redirect("/changePWD")
@@ -1478,18 +1480,26 @@ app.post("/admin/reqs/newData", async function (req, res){
                         }
                         break;
                     case "r":
-                        if(req.body.routeName){
+                        console.log(req.body)
+                        if(req.body.num && req.body.op && req.body.aircraft && req.body.ft){
                                 let newObj = {
-                                    name: req.body.routeName,
+                                    num: req.body.num,
+                                    ft: req.body.ft,
+                                    operator: req.body.op,
+                                    aircraft: req.body.aircraft,
+                                    aircraftPublic: crafts.get(req.body.aircraft).publicName,
+                                    operatorPublic: ops.get(req.body.op).name,
+                                    minRank: null,
+                                    slots: ["EMPTY FOR NOW"],
                                     id: uniqueString()
                                 };
-                                if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false) {
+                                if (await FileExists(`${dataPath}/routes/${sanitize(newObj.id)}.json`) == false || req.body.update) {
                                     await FileWrite(`${dataPath}/routes/${sanitize(newObj.id)}.json`, JSON.stringify(newObj, null, 2));
                                     await reloadData();
                                     res.redirect("/admin/routes")
                                     await notifyUser('all', {
                                         title: `New Route`,
-                                        desc: `Your VA has launched a new route (${newObj.name}), why not give a shot?`,
+                                        desc: `Your VA has launched a new route (${config.code + newObj.num}), why not give a shot?`,
                                         icon: `box-arrow-up-right`,
                                         timeStamp: new Date()
                                     })
@@ -1545,6 +1555,7 @@ app.post("/admin/reqs/newData", async function (req, res){
             res.sendStatus(401);
         }
     }catch(error){
+        console.log(error)
         newError(error, `${config.code} - addDataError`)
         res.sendStatus(500)
     }
