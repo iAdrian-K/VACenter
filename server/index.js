@@ -13,6 +13,9 @@ const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.j
 const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
 const { db, GetUser, GetUsers, CreateUser, GetPirep, GetPireps, CreatePirep } = require("./db")
 const _tplengine = require('./defaultpagevar');
+/**
+ * @typedef {import('./types.js').user} User
+ */
 
 
 //Config
