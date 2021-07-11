@@ -102,10 +102,10 @@ app.post("/login", async (req,res) =>{
                 CreateToken(token, user.username);
                 res.cookie("authToken", token, { maxAge: new Date().getTime() + (10 * 365 * 24 * 60 * 60) }).redirect("/home")
             }else{
-                res.redirect('/?r=ie');
+                res.redirect('/?r=ii');
             }
         }else{
-            res.redirect('/?r=ie')
+            res.redirect('/?r=ii')
         }
     }else{
         res.sendStatus(400)
