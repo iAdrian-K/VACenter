@@ -2,6 +2,8 @@
 
 const sqlite3 = require('sqlite3').verbose();
 
+/**@module Database */
+
 //Database
 let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
@@ -9,24 +11,13 @@ let db = new sqlite3.Database('./database.db', (err) => {
     }
     console.log('Connected to the database.');
 });
-/** @namespace DB - Aircrafts */
 
-/** @namespace DB - Events */
 
-/** @namespace DB - Gates */
-
-/** @namespace DB - News */
-
-/** @namespace DB - Notifications */
-
-/** @namespace DB - Operators */
-
-/** @namespace DB - PIREPS */
+// PIREPS
 /**
  * @desc Returns record of specific PIREP id
  * @param {string} id - Unique id of prirep 
  * @returns {Promise<Array>} Record for that prirep in an array
- * @memberof DB - PIREPS
  */
  function GetPirep(id) {
     return new Promise((resolve, error) => {
@@ -43,7 +34,6 @@ let db = new sqlite3.Database('./database.db', (err) => {
 /**
  * @desc Returns all pireps
  * @returns {Promise<Array>} All PIREP Objects in an array
- * @memberof DB - PIREPS
  */
 function GetPireps() {
     return new Promise((resolve, error) => {
@@ -72,8 +62,7 @@ function GetPireps() {
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
- * @return Error
- * @memberof DB - PIREPS
+ * @return {String} Error
  */
 function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     db.run(`INSERT INTO users(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
@@ -81,18 +70,13 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
         return err;
     });
 }
-/** @namespace DB - Ranks */
 
-/** @namespace DB - Routes */
 
-/** @namespace DB - Slots */
-
-/** @namespace DB - Tokens */
+// Tokens
 /**
  * @desc Returns valid token information if provided token is valid
  * @param {string} token - User token
  * @returns {Promise<array>} Array with the token and user associated with the token
- * @memberof DB - Tokens
  */
 function GetToken(token) {
     return new Promise((resolve, error) => {
@@ -107,12 +91,12 @@ function GetToken(token) {
     })
 }
 
-/** @namespace DB - Users */
+
+// Users
 /**
  * @desc Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
  * @returns {Promise<Array>} Record for that username in an array
- * @memberof DB - Users
  */
 function GetUser(username) {
     return new Promise((resolve, error) => {
@@ -130,7 +114,6 @@ function GetUser(username) {
 /**
  * @desc Returns all users
  * @returns {Promise<Array>} User objects in an array
- * @memberof DB - Users
  */
 function GetUsers() {
     return new Promise((resolve, error) => {
@@ -158,8 +141,7 @@ function GetUsers() {
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
  * @param {boolean} revoked - User access revoked
- * @return Error
- * @memberof DB - Users
+ * @return {String} Error
  */
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked) {
     db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
