@@ -10,13 +10,13 @@ const fs = require('fs');
  * @param {string} path 
  * @param {any} data 
  * @memberof File Functions
- * @returns {promise} - Will return error (fail) or true (success) 
+ * @returns {Promise<boolean|Error>} - Will return error (fail) or true (success) 
  */
 function FileWrite(path, data){
     return new Promise((resolve, error) => {
         fs.writeFile(path, data, (err)=>{
             if(err){
-                error(false)
+                error(err)
             }else{
                 resolve(true)
             }
@@ -27,7 +27,7 @@ function FileWrite(path, data){
  * 
  * @param {string} path 
  * @memberof File Functions
- * @returns {promise} Data from file
+ * @returns {Promise<string|Error|object|null>} Data from file
  */
 function FileRead(path){
     return new Promise((resolve, error) =>{
@@ -43,7 +43,7 @@ function FileRead(path){
 /**
  * 
  * @param {string} path 
- * @returns {promise} State of the file
+ * @returns {Promise<boolean>} State of the file
  * @memberof File Functions
  */
 function FileExists(path){
@@ -61,7 +61,7 @@ function FileExists(path){
 /**
  * 
  * @param {string} path - File Path 
- * @returns {promise} If operation is successful
+ * @returns {Promise<boolean|Error>} If operation is successful
  * @memberof File Functions
  */
 function FileRemove(path) {

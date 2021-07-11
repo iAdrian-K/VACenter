@@ -10,6 +10,18 @@ require('dotenv').config()
 //Parts
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
 
+//Config
+let config;
+/**
+ * Reloads Config
+ * @name Reload Config
+ */
+async function reloadConfig(){
+    config = JSON.parse(await FileRead(path.join(__dirname, "/../", "config.json")))
+}
+reloadConfig()
+
+
 //App
 const app = express();
 app.set('view engine', "ejs");

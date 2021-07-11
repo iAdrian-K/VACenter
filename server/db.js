@@ -42,7 +42,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
 }
 /**
  * @desc Returns all pireps
- * @returns {Promise<Array>} All pireps in an array
+ * @returns {Promise<Array>} All PIREP Objects in an array
  * @memberof DB - PIREPS
  */
 function GetPireps() {
@@ -129,7 +129,7 @@ function GetUser(username) {
 
 /**
  * @desc Returns all users
- * @returns {Promise<Array>} All users in an array
+ * @returns {Promise<Array>} User objects in an array
  * @memberof DB - Users
  */
 function GetUsers() {
