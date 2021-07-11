@@ -88,12 +88,62 @@ let db = new sqlite3.Database('./database.db', (err) => {
     console.log('Connected to the database.');
 });
 
+// Aircrafts
+/**
+ * @desc Returns record of specific aircraft id
+ * @param {string} id - Unique id of aircraft 
+ * @returns {Promise<Array.<aircraft>} Record for that aircraft in an array
+ */
+ function GetAircraft(id) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.each(`SELECT * FROM aircrafts WHERE id = ?`, [id], (err, row) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(row);
+            });
+        });
+    });
+}
+/**
+ * @desc Returns all aircrafts
+ * @returns {Promise<Array.<aircraft>>} All aircraft objects in an array
+ */
+function GetAircrafts() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM aircrafts`, (err, rows) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(rows);
+            });
+        });
+    });
+}
+/**
+ * @desc Creates new Aircraft
+ * @returns {Promise<String|Number>} Error
+ */
+function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO users(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    })
+}
 
 // PIREPS
 /**
  * @desc Returns record of specific PIREP id
  * @param {string} id - Unique id of prirep 
- * @returns {Promise<Array>} Record for that prirep in an array
+ * @returns {Promise<Array.<prirep>} Record for that prirep in an array
  */
  function GetPirep(id) {
     return new Promise((resolve, error) => {
@@ -109,7 +159,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
 }
 /**
  * @desc Returns all pireps
- * @returns {Promise<Array>} All PIREP Objects in an array
+ * @returns {Promise<Array.<pirep>>} All PIREP Objects in an array
  */
 function GetPireps() {
     return new Promise((resolve, error) => {
@@ -158,7 +208,7 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
 /**
  * @desc Returns valid token information if provided token is valid
  * @param {string} token - User token
- * @returns {Promise<array>} Array with the token and user associated with the token
+ * @returns {Promise<Array.<token>>} Array with the token and user associated with the token
  */
 function GetToken(token) {
     return new Promise((resolve, error) => {
@@ -178,7 +228,7 @@ function GetToken(token) {
 /**
  * @desc Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
- * @returns {Promise<Array>} Record for that username in an array
+ * @returns {Promise<Array.<user>>} Record for that username in an array
  */
 function GetUser(username) {
     return new Promise((resolve, error) => {
