@@ -1,15 +1,11 @@
 //@ts-check
 const fs = require('fs');
-/**
- * File Functions
- * @namespace File Functions
- */
+/**@module File Functions*/
 
 /**
  * File Write to FS
  * @param {string} path 
  * @param {any} data 
- * @memberof File Functions
  * @returns {Promise<boolean|Error>} - Will return error (fail) or true (success) 
  */
 function FileWrite(path, data){
@@ -26,7 +22,6 @@ function FileWrite(path, data){
 /**
  * 
  * @param {string} path 
- * @memberof File Functions
  * @returns {Promise<string|Error|object|null>} Data from file
  */
 function FileRead(path){
@@ -44,7 +39,6 @@ function FileRead(path){
  * 
  * @param {string} path 
  * @returns {Promise<boolean>} State of the file
- * @memberof File Functions
  */
 function FileExists(path){
     return new Promise((resolve, error) =>{
@@ -62,7 +56,6 @@ function FileExists(path){
  * 
  * @param {string} path - File Path 
  * @returns {Promise<boolean|Error>} If operation is successful
- * @memberof File Functions
  */
 function FileRemove(path) {
     return new Promise((resolve, error) => {
@@ -75,4 +68,5 @@ function FileRemove(path) {
         })
     })
 }
+
 module.exports = {FileWrite, FileRead, FileExists, FileRemove}
