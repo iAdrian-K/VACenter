@@ -21,6 +21,17 @@
  * @property {boolean} revoked
  */
 
+/**
+ * A aircraft object
+ * @typedef {object} aircraft
+ * @memberOf types
+ * @property {string} livID
+ * @property {string} airID
+ * @property {string} livName
+ * @property {string} airName
+ * @property {string} publicName
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
