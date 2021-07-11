@@ -30,7 +30,7 @@ function reloadVersion(){
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
 const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
 const { 
-    db,
+    db, GetPPURL,
     GetUser, GetUsers, CreateUser,
     GetPirep, GetPireps, CreatePirep,
     GetEvent, GetEvents, CreateEvent,

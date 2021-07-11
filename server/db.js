@@ -472,9 +472,29 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
     });
 }
 
+// Miscellaneous
+/**
+ * Returns the Profile Picture URL of a user
+ * @param {string} username 
+ * @returns {Promise<String>} Profile Picture URL
+ */
+function GetPPURL(username){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
+                if (err) {
+                    error(err.message);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
+
 
 module.exports = { 
-    db,
+    db, GetPPURL,
     GetUser, GetUsers, CreateUser,
     GetPirep, GetPireps, CreatePirep,
     GetEvent, GetEvents, CreateEvent,
