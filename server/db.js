@@ -1,7 +1,24 @@
 //@ts-check
 
 /**
- * @typedef {import('./types.js').user} user
+ * @namespace types
+ */
+
+/**
+ * A user object
+ * @typedef {object} user
+ * @memberOf types
+ * @property {string} username
+ * @property {string} rank
+ * @property {string} passwords
+ * @property {string} display
+ * @property {number} hours
+ * @property {boolean} admin
+ * @property {string} profileURL
+ * @property {string} created
+ * @property {string} llogin
+ * @property {boolean} cp - Change Password Flag
+ * @property {boolean} revoked
  */
 
 const sqlite3 = require('sqlite3').verbose();
