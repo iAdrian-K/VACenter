@@ -94,6 +94,14 @@
  * @property {string} filed
  */
 
+/**
+ * A rank object
+ * @typedef {object} rank
+ * @memberOf types
+ * @property {number} minH
+ * @property {string} rank
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
