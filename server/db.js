@@ -46,6 +46,15 @@
  * @property {string} server
  */
 
+/**
+ * A gate object
+ * @typedef {object} gate
+ * @memberOf types
+ * @property {number} id
+ * @property {string} event
+ * @property {string} gate
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
