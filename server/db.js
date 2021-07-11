@@ -501,6 +501,26 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
     });
 }
 
+// Notifications
+/**
+ * Get all notifications for a user
+ * @param {string} user User 
+ * @returns {Promise<array>} Array of notifications for user
+ */
+function GetNotifications(user){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM notifications WHERE user = ?`, [user], (err, rows) => {
+                if (err) {
+                    newError(err.message, "Error accessing notification data (REF:DB22)")
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
 // Miscellaneous
 /**
  * Returns the Profile Picture URL of a user
@@ -512,7 +532,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB22)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB23)")
                 } else {
                     resolve(row);
                 }
