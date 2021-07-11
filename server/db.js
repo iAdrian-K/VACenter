@@ -117,22 +117,24 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
 function GetEvents() {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.all(`SELECT * FROM events`, (err, rows) => {
+            db.all(`SELECT * FROM events`, (err, events) => {
                 if (err) {
                     error(err.message);
                 } else {
-                    let events = [];
-                    let processed = 0;
-                    rows.forEach(event => {
+                    let eventsProcessed = 0;
+                    events.forEach(event => {
                         event.gates = [];
-                        db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, row) => {
-                            event.gates.push(row);
+                        console.log(event)
+                        let gatesProcessed = 0;
+                        db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, gate) => {
+                            event.gates.push(gate)
                         }, function() {
-                            events.push(event)
-                            processed ++;
-                            
+                            eventsProcessed ++;
+                            if(eventsProcessed == events.length){
+                                resolve(events);
+                            }
                         })
-                    }, function(){})
+                    })
                 }
             });
         });
