@@ -1,15 +1,32 @@
 {
     "source":{
-        "include": ["server"],
-        "includePattern": ".js$"
+        "include": [],
+        "includePattern": ".+\\.js$"
     },
     "plugins": ["plugins/markdown"],
     "templates":{
         "cleverLinks": true,
-        "monospaceLinks": true
+        "monospaceLinks": true,
+        "systemName": "VACenter",
+        "systemSummary": "A revolutionary Crew Center",
+        "systemColor": "red",
+        "footer": "Ya boi",
+        "copyright": "muh test",
+        "includeDate": false,
+        "inlineNav": false,
+        "inverseNav": false,
+        "linenums": true,
+        "showTableOfContents": true,
+        "showAccessFilter": true,
+        "collapseSymbols": false,
+        "sourceRootPath": "./server",
+        "outputSourceFiles": true,
+        "outputSourcePath": true,
+        "search": true
     },
     "opts":{
         "recurse": true,
-        "destination": "./docs/"
+        "destination": "./docs/",
+        "template": "node_modules/ink-docstrap/template"
     }
 }
