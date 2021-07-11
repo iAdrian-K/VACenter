@@ -9,24 +9,24 @@ let db = new sqlite3.Database('./database.db', (err) => {
     }
     console.log('Connected to the database.');
 });
-/** @namespace Aircrafts */
+/** @namespace DB - Aircrafts */
 
-/** @namespace Events */
+/** @namespace DB - Events */
 
-/** @namespace Gates */
+/** @namespace DB - Gates */
 
-/** @namespace News */
+/** @namespace DB - News */
 
-/** @namespace Notifications */
+/** @namespace DB - Notifications */
 
-/** @namespace Operators */
+/** @namespace DB - Operators */
 
-/** @namespace PIREPS */
+/** @namespace DB - PIREPS */
 /**
  * @desc Returns record of specific PIREP id
  * @param {string} id - Unique id of prirep 
- * @returns {promise} Record for that prirep in an array
- * @memberof PIREPS
+ * @returns {Promise<Array>} Record for that prirep in an array
+ * @memberof DB - PIREPS
  */
  function GetPirep(id) {
     return new Promise((resolve, error) => {
@@ -42,8 +42,8 @@ let db = new sqlite3.Database('./database.db', (err) => {
 }
 /**
  * @desc Returns all pireps
- * @returns {promise} All PIREP Objects in an array
- * @memberof PIREPS
+ * @returns {Promise<Array>} All PIREP Objects in an array
+ * @memberof DB - PIREPS
  */
 function GetPireps() {
     return new Promise((resolve, error) => {
@@ -73,7 +73,7 @@ function GetPireps() {
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
  * @return Error
- * @memberof PIREPS
+ * @memberof DB - PIREPS
  */
 function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     db.run(`INSERT INTO users(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
@@ -81,20 +81,20 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
         return err;
     });
 }
-/** @namespace Ranks */
+/** @namespace DB - Ranks */
 
-/** @namespace Routes */
+/** @namespace DB - Routes */
 
-/** @namespace Slots */
+/** @namespace DB - Slots */
 
-/** @namespace Tokens */
+/** @namespace DB - Tokens */
 
-/** @namespace Users */
+/** @namespace DB - Users */
 /**
  * @desc Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
- * @returns {promise} Record for that username in an array
- * @memberof Users
+ * @returns {Promise<Array>} Record for that username in an array
+ * @memberof DB - Users
  */
 function GetUser(username) {
     return new Promise((resolve, error) => {
@@ -111,8 +111,8 @@ function GetUser(username) {
 
 /**
  * @desc Returns all users
- * @returns {promise} User objects in an array
- * @memberof Users
+ * @returns {Promise<Array>} User objects in an array
+ * @memberof DB - Users
  */
 function GetUsers() {
     return new Promise((resolve, error) => {
@@ -141,7 +141,7 @@ function GetUsers() {
  * @param {boolean} cp - Force change password on next login
  * @param {boolean} revoked - User access revoked
  * @return Error
- * @memberof Users
+ * @memberof DB - Users
  */
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked) {
     db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
