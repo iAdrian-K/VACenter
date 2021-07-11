@@ -62,13 +62,19 @@ function GetPireps() {
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
- * @return {String} Error
+ * @returns {Promise<String|Number>} Error
  */
 function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
-    db.run(`INSERT INTO users(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
-        return err;
-    });
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO users(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    })
 }
 
 
@@ -141,12 +147,18 @@ function GetUsers() {
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
  * @param {boolean} revoked - User access revoked
- * @return {String} Error
+ * @return {Promise<String|Number>} Error
  */
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked) {
-    db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
-        return err;
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
     });
 }
 
