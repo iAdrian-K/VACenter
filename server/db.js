@@ -447,16 +447,16 @@ function GetRoutes() {
  */
 /**
  * Creates a new route
- * @param {*} id 
- * @param {*} num 
- * @param {*} ft 
- * @param {*} operator 
- * @param {*} aircraft 
- * @param {*} depICAO 
- * @param {*} arrICAO 
- * @param {*} aircraftPublic 
- * @param {*} operatorPublic 
- * @param {*} minRank 
+ * @param {string} id - Unique identifier
+ * @param {string} num - Flight Number
+ * @param {number} ft - Flight Time 
+ * @param {string} operator - Airline
+ * @param {string} aircraft - Livery ID
+ * @param {string} depICAO - Departing ICAO
+ * @param {string} arrICAO - Arriving ICAO
+ * @param {string} aircraftPublic - Common aircraft name
+ * @param {string} operatorPublic - Common operator name
+ * @param {string} minRank - Minimum rank to fly route
  * @returns {Promise<String|Number>} Record ID of created Route or error
  */
 function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
@@ -480,5 +480,6 @@ module.exports = {
     GetEvent, GetEvents, CreateEvent,
     GetToken, CreateToken,
     GetAircraft, GetAircrafts, CreateAircraft,
-    GetOperator, GetOperators, CreateOperator
+    GetOperator, GetOperators, CreateOperator,
+    GetRoute, GetRoutes, CreateRoute
     };
