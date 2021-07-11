@@ -1,13 +1,13 @@
 //@ts-check
 
 /**
- * @namespace types
+ * @namespace Types
  */
 
 /**
  * A user object
  * @typedef {object} user
- * @memberOf types
+ * @memberOf Types
  * @property {string} username
  * @property {string} rank
  * @property {string} passwords
@@ -24,7 +24,7 @@
 /**
  * A aircraft object
  * @typedef {object} aircraft
- * @memberOf types
+ * @memberOf Types
  * @property {string} livID
  * @property {string} airID
  * @property {string} livName
@@ -35,7 +35,7 @@
 /**
  * A event object
  * @typedef {object} event
- * @memberOf types
+ * @memberOf Types
  * @property {string} title
  * @property {string} body
  * @property {string} arrAir
@@ -49,7 +49,7 @@
 /**
  * A gate object
  * @typedef {object} gate
- * @memberOf types
+ * @memberOf Types
  * @property {number} id
  * @property {string} event
  * @property {string} gate
@@ -58,7 +58,7 @@
 /**
  * A notif object
  * @typedef {object} notification
- * @memberOf types
+ * @memberOf Types
  * @property {number} id
  * @property {string} user
  * @property {string} title
@@ -71,7 +71,7 @@
 /**
  * A operator object
  * @typedef {object} operator
- * @memberOf types
+ * @memberOf Types
  * @property {number} id
  * @property {string} operator
  */
@@ -79,7 +79,7 @@
 /**
  * A PIREP object
  * @typedef {object} PIREP
- * @memberOf types
+ * @memberOf Types
  * @property {number} id
  * @property {string} vehicle
  * @property {string} vehiclePublic
@@ -97,7 +97,7 @@
 /**
  * A rank object
  * @typedef {object} rank
- * @memberOf types
+ * @memberOf Types
  * @property {number} minH
  * @property {string} rank
  */
@@ -105,7 +105,7 @@
 /**
  * A routes object
  * @typedef {object} route
- * @memberOf types
+ * @memberOf Types
  * @property {number} id
  * @property {string} num
  * @property {number} ft - Flight Time 
@@ -120,7 +120,7 @@
 /**
  * A slot object
  * @typedef {object} slot
- * @memberOf types
+ * @memberOf Types
  * @property {number} id
  * @property {string} route
  * @property {string} depTime
@@ -130,7 +130,7 @@
 /**
  * A token object
  * @typedef {object} token
- * @memberOf types
+ * @memberOf Types
  * @property {string} token
  * @property {string} user
  */
