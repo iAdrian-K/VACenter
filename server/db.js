@@ -1,141 +1,8 @@
 //@ts-check
 
 /**
- * @namespace Types
+ * @typedef {import('./types.js').user} User
  */
-
-/**
- * A user object
- * @typedef {object} user
- * @memberOf Types
- * @property {string} username
- * @property {string} rank
- * @property {string} passwords
- * @property {string} display
- * @property {number} hours
- * @property {boolean} admin
- * @property {string} profileURL
- * @property {string} created
- * @property {string} llogin
- * @property {boolean} cp - Change Password Flag
- * @property {boolean} revoked
- */
-
-/**
- * A aircraft object
- * @typedef {object} aircraft
- * @memberOf Types
- * @property {string} livID
- * @property {string} airID
- * @property {string} livName
- * @property {string} airName
- * @property {string} publicName
- */
-
-/**
- * A event object
- * @typedef {object} event
- * @memberOf Types
- * @property {string} title
- * @property {string} body
- * @property {string} arrAir
- * @property {string} depAir
- * @property {string} depTime
- * @property {string} air
- * @property {string} airName
- * @property {string} server
- */
-
-/**
- * A gate object
- * @typedef {object} gate
- * @memberOf Types
- * @property {number} id
- * @property {string} event
- * @property {string} gate
- * @property {boolean} taken
- */
-
-/**
- * A notif object
- * @typedef {object} notification
- * @memberOf Types
- * @property {number} id
- * @property {string} user
- * @property {string} title
- * @property {string} desc
- * @property {string} icon
- * @property {string} timeStamp
- * @property {string} link
- */
-
-/**
- * A operator object
- * @typedef {object} operator
- * @memberOf Types
- * @property {number} id
- * @property {string} operator
- */
-
-/**
- * A PIREP object
- * @typedef {object} PIREP
- * @memberOf Types
- * @property {number} id
- * @property {string} vehicle
- * @property {string} vehiclePublic
- * @property {string} author
- * @property {string} airline
- * @property {string} depICAO
- * @property {string} arrICAO
- * @property {string} route
- * @property {number} flightTime
- * @property {string} comments
- * @property {number} fuel
- * @property {string} filed
- */
-
-/**
- * A rank object
- * @typedef {object} rank
- * @memberOf Types
- * @property {number} minH
- * @property {string} rank
- */
-
-/**
- * A routes object
- * @typedef {object} route
- * @memberOf Types
- * @property {number} id
- * @property {string} num
- * @property {number} ft - Flight Time 
- * @property {string} operator
- * @property {string} aircraft
- * @property {string} depICAO
- * @property {string} arrICAO
- * @property {string} aircraftPublic
- * @property {string} minRank
- */
-
-/**
- * A slot object
- * @typedef {object} slot
- * @memberOf Types
- * @property {number} id
- * @property {string} route
- * @property {string} depTime
- * @property {string} arrTime
- */
-
-/**
- * A token object
- * @typedef {object} token
- * @memberOf Types
- * @property {string} token
- * @property {string} user
- */
-
 
 const sqlite3 = require('sqlite3').verbose();
 
@@ -390,7 +257,7 @@ function GetUser(username) {
 
 /**
  * @desc Returns all users
- * @returns {Promise<Array.<user>>} User objects in an array
+ * @returns {Promise<Array.<{user}>>} User objects in an array
  */
 function GetUsers() {
     return new Promise((resolve, error) => {
