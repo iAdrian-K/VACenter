@@ -62,6 +62,23 @@ function makeid(length) {
     }
     return result;
 }
+const getAppCookies = (req) => {
+    if (req.headers.cookie) {
+        // We extract the raw cookies from the request headers
+        const rawCookies = req.headers.cookie.split('; ');
+        // rawCookies = ['myapp=secretcookie, 'analytics_cookie=beacon;']
+
+        const parsedCookies = {};
+        rawCookies.forEach(rawCookie => {
+            const parsedCookie = rawCookie.split('=');
+            // parsedCookie = ['myapp', 'secretcookie'], ['analytics_cookie', 'beacon']
+            parsedCookies[parsedCookie[0]] = parsedCookie[1];
+        });
+        return parsedCookies;
+    } else {
+        return {};
+    }
+};
 
 //Config
 let config;
@@ -69,8 +86,13 @@ let config;
  * Reloads Config
  * @name Reload Config
  */
-async function reloadConfig(){
-    config = JSON.parse(await FileRead(path.join(__dirname, "/../", "config.json")))
+function reloadConfig(){
+    return new Promise(async (resolve, error) => {
+        config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
+        console.log(config)
+        resolve(true);
+    })
+    
 }
 reloadConfig()
 
@@ -83,7 +105,7 @@ app.engine('ejs', _tplengine);
 app.listen(process.env.PORT);
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
-app.use(cookieParser());
+//app.use(cookieParser());
 
 //Basic Routes
 app.get('*', async (req, res)=>{
@@ -102,14 +124,24 @@ app.get('*', async (req, res)=>{
             }
         }else{
             let user = null;
-            user = await GetUser(req.cookies.authToken);
+            const cookies = getAppCookies(req);
+            const userID = await GetToken(cookies.authToken)[1];
+            user = await GetUser(userID);
             if(user != null){
                 if(user.cp != true && req.path != "/changePWD"){
                     res.redirect("/changePWD")
                 }else{
                     switch (req.path) {
                         case "/":
-                            res.render("login")
+                            res.render("login", {
+                                config: config
+                            })
+                            break;
+                        case "/home":
+                            res.render("home", {
+                                config: config,
+                                user: user
+                            })
                             break;
                         default:
                             res.render("404")
@@ -119,11 +151,12 @@ app.get('*', async (req, res)=>{
             }else{
                 switch (req.path) {
                     case "/":
-                        res.render("login")
+                        res.render("login", {
+                            config: config
+                        })
                         break;
                     case "/setup":
                         if (!config.other) {
-                            console.log(await GetEvents())
                             res.render("setup")
                         } else {
                             res.redirect('/')
@@ -162,7 +195,9 @@ app.post("/login", async (req,res) =>{
 //setup
 app.post('/setup', async (req,res)=>{
     if(req.body.key){
+        console.log(1)
         const Req = await URLReq(MethodValues.GET, "https://api.vanet.app/airline/v1/profile", { 'X-Api-Key': req.body.key}, null, null)
+        console.log(2)
         if(Req[0]){
             res.status(500).send(Req[0]);
         }
@@ -170,24 +205,34 @@ app.post('/setup', async (req,res)=>{
             const newConfig = JSON.parse(Req[1].body).result;
             newConfig.key = req.body.key;
             newConfig.other = {
-                bg: "",
+                bg: "/public/images/stockBG2.jpg",
                 logo: "",
                 rates: 100,
                 navColor: null,
                 ident: makeid(25)
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
-            await reloadConfig();
-            URLReq(MethodValues.POST, "https://admin.va-center.com/stats/regInstance", null, null, {
-                id:config.other.ident,
-                version: `${cvnb}`,
-                airline: config.name,
-                vanetKey: config.key,
-                wholeConfig: JSON.stringify(config)
-            });
-            res.status(200);
+            setTimeout(async () => {
+                await reloadConfig();
+                setTimeout(async () => {
+                    const regReq = await URLReq(MethodValues.POST, "https://admin.va-center.com/stats/regInstance", null, null, {
+                        id: config.other.ident,
+                        version: `${cvnb}`,
+                        airline: config.name,
+                        vanetKey: config.key,
+                        wholeConfig: JSON.stringify(config)
+                    });
+                    if (regReq[1].statusCode == 200) {
+                        res.sendStatus(200);
+                    } else {
+                        res.status(regReq[1].statusCode).send(regReq[2])
+                    }
+                }, 1000);
+                
+            }, 2000);
+            
         }else{
-
+            res.status(Req[1].statusCode).send(Req[2]);
         }
     }else{
         res.sendStatus(400)
