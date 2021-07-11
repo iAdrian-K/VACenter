@@ -127,6 +127,14 @@
  * @property {string} arrTime
  */
 
+/**
+ * A token object
+ * @typedef {object} token
+ * @memberOf types
+ * @property {string} token
+ * @property {string} user
+ */
+
 
 const sqlite3 = require('sqlite3').verbose();
 
