@@ -32,6 +32,20 @@
  * @property {string} publicName
  */
 
+/**
+ * A event object
+ * @typedef {object} event
+ * @memberOf types
+ * @property {string} title
+ * @property {string} body
+ * @property {string} arrAir
+ * @property {string} depAir
+ * @property {string} depTime
+ * @property {string} air
+ * @property {string} airName
+ * @property {string} server
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
