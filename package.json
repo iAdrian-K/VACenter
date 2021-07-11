@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "nodemon server/index.js --config nodemon.json",
-    "genDoc": "jscdoc -c jsdoc.json",
+    "genDoc": "jsdoc -c jsdoc.json",
     "start": "pm2 start server/index.js",
     "preinstall": "npm i pm2 -g"
   },
@@ -29,10 +29,10 @@
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "express-rate-limit": "^5.3.0",
-    "jsdoc": "^3.6.7",
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {
-    "@types/node": "^16.3.1"
+    "@types/node": "^16.3.1",
+    "jsdoc": "^3.6.7"
   }
 }
