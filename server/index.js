@@ -125,10 +125,12 @@ app.get('*', async (req, res)=>{
         }else{
             let user = null;
             const cookies = getAppCookies(req);
-            const userID = await GetToken(cookies.authToken)[1];
+            console.log(cookies.authToken)
+            const userID = (await GetToken(cookies.authToken)).user;
+            console.log(userID)
             user = await GetUser(userID);
             if(user != null){
-                if(user.cp != true && req.path != "/changePWD"){
+                if( Boolean(user.cp) != false && req.path != "/changePWD"){
                     res.redirect("/changePWD")
                 }else{
                     switch (req.path) {
@@ -140,11 +142,15 @@ app.get('*', async (req, res)=>{
                         case "/home":
                             res.render("home", {
                                 config: config,
-                                user: user
+                                user: user,
+                                active: req.path,
+                                title: "Dashboard"
                             })
                             break;
                         default:
-                            res.render("404")
+                            res.render("404", {
+                                config:config
+                            })
                             break;
                     }
                 }
@@ -163,7 +169,9 @@ app.get('*', async (req, res)=>{
                         }
                         break;
                     default:
-                        res.render("404")
+                        res.render("404", {
+                            config: config
+                        })
                         break;
                 }
             }
@@ -223,8 +231,10 @@ app.post('/setup', async (req,res)=>{
                         wholeConfig: JSON.stringify(config)
                     });
                     if (regReq[1].statusCode == 200) {
+                        await reloadConfig();
                         res.sendStatus(200);
                     } else {
+                        await reloadConfig();
                         res.status(regReq[1].statusCode).send(regReq[2])
                     }
                 }, 1000);

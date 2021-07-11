@@ -246,7 +246,7 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
 /**
  * Returns valid token information if provided token is valid
  * @param {string} token - User token
- * @returns {Promise<Array.<token>>} Array with the token and user associated with the token
+ * @returns {Promise<Object>} Array with the token and user associated with the token
  */
 function GetToken(token) {
     return new Promise((resolve, error) => {
