@@ -124,7 +124,6 @@ function GetEvents() {
                     let eventsProcessed = 0;
                     events.forEach(event => {
                         event.gates = [];
-                        console.log(event)
                         let gatesProcessed = 0;
                         db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, gate) => {
                             event.gates.push(gate)
