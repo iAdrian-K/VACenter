@@ -55,6 +55,19 @@
  * @property {string} gate
  */
 
+/**
+ * A notif object
+ * @typedef {object} notification
+ * @memberOf types
+ * @property {number} id
+ * @property {string} user
+ * @property {string} title
+ * @property {string} desc
+ * @property {string} icon
+ * @property {string} timeStamp
+ * @property {string} link
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
