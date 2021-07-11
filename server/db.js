@@ -284,7 +284,7 @@ function CreateToken(token, user) {
 /**
  * @desc Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
- * @returns {Promise<Array.<user>>} Record for that username in an array
+ * @returns {Promise<user>} Record for that username in an array
  */
 function GetUser(username) {
     return new Promise((resolve, error) => {

@@ -87,24 +87,25 @@ app.get('*', async (req, res)=>{
     }
 })
 
+GetUser("123").then(data=>{
+    console.log(data)
+})
+
 //login
 app.post("/login", async (req,res) =>{
     if(req.body.user && req.body.pwd){
-        const userArr = await GetUser(req.body.id);
-        console.log(bcrypt.hashSync("ADMIN1", 10))
-        console.log(userArr)
-        if (userArr.length == 1){
-            const user = userArr[0];
-            
-            if(bcrypt.compareSync(req.body.password, user.password) == true){
+        const user = await GetUser(req.body.user);
+        if (user){
+            console.log(req.body)
+            if(bcrypt.compareSync(req.body.pwd, user.password) == true){
                 const token = makeid(50);
                 CreateToken(token, user.username);
                 res.cookie("authToken", token, { maxAge: new Date().getTime() + (10 * 365 * 24 * 60 * 60) }).redirect("/home")
             }else{
-                res.redirect('/login?r=ie');
+                res.redirect('/?r=ie');
             }
         }else{
-            res.redirect('/login?r=ie')
+            res.redirect('/?r=ie')
         }
     }else{
         res.sendStatus(400)
