@@ -118,6 +118,24 @@ function GetUser(username) {
 }
 
 /**
+ * @desc Returns password specific username
+ * @param {string} username - Unique username of user 
+ * @returns {Promise<Array>} Record for that username in an array
+ */
+ function GetLogin(username) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.each(`SELECT username, password FROM users WHERE username = ?`, [username], (err, row) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(row);
+            });
+        });
+    });
+}
+
+/**
  * @desc Returns all users
  * @returns {Promise<Array>} User objects in an array
  */
