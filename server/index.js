@@ -10,6 +10,7 @@ require('dotenv').config()
 //Parts
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
 const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
+const { db, GetUser, GetUsers, CreateUser, GetPirep, GetPireps, CreatePirep } = require("./db")
 const _tplengine = require('./defaultpagevar');
 
 
@@ -60,3 +61,6 @@ app.get('*', async (req, res)=>{
         }
     }
 })
+
+//login
+app.post(".")
