@@ -4,7 +4,8 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const express = require('express')
+const express = require('express');
+var bodyParser = require('body-parser')
 require('dotenv').config()
 
 //Parts
@@ -32,6 +33,8 @@ app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
 app.engine('ejs', _tplengine);
 app.listen(process.env.PORT);
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 //Basic Routes
 app.get('*', async (req, res)=>{
