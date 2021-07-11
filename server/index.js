@@ -63,4 +63,10 @@ app.get('*', async (req, res)=>{
 })
 
 //login
-app.post(".")
+app.post("/login", async (req,res) =>{
+    if(req.body.user && req.body.pwd){
+
+    }else{
+        res.sendStatus(404)
+    }
+})
