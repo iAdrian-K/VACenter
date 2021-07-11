@@ -41,6 +41,7 @@
  * @property {string} air
  * @property {string} airName
  * @property {string} server
+ * @property {Array} gates
  */
 
 /**
