@@ -1,6 +1,6 @@
 //@ts-check
 
-const { request } = require("http");
+const request = require("request");
 
 /**@module Requests */
 
@@ -71,6 +71,7 @@ function URLReq(method, url, headers, query, data) {
             qs: query,
             form: data,
         };
+        console.log(options)
         request(options, function (error, response, body) {
             if (error) throw new Error(error);
             resolve([error, response, body]);
