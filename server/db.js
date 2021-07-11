@@ -68,6 +68,14 @@
  * @property {string} link
  */
 
+/**
+ * A operator object
+ * @typedef {object} operator
+ * @memberOf types
+ * @property {number} id
+ * @property {string} operator
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
