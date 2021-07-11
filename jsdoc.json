@@ -20,6 +20,7 @@
         "showAccessFilter": true,
         "collapseSymbols": false,
         "sourceRootPath": "./server",
+        "theme": "cyborg",
         "outputSourceFiles": true,
         "outputSourcePath": true,
         "search": true
