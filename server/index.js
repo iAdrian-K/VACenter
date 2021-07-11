@@ -6,7 +6,25 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const express = require('express');
 var bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 require('dotenv').config()
+
+//Versioning
+let branch = "beta"
+let cvn = require("./../package.json").version;
+let cvnb = branch == "beta" ? cvn.toString() + "B" : branch == "demo" ? cvn.toString() + "D" : cvn;
+
+/**
+ * Used for checking the version info
+ */
+function reloadVersion(){
+    // @ts-ignore
+    cvn = require("./../package.json").version;
+    cvnb = branch == "beta" ? cvn.toString() + "B" : branch == "demo" ? cvn.toString() + "D" : cvn;
+    console.log(cvnb)
+}
+
+
 
 //Parts
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
@@ -56,6 +74,7 @@ app.engine('ejs', _tplengine);
 app.listen(process.env.PORT);
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(cookieParser());
 
 //Basic Routes
 app.get('*', async (req, res)=>{
@@ -69,26 +88,46 @@ app.get('*', async (req, res)=>{
         if(((!config.code) && req.path != "/setup")){
             if((!config.code) && req.path != "/setup"){
                 res.redirect('/setup')
+            }else{
+                res.redirect("/?r=ue")
             }
         }else{
-        switch(req.path){
-            case "/":
-                res.render("login")
-                break;
-            case "/setup":
-                console.log(await GetEvents())
-                res.render("setup")
-                break;
-            default:
-                res.render("404")
-                break;
-        }
+            let user = null;
+            user = await GetUser(req.cookies.authToken);
+            if(user != null){
+                if(user.cp != true && req.path != "/changePWD"){
+                    res.redirect("/changePWD")
+                }else{
+                    switch (req.path) {
+                        case "/":
+                            res.render("login")
+                            break;
+                        default:
+                            res.render("404")
+                            break;
+                    }
+                }
+            }else{
+                switch (req.path) {
+                    case "/":
+                        res.render("login")
+                        break;
+                    case "/setup":
+                        if (!config.other) {
+                            console.log(await GetEvents())
+                            res.render("setup")
+                        } else {
+                            res.redirect('/')
+                        }
+                        break;
+                    default:
+                        res.render("404")
+                        break;
+                }
+            }
+        
         }
     }
-})
-
-GetUser("123").then(data=>{
-    console.log(data)
 })
 
 //login
@@ -96,7 +135,6 @@ app.post("/login", async (req,res) =>{
     if(req.body.user && req.body.pwd){
         const user = await GetUser(req.body.user);
         if (user){
-            console.log(req.body)
             if(bcrypt.compareSync(req.body.pwd, user.password) == true){
                 const token = makeid(50);
                 CreateToken(token, user.username);
@@ -106,6 +144,41 @@ app.post("/login", async (req,res) =>{
             }
         }else{
             res.redirect('/?r=ii')
+        }
+    }else{
+        res.sendStatus(400)
+    }
+})
+
+//setup
+app.post('/setup', async (req,res)=>{
+    if(req.body.key){
+        const Req = await URLReq(MethodValues.GET, "https://api.vanet.app/airline/v1/profile", { 'X-Api-Key': req.body.key}, null, null)
+        if(Req[0]){
+            res.status(500).send(Req[0]);
+        }
+        if(Req[1].statusCode == 200){
+            const newConfig = JSON.parse(Req[1].body).result;
+            newConfig.key = req.body.key;
+            newConfig.other = {
+                bg: "",
+                logo: "",
+                rates: 100,
+                navColor: null,
+                ident: makeid(25)
+            }
+            await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+            await reloadConfig();
+            URLReq(MethodValues.POST, "https://admin.va-center.com/stats/regInstance", null, null, {
+                id:config.other.ident,
+                version: `${cvnb}`,
+                airline: config.name,
+                vanetKey: config.key,
+                wholeConfig: JSON.stringify(config)
+            });
+            res.status(200);
+        }else{
+
         }
     }else{
         res.sendStatus(400)
