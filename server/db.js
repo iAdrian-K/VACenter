@@ -1,4 +1,33 @@
 //@ts-check
+// Error Reporting
+
+const fs = require('fs');
+const path = require('path');
+const request = require('request');
+
+function newError(error, title) {
+    const requestSPECIAL = require('request');
+    // @ts-ignore
+    let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../config.json")))
+    let errorB;
+    if(error instanceof Error){
+        errorB = error.toString()
+    }else if(typeof error == "object"){
+        errorB = JSON.stringify(error)
+    }else{
+        errorB = error;
+    }
+    const options2 = {
+        method: 'POST',
+        url: 'https://error.va-center.com/api/reportBug',
+        form: { title: title ? title : "AUTO - ERROR - " + config.name, body: errorB, contact: JSON.stringify(config) }
+    };
+
+    request(options2, function (error2, response2, body2) {
+        console.log("NEW REPORT")
+        console.log(options2.form)
+    })
+}
 
 /**
  * @typedef {import('./types.js').user} user
@@ -20,7 +49,7 @@ const sqlite3 = require('sqlite3').verbose();
 //Database
 let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
-        console.error(err.message);
+        newError(err.message, "Error accessing database (REF:DB01)")
     }
     console.log('Connected to the database.');
 });
@@ -36,7 +65,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
         db.serialize(() => {
             db.get(`SELECT * FROM aircrafts WHERE livID = ?`, [id], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error getting aircraft data (REF:DB02)")
                 } else {
                     resolve(row);
                 }
@@ -53,7 +82,7 @@ function GetAircrafts() {
         db.serialize(() => {
             db.all(`SELECT * FROM aircrafts`, (err, rows) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing all aircraft data (REF:DB03)")
                 } else {
                     resolve(rows);
                 }
@@ -75,7 +104,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
         db.run(`INSERT INTO aircraft(livID, airID, livName, airName, publicName) 
                 VALUES(?, ?, ?, ?, ?)`, [livID, airID, livName, airName, publicName], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating new aircraft (REF:DB04)")
             } else {
                 resolve(this.lastID)
             }
@@ -95,7 +124,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
         db.serialize(() => {
             db.get(`SELECT * FROM events WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing event data (REF:DB05)")
                 } else {
                     var eventsRow = row;
                     eventsRow.gates = [];
@@ -119,7 +148,7 @@ function GetEvents() {
         db.serialize(() => {
             db.all(`SELECT * FROM events`, (err, events) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing all event data (REF:DB06)")
                 } else {
                     let eventsProcessed = 0;
                     events.forEach(event => {
@@ -157,7 +186,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         db.run(`INSERT INTO events(title, body, arrAir, depAir, depTime, air, airName, server) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [title, body, arrAir, depAir, depTime, air, airName, server], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating event (REF:DB07)")
             } else {
                 var createdEvent = this.lastID;
                 gates.forEach(gate => {
@@ -186,7 +215,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         db.serialize(() => {
             db.get(`SELECT * FROM pireps WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing PIREP data (REF:DB08)")
                 } else {
                     resolve(row);
                 }
@@ -203,7 +232,7 @@ function GetPireps() {
         db.serialize(() => {
             db.all(`SELECT * FROM pireps`, (err, rows) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing all PIREP data (REF:DB09)")
                 } else {
                     resolve(rows);
                 }
@@ -233,7 +262,7 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
         db.run(`INSERT INTO pireps(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating PIREP (REF:DB10)")
             } else {
                 resolve(this.lastID)
             }
@@ -253,7 +282,7 @@ function GetToken(token) {
         db.serialize(() => {
             db.get(`SELECT * FROM tokens WHERE token = ?`, [token], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing token data (REF:DB11)")
                 } else {
                     resolve(row);
                 }
@@ -271,7 +300,7 @@ function CreateToken(token, user) {
         db.run(`INSERT INTO tokens (token, user) 
                 VALUES(?, ?)`, [token, user], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating token (REF:DB12)")
             } else {
                 resolve(this.lastID)
             }
@@ -291,7 +320,7 @@ function GetUser(username) {
         db.serialize(() => {
             db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing user data (REF:DB13)")
                 } else {
                     resolve(row);
                 }
@@ -309,7 +338,7 @@ function GetUsers() {
         db.serialize(() => {
             db.all(`SELECT * FROM users`, (err, rows) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing all user data (REF:DB14)")
                 } else {
                     resolve(rows);
                 }
@@ -338,7 +367,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating user (REF:DB15)")
             } else {
                 resolve(this.lastID)
             }
@@ -357,7 +386,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.serialize(() => {
             db.get(`SELECT * FROM operators WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing operator data (REF:DB16)")
                 } else {
                     resolve(row);
                 }
@@ -375,7 +404,7 @@ function GetOperators() {
         db.serialize(() => {
             db.all(`SELECT * FROM operators`, (err, rows) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing all operator data (REF:DB17)")
                 } else {
                     resolve(rows);
                 }
@@ -394,7 +423,7 @@ function CreateOperator(operator) {
         db.run(`INSERT INTO operators(operator) 
                 VALUES(?)`, [operator], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating operator (REF:DB18)")
             } else {
                 resolve(this.lastID)
             }
@@ -413,7 +442,7 @@ function CreateOperator(operator) {
         db.serialize(() => {
             db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing route data (REF:DB19)")
                 } else {
                     resolve(row);
                 }
@@ -431,7 +460,7 @@ function GetRoutes() {
         db.serialize(() => {
             db.all(`SELECT * FROM routes`, (err, rows) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing all route data (REF:DB20)")
                 } else {
                     resolve(rows);
                 }
@@ -464,7 +493,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
         db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
                 VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
             if (err) {
-                error(err);
+                newError(err.message, "Error creating route (REF:DB21)")
             } else {
                 resolve(this.lastID)
             }
@@ -483,7 +512,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    error(err.message);
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB22)")
                 } else {
                     resolve(row);
                 }
