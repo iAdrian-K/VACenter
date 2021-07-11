@@ -284,7 +284,7 @@ function CreateToken(token, user) {
 /**
  * @desc Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
- * @returns {Promise<user>} Record for that username in an array
+ * @returns {Promise<user>} Record for that username
  */
 function GetUser(username) {
     return new Promise((resolve, error) => {
@@ -346,6 +346,62 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
     });
 }
 
+// Operators
+/**
+ * @desc Returns record of specific Operator ID
+ * @param {string} id - Unique id of operator 
+ * @returns {Promise<operator>} Record for that operator
+ */
+ function GetOperator(id) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM operators WHERE id = ?`, [id], (err, row) => {
+                if (err) {
+                    error(err.message);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * @desc Returns all operators
+ * @returns {Promise<Array.<{operator}>>} Operator objects in an array
+ */
+function GetOperators() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM operators`, (err, rows) => {
+                if (err) {
+                    error(err.message);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * @desc Creates a new operator
+ * @param {string} operator - Name of operator
+ * returns {Promise<String|Number>} Record ID of created Operator or error
+ */
+function CreateOperator(operator) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO operators(operator) 
+                VALUES(?)`, [operator], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    });
+}
+
 
 module.exports = { 
     db,
@@ -354,4 +410,5 @@ module.exports = {
     GetEvent, GetEvents, CreateEvent,
     GetToken, CreateToken,
     GetAircraft, GetAircrafts, CreateAircraft,
+    GetOperator, GetOperators, CreateOperator
     };

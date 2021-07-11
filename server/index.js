@@ -29,7 +29,15 @@ function reloadVersion(){
 //Parts
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
 const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
-const { db, GetUser, GetUsers, CreateUser, GetPirep, GetPireps, CreatePirep, GetEvent, GetEvents, CreateEvent, GetToken, CreateToken, GetAircraft, GetAircrafts, CreateAircraft } = require("./db")
+const { 
+    db,
+    GetUser, GetUsers, CreateUser,
+    GetPirep, GetPireps, CreatePirep,
+    GetEvent, GetEvents, CreateEvent,
+    GetToken, CreateToken,
+    GetAircraft, GetAircrafts, CreateAircraft,
+    GetOperator, GetOperators, CreateOperator
+    } = require("./db")
 const _tplengine = require('./defaultpagevar');
 /**
  * @typedef {import('./types.js').user} user
