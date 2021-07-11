@@ -88,6 +88,24 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
 /** @namespace DB - Slots */
 
 /** @namespace DB - Tokens */
+/**
+ * @desc Returns valid token information if provided token is valid
+ * @param {string} token - User token
+ * @returns {Promise<array>} Array with the token and user associated with the token
+ * @memberof DB - Tokens
+ */
+function GetToken(token) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM tokens WHERE token = ?`, [token], (err, row) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(row);
+            })
+        })
+    })
+}
 
 /** @namespace DB - Users */
 /**
