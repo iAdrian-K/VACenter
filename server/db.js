@@ -262,7 +262,7 @@ function GetToken(token) {
     })
 }
 /**
- * 
+ * @desc Creates new token
  * @param {String} token 
  * @param {String} user 
  */
