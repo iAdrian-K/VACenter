@@ -16,17 +16,141 @@ let db = new sqlite3.Database('./database.db', (err) => {
     console.log('Connected to the database.');
 });
 
+// Aircrafts
+/**
+ * @desc Returns record of specific aircraft id
+ * @param {string} id - Unique id of aircraft 
+ * @returns {Promise<Array.<aircraft>} Record for that aircraft in an array
+ */
+ function GetAircraft(id) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM aircrafts WHERE livID = ?`, [id], (err, row) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(row);
+            });
+        });
+    });
+}
+/**
+ * @desc Returns all aircrafts
+ * @returns {Promise<Array.<aircraft>>} All aircraft objects in an array
+ */
+function GetAircrafts() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM aircrafts`, (err, rows) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(rows);
+            });
+        });
+    });
+}
+/**
+ * @desc Creates new Aircraft
+ * @param {*} livID 
+ * @param {*} airID 
+ * @param {*} livName 
+ * @param {*} airName 
+ * @param {*} publicName 
+ * @returns {Promise<String|Number>} Error 
+ */
+function CreateAircraft(livID, airID, livName, airName, publicName) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO aircraft(livID, airID, livName, airName, publicName) 
+                VALUES(?, ?, ?, ?, ?)`, [livID, airID, livName, airName, publicName], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    })
+}
+
+// Events
+/**
+ * @desc Returns record of specific event id
+ * @param {string} id - Unique id of event 
+ * @returns {Promise<Array.<aircraft>} Record for that aircraft in an array
+ */
+ function GetEvent(id) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM events WHERE id = ?`, [id], (err, row) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(row);
+            });
+        });
+    });
+}
+/**
+ * @desc Returns all aircrafts
+ * @returns {Promise<Array.<aircraft>>} All aircraft objects in an array
+ */
+function GetEvents() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM aircrafts`, (err, rows) => {
+                if (err) {
+                    error(err.message);
+                }
+                resolve(rows);
+            });
+        });
+    });
+}
+/**
+ * @desc Creates new Event
+ * @param {String} title
+ * @param {String} body 
+ * @param {String} arrAir 
+ * @param {String} depAir 
+ * @param {String} depTime 
+ * @param {String} air 
+ * @param {String} airName 
+ * @param {String} server 
+ * @param {Array} gates 
+ * @returns {Promise<String|Number>} Error
+ */
+function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server, gates) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO events(title, body, arrAir, depAir, depTime, air, airName, server) 
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [title, body, arrAir, depAir, depTime, air, airName, server], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                var createdEvent = this.lastID;
+                gates.forEach(gate => {
+                    db.run(`INSERT INTO gates(eventID, gate, taken) 
+                            VALUES(?, ?, 0)`, [createdEvent, gate], function (err) {
+                        if (err) {
+                            error(err);
+                        }
+                    });
+                })
+                resolve(createdEvent);
+            }
+        });
+    })
+}
 
 // PIREPS
 /**
  * @desc Returns record of specific PIREP id
  * @param {string} id - Unique id of prirep 
- * @returns {Promise<Array>} Record for that prirep in an array
+ * @returns {Promise<Array.<PIREP>>} Record for that prirep in an array
  */
  function GetPirep(id) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.each(`SELECT * FROM pireps WHERE id = ?`, [id], (err, row) => {
+            db.get(`SELECT * FROM pireps WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     error(err.message);
                 }
@@ -37,7 +161,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
 }
 /**
  * @desc Returns all pireps
- * @returns {Promise<Array>} All PIREP Objects in an array
+ * @returns {Promise<Array.<PIREP>>} All PIREP Objects in an array
  */
 function GetPireps() {
     return new Promise((resolve, error) => {
@@ -70,7 +194,7 @@ function GetPireps() {
  */
 function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO users(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
+        db.run(`INSERT INTO pireps(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
             if (err) {
                 error(err);
@@ -86,7 +210,7 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
 /**
  * @desc Returns valid token information if provided token is valid
  * @param {string} token - User token
- * @returns {Promise<array>} Array with the token and user associated with the token
+ * @returns {Promise<Array.<token>>} Array with the token and user associated with the token
  */
 function GetToken(token) {
     return new Promise((resolve, error) => {
@@ -106,12 +230,12 @@ function GetToken(token) {
 /**
  * @desc Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
- * @returns {Promise<Array>} Record for that username in an array
+ * @returns {Promise<Array.<user>>} Record for that username in an array
  */
 function GetUser(username) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.each(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+            db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
                     error(err.message);
                 }
