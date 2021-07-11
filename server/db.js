@@ -130,11 +130,9 @@ function GetEvents() {
                         }, function() {
                             events.push(event)
                             processed ++;
-                            if (processed == rows.length){
-                                resolve(events); 
-                            }
+                            
                         })
-                    })
+                    }, function(){})
                 }
             });
         });
