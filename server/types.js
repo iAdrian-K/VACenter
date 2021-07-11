@@ -9,7 +9,7 @@
  * @typedef {Object} user
  * @property {string} username
  * @property {string} rank
- * @property {string} passwords
+ * @property {string} password
  * @property {string} display
  * @property {number} hours
  * @property {boolean} admin

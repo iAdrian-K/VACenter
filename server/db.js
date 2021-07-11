@@ -1,7 +1,16 @@
 //@ts-check
 
 /**
- * @typedef {import('./types.js').user} User
+ * @typedef {import('./types.js').user} user
+ * @typedef {import('./types.js').aircraft} aircraft
+ * @typedef {import('./types.js').event} event
+ * @typedef {import('./types.js').gate} gate
+ * @typedef {import('./types.js').notification} notification
+ * @typedef {import('./types.js').operator} operator
+ * @typedef {import('./types.js').PIREP} PIREP
+ * @typedef {import('./types.js').rank} rank
+ * @typedef {import('./types.js').route} route
+ * @typedef {import('./types.js').slot} slot
  */
 
 const sqlite3 = require('sqlite3').verbose();
