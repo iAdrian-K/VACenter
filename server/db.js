@@ -266,7 +266,7 @@ function GetToken(token) {
  * @param {String} token 
  * @param {String} user 
  */
-function createToken(token, user) {
+function CreateToken(token, user) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO tokens (token, user) 
                 VALUES(?, ?)`, [token, user], function (err) {
@@ -347,7 +347,11 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
 }
 
 
-module.exports = { db,
+module.exports = { 
+    db,
     GetUser, GetUsers, CreateUser,
     GetPirep, GetPireps, CreatePirep,
-    GetEvent, GetEvents, CreateEvent};
+    GetEvent, GetEvents, CreateEvent,
+    GetToken, CreateToken,
+    GetAircraft, GetAircrafts, CreateAircraft,
+    };
