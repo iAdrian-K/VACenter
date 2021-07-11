@@ -29,7 +29,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
 /**
  * @desc Returns record of specific aircraft id
  * @param {string} id - Unique id of aircraft 
- * @returns {Promise<Array.<aircraft>} Record for that aircraft in an array
+ * @returns {Promise<Array.<aircraft>>} Record for that aircraft in an array
  */
  function GetAircraft(id) {
     return new Promise((resolve, error) => {
