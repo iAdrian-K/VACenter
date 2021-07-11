@@ -117,6 +117,17 @@
  * @property {string} minRank
  */
 
+/**
+ * A slot object
+ * @typedef {object} slot
+ * @memberOf types
+ * @property {number} id
+ * @property {string} route
+ * @property {string} depTime
+ * @property {string} arrTime
+ */
+
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
