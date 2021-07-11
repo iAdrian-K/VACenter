@@ -36,7 +36,8 @@ const {
     GetEvent, GetEvents, CreateEvent,
     GetToken, CreateToken,
     GetAircraft, GetAircrafts, CreateAircraft,
-    GetOperator, GetOperators, CreateOperator
+    GetOperator, GetOperators, CreateOperator,
+    GetRoute, GetRoutes, CreateRoute
     } = require("./db")
 const _tplengine = require('./defaultpagevar');
 /**

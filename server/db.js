@@ -27,7 +27,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
 
 // Aircrafts
 /**
- * @desc Returns record of specific aircraft id
+ * Returns record of specific aircraft id
  * @param {string} id - Unique id of aircraft 
  * @returns {Promise<Array.<aircraft>>} Record for that aircraft in an array
  */
@@ -45,7 +45,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
     });
 }
 /**
- * @desc Returns all aircrafts
+ * Returns all aircrafts
  * @returns {Promise<Array.<aircraft>>} All aircraft objects in an array
  */
 function GetAircrafts() {
@@ -62,7 +62,7 @@ function GetAircrafts() {
     });
 }
 /**
- * @desc Creates new Aircraft
+ * Creates new Aircraft
  * @param {String} livID - Livery ID
  * @param {String} airID - Aircraft ID
  * @param {String} livName - Livery Name
@@ -86,7 +86,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
 
 // Events
 /**
- * @desc Returns record of specific event id
+ * Returns record of specific event id
  * @param {string} id - Unique id of event 
  * @returns {Promise<Array.<event>>} Record for that aircraft in an array
  */
@@ -111,7 +111,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
     });
 }
 /**
- * @desc Returns all aircrafts
+ * Returns all aircrafts
  * @returns {Promise<Array.<event>>} All aircraft objects in an array
  */
 function GetEvents() {
@@ -140,7 +140,7 @@ function GetEvents() {
     });
 }
 /**
- * @desc Creates new Event
+ * Creates new Event
  * @param {String} title
  * @param {String} body 
  * @param {String} arrAir 
@@ -177,7 +177,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
 
 // PIREPS
 /**
- * @desc Returns record of specific PIREP id
+ * Returns record of specific PIREP id
  * @param {string} id - Unique id of prirep 
  * @returns {Promise<Array.<PIREP>>} Record for that prirep in an array
  */
@@ -195,7 +195,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
     });
 }
 /**
- * @desc Returns all pireps
+ * Returns all pireps
  * @returns {Promise<Array.<PIREP>>} All PIREP Objects in an array
  */
 function GetPireps() {
@@ -212,7 +212,7 @@ function GetPireps() {
     });
 }
 /**
- * @desc Creates new PIREP
+ * Creates new PIREP
  * @param {string} id - Unique ID of pirep
  * @param {string} vehicle - Livery ID
  * @param {string} vehiclePublic - Name of Vehicle
@@ -244,7 +244,7 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
 
 // Tokens
 /**
- * @desc Returns valid token information if provided token is valid
+ * Returns valid token information if provided token is valid
  * @param {string} token - User token
  * @returns {Promise<Array.<token>>} Array with the token and user associated with the token
  */
@@ -262,7 +262,7 @@ function GetToken(token) {
     })
 }
 /**
- * @desc Creates new token
+ * Creates new token
  * @param {String} token 
  * @param {String} user 
  */
@@ -282,7 +282,7 @@ function CreateToken(token, user) {
 
 // Users
 /**
- * @desc Returns record of specific User ID (UID)
+ * Returns record of specific User ID (UID)
  * @param {string} username - Unique username of user 
  * @returns {Promise<user>} Record for that username
  */
@@ -301,7 +301,7 @@ function GetUser(username) {
 }
 
 /**
- * @desc Returns all users
+ * Returns all users
  * @returns {Promise<Array.<{user}>>} User objects in an array
  */
 function GetUsers() {
@@ -319,7 +319,7 @@ function GetUsers() {
 }
 
 /**
- * @desc Creates a new user
+ * Creates a new user
  * @param {string} username - Digit Username
  * @param {string} rank - Rank of user
  * @param {boolean} admin - Admin status
@@ -348,7 +348,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
 
 // Operators
 /**
- * @desc Returns record of specific Operator ID
+ * Returns record of specific Operator ID
  * @param {string} id - Unique id of operator 
  * @returns {Promise<operator>} Record for that operator
  */
@@ -367,7 +367,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
 }
 
 /**
- * @desc Returns all operators
+ * Returns all operators
  * @returns {Promise<Array.<{operator}>>} Operator objects in an array
  */
 function GetOperators() {
@@ -385,7 +385,7 @@ function GetOperators() {
 }
 
 /**
- * @desc Creates a new operator
+ * Creates a new operator
  * @param {string} operator - Name of operator
  * returns {Promise<String|Number>} Record ID of created Operator or error
  */
@@ -393,6 +393,76 @@ function CreateOperator(operator) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO operators(operator) 
                 VALUES(?)`, [operator], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    });
+}
+
+// Routes
+/**
+ * Returns record of specific Route ID
+ * @param {string} id - Unique id of route 
+ * @returns {Promise<route>} Record for that route
+ */
+ function GetRoute(id) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
+                if (err) {
+                    error(err.message);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Returns all routes
+ * @returns {Promise<Array.<{route}>>} Route objects in an array
+ */
+function GetRoutes() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM routes`, (err, rows) => {
+                if (err) {
+                    error(err.message);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * 
+ * @param {string} operator - Name of operator
+ * 
+ */
+/**
+ * Creates a new route
+ * @param {*} id 
+ * @param {*} num 
+ * @param {*} ft 
+ * @param {*} operator 
+ * @param {*} aircraft 
+ * @param {*} depICAO 
+ * @param {*} arrICAO 
+ * @param {*} aircraftPublic 
+ * @param {*} operatorPublic 
+ * @param {*} minRank 
+ * @returns {Promise<String|Number>} Record ID of created Route or error
+ */
+function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
+                VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
             if (err) {
                 error(err);
             } else {
