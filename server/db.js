@@ -53,6 +53,7 @@
  * @property {number} id
  * @property {string} event
  * @property {string} gate
+ * @property {boolean} taken
  */
 
 /**
