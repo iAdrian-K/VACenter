@@ -1,13 +1,14 @@
 const sqlite3 = require('sqlite3').verbose();
+
 //Database
-//@ts-ignore
 let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         console.error(err.message);
     }
     console.log('Connected to the database.');
 });
-//@ts-ignore
+
+
 function GetUser(username) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
@@ -53,7 +54,8 @@ function GetPirep(id) {
         });
     });
 }
-//@ts-ignore
+
+
 function GetPireps() {
     return new Promise((resolve, error) => {
         db.serialize(() => {
