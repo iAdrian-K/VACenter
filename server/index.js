@@ -68,7 +68,17 @@ app.get('*', async (req, res)=>{
 //login
 app.post("/login", async (req,res) =>{
     if(req.body.user && req.body.pwd){
-        
+        const userArr = await GetUser(req.body.id);
+        if (userArr.length == 1){
+            const user = userArr[0];
+            if(bcrypt.compareSync(req.body.password, user.password) == true){
+                //
+            }else{
+                res.redirect('/login?r=ie');
+            }
+        }else{
+            res.redirect('/login?r=ie')
+        }
     }else{
         res.sendStatus(404)
     }
