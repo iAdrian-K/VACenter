@@ -25,7 +25,16 @@ const _tplengine = require('./defaultpagevar');
  * @typedef {import('./types.js').route} route
  * @typedef {import('./types.js').slot} slot
  */
-
+function makeid(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
+}
 
 //Config
 let config;

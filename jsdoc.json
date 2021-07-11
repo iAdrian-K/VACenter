@@ -15,6 +15,7 @@
         "includeDate": false,
         "inlineNav": false,
         "inverseNav": false,
+        "sort": false,
         "linenums": true,
         "showTableOfContents": true,
         "showAccessFilter": true,
