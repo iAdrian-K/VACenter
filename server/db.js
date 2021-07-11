@@ -1,5 +1,9 @@
 //@ts-check
 
+/**
+ * @typedef {import('./types.js').user} user
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
@@ -119,7 +123,7 @@ function GetUser(username) {
 
 /**
  * @desc Returns all users
- * @returns {Promise<Array>} User objects in an array
+ * @returns {Promise<Array.<user>>} User objects in an array
  */
 function GetUsers() {
     return new Promise((resolve, error) => {
