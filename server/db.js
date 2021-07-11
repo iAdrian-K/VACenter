@@ -63,12 +63,12 @@ function GetAircrafts() {
 }
 /**
  * @desc Creates new Aircraft
- * @param {*} livID 
- * @param {*} airID 
- * @param {*} livName 
- * @param {*} airName 
- * @param {*} publicName 
- * @returns {Promise<String|Number>} Error 
+ * @param {String} livID - Livery ID
+ * @param {String} airID - Aircraft ID
+ * @param {String} livName - Livery Name
+ * @param {String} airName - Aircraft Name
+ * @param {String} publicName - Public Name (Livery Name and Aircraft Name)
+ * @returns {Promise<String|Number>} Record ID of created Aircraft or error
  */
 function CreateAircraft(livID, airID, livName, airName, publicName) {
     return new Promise((resolve, error) => {
@@ -150,7 +150,7 @@ function GetEvents() {
  * @param {String} airName 
  * @param {String} server 
  * @param {Array} gates 
- * @returns {Promise<String|Number>} Error
+ * returns {Promise<String|Number>} Record ID of created Event or error
  */
 function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server, gates) {
     return new Promise((resolve, error) => {
@@ -226,7 +226,7 @@ function GetPireps() {
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
- * @returns {Promise<String|Number>} Error
+ * returns {Promise<String|Number>} Record ID of created PIREP or error
  */
 function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     return new Promise((resolve, error) => {
@@ -260,6 +260,23 @@ function GetToken(token) {
             })
         })
     })
+}
+/**
+ * 
+ * @param {String} token 
+ * @param {String} user 
+ */
+function createToken(token, user) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO tokens (token, user) 
+                VALUES(?, ?)`, [token, user], function (err) {
+            if (err) {
+                error(err);
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    });
 }
 
 
@@ -314,7 +331,7 @@ function GetUsers() {
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
  * @param {boolean} revoked - User access revoked
- * @return {Promise<String|Number>} Error
+ * returns {Promise<String|Number>} Record ID of created User or error
  */
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked) {
     return new Promise((resolve, error) => {
