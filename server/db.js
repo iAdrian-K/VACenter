@@ -102,6 +102,21 @@
  * @property {string} rank
  */
 
+/**
+ * A routes object
+ * @typedef {object} route
+ * @memberOf types
+ * @property {number} id
+ * @property {string} num
+ * @property {number} ft - Flight Time 
+ * @property {string} operator
+ * @property {string} aircraft
+ * @property {string} depICAO
+ * @property {string} arrICAO
+ * @property {string} aircraftPublic
+ * @property {string} minRank
+ */
+
 const sqlite3 = require('sqlite3').verbose();
 
 /**@module Database */
