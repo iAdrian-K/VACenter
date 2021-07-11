@@ -1,3 +1,5 @@
+//@ts-check
+
 const sqlite3 = require('sqlite3').verbose();
 
 //Database
@@ -8,7 +10,12 @@ let db = new sqlite3.Database('./database.db', (err) => {
     console.log('Connected to the database.');
 });
 
-
+//Users
+/**
+ * @desc Returns record of specific UID
+ * @param {string} username - unique username of user 
+ * @returns {promise} Record for that username in an array
+ */
 function GetUser(username) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
@@ -21,7 +28,12 @@ function GetUser(username) {
         });
     });
 }
-//@ts-ignore
+
+/**
+ * @desc Returns all users
+ *
+ * @returns {promise} All users in an array
+ */
 function GetUsers() {
     return new Promise((resolve, error) => {
         db.serialize(() => {
@@ -34,14 +46,14 @@ function GetUsers() {
         });
     });
 }
-//@ts-ignore
+
 function CreateUser(username, rank, admin, password, display, hours, created, llogin, cp, revoked) {
     db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
         return err;
     });
 }
-//@ts-ignore
+
 function GetPirep(id) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
@@ -55,7 +67,6 @@ function GetPirep(id) {
     });
 }
 
-
 function GetPireps() {
     return new Promise((resolve, error) => {
         db.serialize(() => {
@@ -68,7 +79,7 @@ function GetPireps() {
         });
     });
 }
-//@ts-ignore
+
 function CreatePirep(username, rank, admin, password, display, hours, created, llogin, cp, revoked) {
     db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
