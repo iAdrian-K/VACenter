@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "nodemon server/index.js --config nodemon.json",
+    "genDoc": "jscdoc -c jsdoc.json",
     "start": "pm2 start server/index.js",
     "preinstall": "npm i pm2 -g"
   },
