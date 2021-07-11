@@ -161,8 +161,9 @@ let db = new sqlite3.Database('./database.db', (err) => {
             db.get(`SELECT * FROM aircrafts WHERE livID = ?`, [id], (err, row) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(row);
                 }
-                resolve(row);
             });
         });
     });
@@ -177,8 +178,9 @@ function GetAircrafts() {
             db.all(`SELECT * FROM aircrafts`, (err, rows) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(rows);
                 }
-                resolve(rows);
             });
         });
     });
@@ -205,11 +207,12 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
     })
 }
 
+
 // Events
 /**
  * @desc Returns record of specific event id
  * @param {string} id - Unique id of event 
- * @returns {Promise<Array.<aircraft>} Record for that aircraft in an array
+ * @returns {Promise<Array.<event>>} Record for that aircraft in an array
  */
  function GetEvent(id) {
     return new Promise((resolve, error) => {
@@ -217,24 +220,26 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
             db.get(`SELECT * FROM events WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(row);
                 }
-                resolve(row);
             });
         });
     });
 }
 /**
  * @desc Returns all aircrafts
- * @returns {Promise<Array.<aircraft>>} All aircraft objects in an array
+ * @returns {Promise<Array.<event>>} All aircraft objects in an array
  */
 function GetEvents() {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.all(`SELECT * FROM aircrafts`, (err, rows) => {
+            db.all(`SELECT * FROM events`, (err, rows) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(rows);
                 }
-                resolve(rows);
             });
         });
     });
@@ -274,6 +279,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
     })
 }
 
+
 // PIREPS
 /**
  * @desc Returns record of specific PIREP id
@@ -286,8 +292,9 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
             db.get(`SELECT * FROM pireps WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(row);
                 }
-                resolve(row);
             });
         });
     });
@@ -302,8 +309,9 @@ function GetPireps() {
             db.all(`SELECT * FROM pireps`, (err, rows) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(rows);
                 }
-                resolve(rows);
             });
         });
     });
@@ -351,8 +359,9 @@ function GetToken(token) {
             db.get(`SELECT * FROM tokens WHERE token = ?`, [token], (err, row) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(row);
                 }
-                resolve(row);
             })
         })
     })
@@ -371,8 +380,9 @@ function GetUser(username) {
             db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(row);
                 }
-                resolve(row);
             });
         });
     });
@@ -388,8 +398,9 @@ function GetUsers() {
             db.all(`SELECT * FROM users`, (err, rows) => {
                 if (err) {
                     error(err.message);
+                } else {
+                    resolve(rows);
                 }
-                resolve(rows);
             });
         });
     });
