@@ -11,7 +11,7 @@ require('dotenv').config()
 //Parts
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
 const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
-const { db, GetUser, GetUsers, CreateUser, GetPirep, GetPireps, CreatePirep } = require("./db")
+const { db, GetUser, GetUsers, CreateUser, GetPirep, GetPireps, CreatePirep, GetEvent, GetEvents, CreateEvent } = require("./db")
 const _tplengine = require('./defaultpagevar');
 /**
  * @typedef {import('./types.js').user} User
@@ -58,6 +58,7 @@ app.get('*', async (req, res)=>{
                 res.render("login")
                 break;
             case "/setup":
+                console.log(await GetEvents())
                 res.render("setup")
                 break;
             default:

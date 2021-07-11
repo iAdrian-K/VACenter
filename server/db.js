@@ -97,7 +97,14 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
                 if (err) {
                     error(err.message);
                 } else {
-                    resolve(row);
+                    var eventsRow = row;
+                    eventsRow.gates = [];
+                    db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [id], (err, row) => {
+                        eventsRow.gates.push(row);
+                    }, function() {
+                        resolve(eventsRow);
+                    })
+                    
                 }
             });
         });
@@ -114,7 +121,20 @@ function GetEvents() {
                 if (err) {
                     error(err.message);
                 } else {
-                    resolve(rows);
+                    let events = [];
+                    let processed = 0;
+                    rows.forEach(event => {
+                        event.gates = [];
+                        db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, row) => {
+                            event.gates.push(row);
+                        }, function() {
+                            events.push(event)
+                            processed ++;
+                            if (processed == rows.length){
+                                resolve(events); 
+                            }
+                        })
+                    })
                 }
             });
         });
@@ -313,4 +333,5 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
 
 module.exports = { db,
     GetUser, GetUsers, CreateUser,
-    GetPirep, GetPireps, CreatePirep };
+    GetPirep, GetPireps, CreatePirep,
+    GetEvent, GetEvents, CreateEvent};
