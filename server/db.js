@@ -97,7 +97,7 @@ function GetAircrafts() {
  * @param {String} livName - Livery Name
  * @param {String} airName - Aircraft Name
  * @param {String} publicName - Public Name (Livery Name and Aircraft Name)
- * @returns {Promise<String|Number>} Record ID of created Aircraft or error
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateAircraft(livID, airID, livName, airName, publicName) {
     return new Promise((resolve, error) => {
@@ -105,8 +105,9 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
                 VALUES(?, ?, ?, ?, ?)`, [livID, airID, livName, airName, publicName], function (err) {
             if (err) {
                 newError(err.message, "Error creating new aircraft (REF:DB04)")
+                resolve(false)
             } else {
-                resolve(this.lastID)
+                resolve(true)
             }
         });
     })
@@ -117,7 +118,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
 /**
  * Returns record of specific event id
  * @param {string} id - Unique id of event 
- * @returns {Promise<Array.<event>>} Record for that aircraft in an array
+ * @returns {Promise<Array.<event>|Boolean>} Record for that aircraft in an array
  */
  function GetEvent(id) {
     return new Promise((resolve, error) => {
@@ -125,6 +126,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
             db.get(`SELECT * FROM events WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     newError(err.message, "Error accessing event data (REF:DB05)")
+                    resolve(false)
                 } else {
                     var eventsRow = row;
                     eventsRow.gates = [];
@@ -179,7 +181,7 @@ function GetEvents() {
  * @param {String} airName 
  * @param {String} server 
  * @param {Array} gates 
- * returns {Promise<String|Number>} Record ID of created Event or error
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server, gates) {
     return new Promise((resolve, error) => {
@@ -187,17 +189,18 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [title, body, arrAir, depAir, depTime, air, airName, server], function (err) {
             if (err) {
                 newError(err.message, "Error creating event (REF:DB07)")
+                resolve(false)
             } else {
                 var createdEvent = this.lastID;
                 gates.forEach(gate => {
                     db.run(`INSERT INTO gates(eventID, gate, taken) 
                             VALUES(?, ?, 0)`, [createdEvent, gate], function (err) {
                         if (err) {
-                            error(err);
+                            newError(err.message, "Error creating event's gate (REF:DB08)")
                         }
                     });
                 })
-                resolve(createdEvent);
+                resolve(true);
             }
         });
     })
@@ -215,7 +218,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         db.serialize(() => {
             db.get(`SELECT * FROM pireps WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing PIREP data (REF:DB08)")
+                    newError(err.message, "Error accessing PIREP data (REF:DB09)")
                 } else {
                     resolve(row);
                 }
@@ -232,7 +235,7 @@ function GetPireps() {
         db.serialize(() => {
             db.all(`SELECT * FROM pireps`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all PIREP data (REF:DB09)")
+                    newError(err.message, "Error accessing all PIREP data (REF:DB10)")
                 } else {
                     resolve(rows);
                 }
@@ -255,16 +258,17 @@ function GetPireps() {
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
- * returns {Promise<String|Number>} Record ID of created PIREP or error
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO pireps(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
             if (err) {
-                newError(err.message, "Error creating PIREP (REF:DB10)")
+                newError(err.message, "Error creating PIREP (REF:DB11)")
+                resolve(false)
             } else {
-                resolve(this.lastID)
+                resolve(true)
             }
         });
     })
@@ -282,7 +286,7 @@ function GetToken(token) {
         db.serialize(() => {
             db.get(`SELECT * FROM tokens WHERE token = ?`, [token], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing token data (REF:DB11)")
+                    newError(err.message, "Error accessing token data (REF:DB12)")
                 } else {
                     resolve(row);
                 }
@@ -293,16 +297,18 @@ function GetToken(token) {
 /**
  * Creates new token
  * @param {String} token 
- * @param {String} user 
+ * @param {String} user
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateToken(token, user) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO tokens (token, user) 
                 VALUES(?, ?)`, [token, user], function (err) {
             if (err) {
-                newError(err.message, "Error creating token (REF:DB12)")
+                newError(err.message, "Error creating token (REF:DB13)")
+                resolve(false)
             } else {
-                resolve(this.lastID)
+                resolve(true)
             }
         });
     });
@@ -320,7 +326,7 @@ function GetUser(username) {
         db.serialize(() => {
             db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing user data (REF:DB13)")
+                    newError(err.message, "Error accessing user data (REF:DB14)")
                 } else {
                     resolve(row);
                 }
@@ -338,7 +344,7 @@ function GetUsers() {
         db.serialize(() => {
             db.all(`SELECT * FROM users`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all user data (REF:DB14)")
+                    newError(err.message, "Error accessing all user data (REF:DB15)")
                 } else {
                     resolve(rows);
                 }
@@ -360,16 +366,17 @@ function GetUsers() {
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
  * @param {boolean} revoked - User access revoked
- * returns {Promise<String|Number>} Record ID of created User or error
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
             if (err) {
-                newError(err.message, "Error creating user (REF:DB15)")
+                newError(err.message, "Error creating user (REF:DB16)")
+                resolve(false)
             } else {
-                resolve(this.lastID)
+                resolve(true)
             }
         });
     });
@@ -386,7 +393,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.serialize(() => {
             db.get(`SELECT * FROM operators WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing operator data (REF:DB16)")
+                    newError(err.message, "Error accessing operator data (REF:DB17)")
                 } else {
                     resolve(row);
                 }
@@ -404,7 +411,7 @@ function GetOperators() {
         db.serialize(() => {
             db.all(`SELECT * FROM operators`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all operator data (REF:DB17)")
+                    newError(err.message, "Error accessing all operator data (REF:DB18)")
                 } else {
                     resolve(rows);
                 }
@@ -416,16 +423,17 @@ function GetOperators() {
 /**
  * Creates a new operator
  * @param {string} operator - Name of operator
- * returns {Promise<String|Number>} Record ID of created Operator or error
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateOperator(operator) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO operators(operator) 
                 VALUES(?)`, [operator], function (err) {
             if (err) {
-                newError(err.message, "Error creating operator (REF:DB18)")
+                newError(err.message, "Error creating operator (REF:DB19)")
+                resolve(false)
             } else {
-                resolve(this.lastID)
+                resolve(true)
             }
         });
     });
@@ -442,7 +450,7 @@ function CreateOperator(operator) {
         db.serialize(() => {
             db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing route data (REF:DB19)")
+                    newError(err.message, "Error accessing route data (REF:DB20)")
                 } else {
                     resolve(row);
                 }
@@ -460,7 +468,7 @@ function GetRoutes() {
         db.serialize(() => {
             db.all(`SELECT * FROM routes`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all route data (REF:DB20)")
+                    newError(err.message, "Error accessing all route data (REF:DB21)")
                 } else {
                     resolve(rows);
                 }
@@ -469,11 +477,6 @@ function GetRoutes() {
     });
 }
 
-/**
- * 
- * @param {string} operator - Name of operator
- * 
- */
 /**
  * Creates a new route
  * @param {string} id - Unique identifier
@@ -486,16 +489,17 @@ function GetRoutes() {
  * @param {string} aircraftPublic - Common aircraft name
  * @param {string} operatorPublic - Common operator name
  * @param {string} minRank - Minimum rank to fly route
- * @returns {Promise<String|Number>} Record ID of created Route or error
+ * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
                 VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
             if (err) {
-                newError(err.message, "Error creating route (REF:DB21)")
+                newError(err.message, "Error creating route (REF:DB22)")
+                resolve(false)
             } else {
-                resolve(this.lastID)
+                resolve(true)
             }
         });
     });
@@ -507,14 +511,80 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
  * @param {string} user User 
  * @returns {Promise<array>} Array of notifications for user
  */
-function GetNotifications(user){
+function GetNotification(user){
     return new Promise((resolve, error) => {
         db.serialize(() => {
             db.all(`SELECT * FROM notifications WHERE user = ?`, [user], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing notification data (REF:DB22)")
+                    newError(err.message, "Error accessing notification data (REF:DB23)")
                 } else {
                     resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Creates a new notification
+ * @param {String} user - Username to assign the notification to
+ * @param {String} title - Title of notification
+ * @param {String} desc - Description of notification
+ * @param {String} icon - Icon for notification
+ * @param {String} timeStamp - Creation time stamp of notification
+ * @param {String} link - Link for notification
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function CreateNotification(user, title, desc, icon, timeStamp, link){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`INSERT INTO notifications(user, title, desc, icon, timeStamp, link)
+                    VALUES(?,?,?,?,?,?)`, [user, title, desc, icon, timeStamp, link], (err) => {
+                if (err) {
+                    newError(err.message, "Error creating notification (REF:DB24)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Delete notification
+ * @param {String} id - Unqique ID
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+ function DeleteNotification(id){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM notifications WHERE id = ?`, [id], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting notification (REF:DB25)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Delete all User's Notifications
+ * @param {String} username - Username of user
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+ function DeleteUsersNotifications(username){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM notifications WHERE user = ?`, [username], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting notification (REF:DB26)")
+                    resolve(false)
+                } else {
+                    resolve(true)
                 }
             });
         });
@@ -532,7 +602,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB23)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB27)")
                 } else {
                     resolve(row);
                 }
@@ -550,5 +620,6 @@ module.exports = {
     GetToken, CreateToken,
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
-    GetRoute, GetRoutes, CreateRoute
+    GetRoute, GetRoutes, CreateRoute,
+    GetNotification, CreateNotification, DeleteNotification, DeleteUsersNotifications
     };
