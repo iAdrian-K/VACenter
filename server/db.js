@@ -40,6 +40,7 @@ function newError(error, title) {
  * @typedef {import('./types.js').rank} rank
  * @typedef {import('./types.js').route} route
  * @typedef {import('./types.js').slot} slot
+ * @typedef {import('./types.js').statistic} statistic
  */
 
 const sqlite3 = require('sqlite3').verbose();

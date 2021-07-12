@@ -54,6 +54,7 @@ const { resolveInclude } = require('ejs');
  * @typedef {import('./types.js').rank} rank
  * @typedef {import('./types.js').route} route
  * @typedef {import('./types.js').slot} slot
+ * @typedef {import('./types.js').statistic} statistic
  */
 function makeid(length) {
     var result = '';
