@@ -39,7 +39,8 @@ const {
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
-    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications
+    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
+    GetStats, DeleteStat, UpdateStat
     } = require("./db")
 const _tplengine = require('./defaultpagevar');
 const { resolveInclude } = require('ejs');

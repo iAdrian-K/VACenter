@@ -599,7 +599,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
 
 /**
  * Delete notification
- * @param {String} id - Unqique ID
+ * @param {String} id - Unique ID
  * @returns {Promise<Boolean>} Returns boolean of query
  */
  function DeleteNotification(id){
@@ -637,6 +637,66 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
     });
 }
 
+// Stats
+/**
+ * Get all stats
+ * @returns {Promise<array>} Array of stats for user
+ */
+ function GetStats(){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM stats`, (err, rows) => {
+                if (err) {
+                    newError(err.message, "Error accessing stats data (REF:DB30)")
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Delete stat
+ * @param {String} name - Name of stat
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+ function DeleteStat(name){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM stats WHERE name = ?`, [name], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting stat (REF:DB31)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+/**
+ * 
+ * @param {String} name - Name of stat
+ * @param {String} newName - New name for stat
+ * @param {String} newValue - New value for stat
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function UpdateStat(name, newName, newValue){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
+                if (err) {
+                    newError(err.message, "Error updating stat (REF:DB32)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    })
+}
+
 // Miscellaneous
 /**
  * Returns the Profile Picture URL of a user
@@ -648,7 +708,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB30)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB33)")
                 } else {
                     resolve(row);
                 }
@@ -667,5 +727,6 @@ module.exports = {
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
-    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications
+    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
+    GetStats, DeleteStat, UpdateStat
     };
