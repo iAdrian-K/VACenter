@@ -280,7 +280,34 @@ app.get('*', async (req, res)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
-
+                    case "/account":
+                        if (user) {
+                            res.render("account", {
+                                active: req.path,
+                                title: "Account",
+                                user: user,
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin":
+                        if (user) {
+                            if(user.admin == true){
+                                res.render("admin/selector", {
+                                    active: req.path,
+                                    title: "Admin Menu",
+                                    user: user,
+                                    activer: "/admin"
+                                })
+                            }else{
+                                res.sendStatus(403);
+                            }
+                            
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
                     case "/report":
                         res.render("report")
                         break;
@@ -290,6 +317,9 @@ app.get('*', async (req, res)=>{
                         }else{
                             res.render("setup")
                         }
+                        break;
+                    case "/logout":
+                        res.clearCookie("authToken").redirect("/");
                         break;
                     default:
                         res.render("404");
