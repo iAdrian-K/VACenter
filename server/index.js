@@ -41,6 +41,7 @@ const {
     GetNotification, CreateNotification, DeleteNotification, DeleteUsersNotifications
     } = require("./db")
 const _tplengine = require('./defaultpagevar');
+const { resolveInclude } = require('ejs');
 /**
  * @typedef {import('./types.js').user} user
  * @typedef {import('./types.js').aircraft} aircraft
@@ -146,9 +147,10 @@ function checkForCPWD(cookies) {
 function checkForUser(cookies){
     return new Promise((async resolve => {
         if(cookies.authToken){
-            const UID = await GetToken(cookies.authToken)
-            if (UID) {
-                const user = await GetUser(UID);
+            const Token = await GetToken(cookies.authToken)
+            if (Token.user) {
+                const user = await GetUser(Token.user);
+                console.log(user)
                 if (user) {
                     resolve(user);
                 } else {
@@ -163,6 +165,18 @@ function checkForUser(cookies){
     }))
 }
 
+/**
+ * Add a users notifications to an object
+ * @param {user} userObj 
+ * @returns {Promise<user>} User with Notifs
+ */
+async function getUserWithNotifs(userObj){
+    return new Promise((async resolve => {
+        const notfs = await GetNotification(userObj.username)
+        userObj.notifications = notfs;
+        resolve(userObj);
+    }))
+}
 
 //Basic Routes
 app.get('*', async (req, res)=>{
@@ -184,7 +198,8 @@ app.get('*', async (req, res)=>{
             }
         }else{
             const changePWD = await checkForCPWD(cookies);
-            const user = await checkForUser(cookies);
+            console.log(req.path)
+            const user = await getUserWithNotifs(await checkForUser(cookies));
             if(changePWD == true && req.path != "/changePWD"){
                 res.redirect('/changePWD');
             }else{
@@ -197,7 +212,17 @@ app.get('*', async (req, res)=>{
                         }
                         break;
                     case "/home":
-                        res.render("home")
+                        console.log(user)
+                        if(user){
+                            res.render("home", {
+                                active: req.path,
+                                title: "Dashboard",
+                                user: user
+                            })
+                        }else{
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        
                         break;
                     case "/report":
                         res.render("report")
