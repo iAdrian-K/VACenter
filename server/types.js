@@ -126,5 +126,13 @@
  * @property {string} token
  * @property {string} user
  */
+
+/**
+ * A stat Object
+ * @typedef {Object} statistic
+ * @property {string} type
+ * @property {any} value
+ */
+
 //@ts-ignore
-module.exports = {user, aircraft, event, gate, notification, operator, PIREP, rank, route, slot, token}
+module.exports = {user, aircraft, event, gate, notification, operator, PIREP, rank, route, slot, token, statistic}
