@@ -148,13 +148,17 @@ function checkForUser(cookies){
     return new Promise((async resolve => {
         if(cookies.authToken){
             const Token = await GetToken(cookies.authToken)
-            if (Token.user) {
-                const user = await GetUser(Token.user);
-                console.log(user)
-                if (user) {
-                    resolve(user);
-                } else {
-                    resolve(false);
+            if (Token) {
+                if(Token.user){
+                    const user = await GetUser(Token.user);
+                    console.log(user)
+                    if (user) {
+                        resolve(user);
+                    } else {
+                        resolve(false);
+                    }
+                }else{
+                    resolve(false)
                 }
             } else {
                 resolve(false);
@@ -199,7 +203,10 @@ app.get('*', async (req, res)=>{
         }else{
             const changePWD = await checkForCPWD(cookies);
             console.log(req.path)
-            const user = await getUserWithNotifs(await checkForUser(cookies));
+            let user = await checkForUser(cookies);
+            if(user){
+                user = await getUserWithNotifs(user);
+            }
             if(changePWD == true && req.path != "/changePWD"){
                 res.redirect('/changePWD');
             }else{
