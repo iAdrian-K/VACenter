@@ -18,6 +18,7 @@
  * @property {string} llogin
  * @property {boolean} cp - Change Password Flag
  * @property {boolean} revoked
+ * @property {array} notifications
  */
 
 /**
