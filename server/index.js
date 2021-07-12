@@ -24,7 +24,8 @@ function reloadVersion(){
     console.log(cvnb)
 }
 
-
+reloadVersion();
+console.log(makeid(50))
 
 //Parts
 const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
@@ -91,13 +92,12 @@ let config;
 function reloadConfig(){
     return new Promise(async (resolve, error) => {
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
-        console.log(config)
         resolve(true);
     })
     
 }
 reloadConfig()
-
+setInterval(reloadConfig, 5000);
 
 //App
 const app = express();
@@ -151,7 +151,6 @@ function checkForUser(cookies){
             if (Token) {
                 if(Token.user){
                     const user = await GetUser(Token.user);
-                    console.log(user)
                     if (user) {
                         resolve(user);
                     } else {
@@ -202,7 +201,6 @@ app.get('*', async (req, res)=>{
             }
         }else{
             const changePWD = await checkForCPWD(cookies);
-            console.log(req.path)
             let user = await checkForUser(cookies);
             if(user){
                 user = await getUserWithNotifs(user);
@@ -219,7 +217,6 @@ app.get('*', async (req, res)=>{
                         }
                         break;
                     case "/home":
-                        console.log(user)
                         if(user){
                             res.render("home", {
                                 active: req.path,
@@ -231,6 +228,58 @@ app.get('*', async (req, res)=>{
                         }
                         
                         break;
+                    case "/newPirep":
+                        if (user) {
+                            res.render("npirep", {
+                                active: req.path,
+                                title: "New Flight",
+                                user: user,
+                                routes: await GetRoutes(),
+                                craft: await GetAircrafts(),
+                                ops: await GetOperators(),
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+
+                        break;
+                    case "/oldPirep":
+                        if (user) {
+                            res.render("opirep", {
+                                active: req.path,
+                                title: "Previous Flights",
+                                user: user,
+                                pireps: await GetUsersPireps(user.username),
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/events":
+                        if (user) {
+                            res.render("events", {
+                                active: req.path,
+                                title: "Events",
+                                user: user,
+                                events: await GetEvents(),
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/about":
+                        if (user) {
+                            res.render("about", {
+                                active: req.path,
+                                title: "Events",
+                                user: user,
+                                events: await GetEvents(),
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+
                     case "/report":
                         res.render("report")
                         break;
@@ -273,9 +322,7 @@ app.post("/login", async (req,res) =>{
 //setup
 app.post('/setup', async (req,res)=>{
     if(req.body.key){
-        console.log(1)
         const Req = await URLReq(MethodValues.GET, "https://api.vanet.app/airline/v1/profile", { 'X-Api-Key': req.body.key}, null, null)
-        console.log(2)
         if(Req[0]){
             res.status(500).send(Req[0]);
         }
