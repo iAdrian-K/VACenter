@@ -7,7 +7,7 @@ setInterval(() => {
 
 
 // custom ejs render function
-function render(filename, payload = {}, cb) {
+module.exports = function render(filename, payload = {}, cb) {
     // some default page vars
     payload.config = payload.config || _config;
     // resources
