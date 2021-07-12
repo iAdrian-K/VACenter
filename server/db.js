@@ -334,6 +334,26 @@ function CreateToken(token, user) {
     });
 }
 
+/**
+ * Delete all User's Notifications
+ * @param {String} username - Username of user
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+ function DeleteTokens(username){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM tokens WHERE user = ?`, [username], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting user's token (REF:DB15)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+
 
 // Users
 /**
@@ -346,7 +366,7 @@ function GetUser(username) {
         db.serialize(() => {
             db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing user data (REF:DB15)")
+                    newError(err.message, "Error accessing user data (REF:DB16)")
                 } else {
                     resolve(row);
                 }
@@ -364,7 +384,7 @@ function GetUsers() {
         db.serialize(() => {
             db.all(`SELECT * FROM users`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all user data (REF:DB16)")
+                    newError(err.message, "Error accessing all user data (REF:DB17)")
                 } else {
                     resolve(rows);
                 }
@@ -393,7 +413,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
             if (err) {
-                newError(err.message, "Error creating user (REF:DB17)")
+                newError(err.message, "Error creating user (REF:DB18)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -413,7 +433,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.serialize(() => {
             db.get(`SELECT * FROM operators WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing operator data (REF:DB18)")
+                    newError(err.message, "Error accessing operator data (REF:DB19)")
                 } else {
                     resolve(row);
                 }
@@ -431,7 +451,7 @@ function GetOperators() {
         db.serialize(() => {
             db.all(`SELECT * FROM operators`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all operator data (REF:DB19)")
+                    newError(err.message, "Error accessing all operator data (REF:DB20)")
                 } else {
                     resolve(rows);
                 }
@@ -450,7 +470,7 @@ function CreateOperator(operator) {
         db.run(`INSERT INTO operators(operator) 
                 VALUES(?)`, [operator], function (err) {
             if (err) {
-                newError(err.message, "Error creating operator (REF:DB20)")
+                newError(err.message, "Error creating operator (REF:DB21)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -470,7 +490,7 @@ function CreateOperator(operator) {
         db.serialize(() => {
             db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing route data (REF:DB21)")
+                    newError(err.message, "Error accessing route data (REF:DB22)")
                 } else {
                     resolve(row);
                 }
@@ -488,7 +508,7 @@ function GetRoutes() {
         db.serialize(() => {
             db.all(`SELECT * FROM routes`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all route data (REF:DB22)")
+                    newError(err.message, "Error accessing all route data (REF:DB23)")
                 } else {
                     resolve(rows);
                 }
@@ -516,7 +536,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
         db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
                 VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
             if (err) {
-                newError(err.message, "Error creating route (REF:DB23)")
+                newError(err.message, "Error creating route (REF:DB24)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -536,7 +556,7 @@ function GetNotification(user){
         db.serialize(() => {
             db.all(`SELECT * FROM notifications WHERE user = ?`, [user], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing notification data (REF:DB24)")
+                    newError(err.message, "Error accessing notification data (REF:DB25)")
                 } else {
                     resolve(rows);
                 }
@@ -561,7 +581,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
             db.run(`INSERT INTO notifications(user, title, desc, icon, timeStamp, link)
                     VALUES(?,?,?,?,?,?)`, [user, title, desc, icon, timeStamp, link], (err) => {
                 if (err) {
-                    newError(err.message, "Error creating notification (REF:DB25)")
+                    newError(err.message, "Error creating notification (REF:DB26)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -569,7 +589,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
             });
             db.run(`DELETE FROM notifications WHERE id IN (SELECT id FROM notifications ORDER BY id DESC LIMIT -1 OFFSET 5) AND user = ?`, [user], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notifications while creating notification (REF:DB26)")
+                    newError(err.message, "Error deleting notifications while creating notification (REF:DB27)")
                 }
             })
         });
@@ -586,7 +606,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB27)")
+                    newError(err.message, "Error deleting notification (REF:DB28)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -606,7 +626,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE user = ?`, [username], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB28)")
+                    newError(err.message, "Error deleting notification (REF:DB29)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -627,7 +647,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB29)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB30)")
                 } else {
                     resolve(row);
                 }
@@ -642,7 +662,7 @@ module.exports = {
     GetUser, GetUsers, CreateUser,
     GetPirep, GetUsersPireps, GetPireps, CreatePirep,
     GetEvent, GetEvents, CreateEvent,
-    GetToken, CreateToken,
+    GetToken, CreateToken, DeleteTokens,
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,

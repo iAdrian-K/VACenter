@@ -34,7 +34,7 @@ const {
     GetUser, GetUsers, CreateUser,
     GetPirep, GetUsersPireps, GetPireps, CreatePirep,
     GetEvent, GetEvents, CreateEvent,
-    GetToken, CreateToken,
+    GetToken, CreateToken, DeleteTokens,
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
