@@ -142,8 +142,8 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
     });
 }
 /**
- * Returns all aircrafts
- * @returns {Promise<Array.<event>>} All aircraft objects in an array
+ * Returns all events
+ * @returns {Promise<Array.<event>>} All events objects in an array
  */
 function GetEvents() {
     return new Promise((resolve, error) => {
@@ -551,7 +551,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
  * @param {string} user User 
  * @returns {Promise<array>} Array of notifications for user
  */
-function GetNotification(user){
+function GetNotifications(user){
     return new Promise((resolve, error) => {
         db.serialize(() => {
             db.all(`SELECT * FROM notifications WHERE user = ?`, [user], (err, rows) => {
@@ -666,5 +666,5 @@ module.exports = {
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
-    GetNotification, CreateNotification, DeleteNotification, DeleteUsersNotifications
+    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications
     };
