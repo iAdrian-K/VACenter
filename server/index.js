@@ -108,8 +108,65 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 //app.use(cookieParser());
 
+//Util Funcs
+/**
+ * CheckCPWD - Used for checking if a user needs to change their password.
+ * @param {Object} cookies 
+ * @returns {Promise<boolean>}
+ */
+function checkForCPWD(cookies) {
+    return new Promise((async resolve => {
+        if (cookies.authToken) {
+            const UID = await GetToken(cookies.authToken)
+            if (UID) {
+                const user = await GetUser(UID);
+                if (user) {
+                    if (user.cp) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                } else {
+                    resolve(false);
+                }
+            } else {
+                resolve(false);
+            }
+        } else {
+            resolve(false);
+        }
+    }))
+}
+
+/**
+ * Check for User
+ * @param {Object} cookies 
+ * @returns {Promise<boolean|Object>} User Obj, or False
+ */
+function checkForUser(cookies){
+    return new Promise((async resolve => {
+        if(cookies.authToken){
+            const UID = await GetToken(cookies.authToken)
+            if (UID) {
+                const user = await GetUser(UID);
+                if (user) {
+                    resolve(user);
+                } else {
+                    resolve(false);
+                }
+            } else {
+                resolve(false);
+            }
+        }else{
+            resolve(false);
+        }
+    }))
+}
+
+
 //Basic Routes
 app.get('*', async (req, res)=>{
+    const cookies = getAppCookies(req)
     if(req.path.slice(0,8) == "/public/"){
         if(await FileExists(path.join(__dirname, "..", req.path))){
             res.sendFile(path.join(__dirname, "..", req.path));
@@ -117,6 +174,8 @@ app.get('*', async (req, res)=>{
             res.sendStatus(404);
         }
     }else{
+
+        //Check for setup
         if(((!config.code) && req.path != "/setup")){
             if((!config.code) && req.path != "/setup"){
                 res.redirect('/setup')
@@ -124,59 +183,37 @@ app.get('*', async (req, res)=>{
                 res.redirect("/?r=ue")
             }
         }else{
-            let user = null;
-            const cookies = getAppCookies(req);
-            console.log(cookies.authToken)
-            const userID = (await GetToken(cookies.authToken)).user;
-            console.log(userID)
-            user = await GetUser(userID);
-            if(user != null){
-                if( Boolean(user.cp) != false && req.path != "/changePWD"){
-                    res.redirect("/changePWD")
-                }else{
-                    switch (req.path) {
-                        case "/":
-                            res.render("login", {
-                                config: config
-                            })
-                            break;
-                        case "/home":
-                            res.render("home", {
-                                config: config,
-                                user: user,
-                                active: req.path,
-                                title: "Dashboard"
-                            })
-                            break;
-                        default:
-                            res.render("404", {
-                                config:config
-                            })
-                            break;
-                    }
-                }
+            const changePWD = await checkForCPWD(cookies);
+            const user = await checkForUser(cookies);
+            if(changePWD == true && req.path != "/changePWD"){
+                res.redirect('/changePWD');
             }else{
-                switch (req.path) {
+                switch(req.path){
                     case "/":
-                        res.render("login", {
-                            config: config
-                        })
+                        if(user){
+                            res.redirect("/home");
+                        }else{
+                        res.render("login")
+                        }
+                        break;
+                    case "/home":
+                        res.render("home")
+                        break;
+                    case "/report":
+                        res.render("report")
                         break;
                     case "/setup":
-                        if (!config.other) {
+                        if(config.other){
+                            res.redirect("/")
+                        }else{
                             res.render("setup")
-                        } else {
-                            res.redirect('/')
                         }
                         break;
                     default:
-                        res.render("404", {
-                            config: config
-                        })
+                        res.render("404");
                         break;
                 }
             }
-        
         }
     }
 })
