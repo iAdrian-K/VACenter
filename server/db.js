@@ -547,6 +547,11 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
                     resolve(true)
                 }
             });
+            db.run(`DELETE FROM notifications WHERE id IN (SELECT id FROM notifications ORDER BY id DESC LIMIT -1 OFFSET 5) AND user = ?`, [user], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting notifications while creating notification (REF:DB25)")
+                }
+            })
         });
     });
 }
@@ -561,7 +566,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB25)")
+                    newError(err.message, "Error deleting notification (REF:DB26)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -581,7 +586,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE user = ?`, [username], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB26)")
+                    newError(err.message, "Error deleting notification (REF:DB27)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -602,7 +607,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB27)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB28)")
                 } else {
                     resolve(row);
                 }
