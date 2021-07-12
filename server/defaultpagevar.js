@@ -1,9 +1,13 @@
-
 const _ejs = require('ejs');
 // example: global config
-const _config = require('../config.json');
+let _config = require('../config.json');
+setInterval(() => {
+    _config = require('../config.json');
+}, 5000);
+
+
 // custom ejs render function
-module.exports = function render(filename, payload = {}, cb) {
+function render(filename, payload = {}, cb) {
     // some default page vars
     payload.config = payload.config || _config;
     // resources
