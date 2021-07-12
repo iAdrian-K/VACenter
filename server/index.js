@@ -32,7 +32,7 @@ const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
 const { 
     db, GetPPURL,
     GetUser, GetUsers, CreateUser,
-    GetPirep, GetPireps, CreatePirep,
+    GetPirep, GetUsersPireps, GetPireps, CreatePirep,
     GetEvent, GetEvents, CreateEvent,
     GetToken, CreateToken,
     GetAircraft, GetAircrafts, CreateAircraft,

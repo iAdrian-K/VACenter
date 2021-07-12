@@ -226,6 +226,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         });
     });
 }
+
 /**
  * Returns all pireps
  * @returns {Promise<Array.<PIREP>>} All PIREP Objects in an array
@@ -243,6 +244,25 @@ function GetPireps() {
         });
     });
 }
+
+/**
+ * Returns all pireps for a user
+ * @returns {Promise<Array.<PIREP>>} All PIREP Objects in an array
+ */
+ function GetUsersPireps(user) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM pireps WHERE author = ?`, [user], (err, rows) => {
+                if (err) {
+                    newError(err.message, "Error accessing all PIREP data for a user (REF:DB11)")
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
 /**
  * Creates new PIREP
  * @param {string} id - Unique ID of pirep
@@ -265,7 +285,7 @@ function CreatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrIC
         db.run(`INSERT INTO pireps(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
             if (err) {
-                newError(err.message, "Error creating PIREP (REF:DB11)")
+                newError(err.message, "Error creating PIREP (REF:DB12)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -286,7 +306,7 @@ function GetToken(token) {
         db.serialize(() => {
             db.get(`SELECT * FROM tokens WHERE token = ?`, [token], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing token data (REF:DB12)")
+                    newError(err.message, "Error accessing token data (REF:DB13)")
                 } else {
                     resolve(row);
                 }
@@ -305,7 +325,7 @@ function CreateToken(token, user) {
         db.run(`INSERT INTO tokens (token, user) 
                 VALUES(?, ?)`, [token, user], function (err) {
             if (err) {
-                newError(err.message, "Error creating token (REF:DB13)")
+                newError(err.message, "Error creating token (REF:DB14)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -326,7 +346,7 @@ function GetUser(username) {
         db.serialize(() => {
             db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing user data (REF:DB14)")
+                    newError(err.message, "Error accessing user data (REF:DB15)")
                 } else {
                     resolve(row);
                 }
@@ -344,7 +364,7 @@ function GetUsers() {
         db.serialize(() => {
             db.all(`SELECT * FROM users`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all user data (REF:DB15)")
+                    newError(err.message, "Error accessing all user data (REF:DB16)")
                 } else {
                     resolve(rows);
                 }
@@ -373,7 +393,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.run(`INSERT INTO users(username, rank, admin, password, display, hours, created, llogin, cp, revoked) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, hours, created, llogin, cp, revoked], function (err) {
             if (err) {
-                newError(err.message, "Error creating user (REF:DB16)")
+                newError(err.message, "Error creating user (REF:DB17)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -393,7 +413,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.serialize(() => {
             db.get(`SELECT * FROM operators WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing operator data (REF:DB17)")
+                    newError(err.message, "Error accessing operator data (REF:DB18)")
                 } else {
                     resolve(row);
                 }
@@ -411,7 +431,7 @@ function GetOperators() {
         db.serialize(() => {
             db.all(`SELECT * FROM operators`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all operator data (REF:DB18)")
+                    newError(err.message, "Error accessing all operator data (REF:DB19)")
                 } else {
                     resolve(rows);
                 }
@@ -430,7 +450,7 @@ function CreateOperator(operator) {
         db.run(`INSERT INTO operators(operator) 
                 VALUES(?)`, [operator], function (err) {
             if (err) {
-                newError(err.message, "Error creating operator (REF:DB19)")
+                newError(err.message, "Error creating operator (REF:DB20)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -450,7 +470,7 @@ function CreateOperator(operator) {
         db.serialize(() => {
             db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing route data (REF:DB20)")
+                    newError(err.message, "Error accessing route data (REF:DB21)")
                 } else {
                     resolve(row);
                 }
@@ -468,7 +488,7 @@ function GetRoutes() {
         db.serialize(() => {
             db.all(`SELECT * FROM routes`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all route data (REF:DB21)")
+                    newError(err.message, "Error accessing all route data (REF:DB22)")
                 } else {
                     resolve(rows);
                 }
@@ -496,7 +516,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
         db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
                 VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
             if (err) {
-                newError(err.message, "Error creating route (REF:DB22)")
+                newError(err.message, "Error creating route (REF:DB23)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -516,7 +536,7 @@ function GetNotification(user){
         db.serialize(() => {
             db.all(`SELECT * FROM notifications WHERE user = ?`, [user], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing notification data (REF:DB23)")
+                    newError(err.message, "Error accessing notification data (REF:DB24)")
                 } else {
                     resolve(rows);
                 }
@@ -541,7 +561,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
             db.run(`INSERT INTO notifications(user, title, desc, icon, timeStamp, link)
                     VALUES(?,?,?,?,?,?)`, [user, title, desc, icon, timeStamp, link], (err) => {
                 if (err) {
-                    newError(err.message, "Error creating notification (REF:DB24)")
+                    newError(err.message, "Error creating notification (REF:DB25)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -549,7 +569,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
             });
             db.run(`DELETE FROM notifications WHERE id IN (SELECT id FROM notifications ORDER BY id DESC LIMIT -1 OFFSET 5) AND user = ?`, [user], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notifications while creating notification (REF:DB25)")
+                    newError(err.message, "Error deleting notifications while creating notification (REF:DB26)")
                 }
             })
         });
@@ -566,7 +586,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB26)")
+                    newError(err.message, "Error deleting notification (REF:DB27)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -586,7 +606,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE user = ?`, [username], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB27)")
+                    newError(err.message, "Error deleting notification (REF:DB28)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -607,7 +627,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB28)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB29)")
                 } else {
                     resolve(row);
                 }
@@ -620,7 +640,7 @@ function GetPPURL(username){
 module.exports = { 
     db, GetPPURL,
     GetUser, GetUsers, CreateUser,
-    GetPirep, GetPireps, CreatePirep,
+    GetPirep, GetUsersPireps, GetPireps, CreatePirep,
     GetEvent, GetEvents, CreateEvent,
     GetToken, CreateToken,
     GetAircraft, GetAircrafts, CreateAircraft,
