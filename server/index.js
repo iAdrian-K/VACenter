@@ -39,7 +39,7 @@ const {
     GetAircraft, GetAircrafts, CreateAircraft,
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
-    GetNotification, CreateNotification, DeleteNotification, DeleteUsersNotifications
+    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications
     } = require("./db")
 const _tplengine = require('./defaultpagevar');
 const { resolveInclude } = require('ejs');
@@ -175,7 +175,7 @@ function checkForUser(cookies){
  */
 async function getUserWithNotifs(userObj){
     return new Promise((async resolve => {
-        const notfs = await GetNotification(userObj.username)
+        const notfs = await GetNotifications(userObj.username)
         userObj.notifications = notfs;
         resolve(userObj);
     }))
