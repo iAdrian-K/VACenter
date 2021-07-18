@@ -697,7 +697,7 @@ function UpdateStat(name, newName, newValue){
                 })
             } else {
                 db.serialize(() => {
-                    db.run(`UPDATE stats(value) VALUES (?) WHERE name = ?`, [newValue, name], (err) => {
+                    db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
                         if (err) {
                             newError(err.message, "Error updating stat (REF:DB33)")
                             resolve(false)
