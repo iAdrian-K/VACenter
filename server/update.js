@@ -57,9 +57,9 @@ function update(){
                 fs.writeFileSync(`${__dirname}/../${file}`, fileRaw);
                 console.log(file)
             });
-            const package = require('./../package.json')
-            package.version = cversion.version;
-            fs.writeFileSync(`${__dirname}/../package.json`, JSON.stringify(package, null, 2));
+            const packageObj = require('./../package.json')
+            packageObj.version = cversion.version;
+            fs.writeFileSync(`${__dirname}/../package.json`, JSON.stringify(packageObj, null, 2));
             const packagelock = require('./../package-lock.json')
             packagelock.version = cversion.version;
             fs.writeFileSync(`${__dirname}/../package-lock.json`, JSON.stringify(packagelock, null, 2));

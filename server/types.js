@@ -35,6 +35,7 @@
  * A event Object
  * @typedef {Object} event
  * @property {string} title
+ * @property {number} ID
  * @property {string} body
  * @property {string} arrAir
  * @property {string} depAir
