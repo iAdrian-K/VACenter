@@ -695,7 +695,19 @@ app.post('/setup', async (req,res)=>{
 })
 
 
-
+app.post("/newPIREP", async (req, res) => {
+    const cookies = getAppCookies(req)
+    if (req.body.name && req.body.min) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            //await CreatePirep(makeid(25), )
+        }else{
+            res.sendStatus(401);
+        }
+    }else{
+        res.sendStatus(400);
+    }
+})
 
 
 
@@ -860,7 +872,7 @@ app.post("/admin/users/new", async function (req, res) {
                         status: pilotIDReq[2].status == 0 ? true : false,
                         id: pilotIDReq[2].result != false ? pilotIDReq[2].result : null,
                     }
-                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.name, "/public/images/defaultPP.png", 0, (new Date()).toString(), (new Date(0).toString()), true, false)
+                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false)
                     res.redirect("/admin/users")
                 }else{
                     res.sendStatus(409);
