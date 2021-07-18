@@ -28,10 +28,10 @@
                     <% operators.forEach(op=>{%>
                         <tr>
                             <th scope="row">
-                                <%= op.name %>
+                                <%= op.operator %>
                             </th>
                             <td>
-                                <button class="btn btn-danger" onclick="remData('o', '<%=op.id%>')"><i
+                                <button <% if(op.operator != config.name){%>class="btn btn-danger" onclick="remData('o', '<%=op.id%>')"<%}else{%>class="btn btn-secondary" style="cursor: not-allowed !important;" disabled<%}%>><i
                                         class="bi bi-x-circle"></i></button>
                             </td>
 

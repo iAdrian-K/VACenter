@@ -30,13 +30,13 @@
                         <% users.forEach(target=>{%>
                             <tr style="<% if(target.revoked){%>background-color:rgba(255, 0, 0, 0.2) !important;<%}%> cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=target.username.split("=")[0]%>" <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
                                 <th scope="row">
-                                    <%= Buffer.from(target.username, 'base64').toString() %>
+                                    <%= target.username %>
                                 </th>
                                 <td>
                                     <%= target.rank %>
                                 </td>
                                 <td>
-                                    <%= target.name %>
+                                    <%= target.display %>
                                 </td>
                             </tr>
 
@@ -125,7 +125,7 @@
                             <form class="form-control p-3" method="POST" action="/admin/reqs/resetPWD">
                                 <h5>Security</h5>
                                 <input type="hidden" name="targetUID" value="<%=target.username%>">
-                                <% if(target.meta.cp || target.admin !=false){%>
+                                <% if(target.cp || target.admin !=false){%>
                                     <button class="btn btn-danger" disabled>Reset PWD</button>
                                     <%}else{%>
                                         <button class="btn btn-danger">Reset PWD</button>
@@ -151,8 +151,8 @@
                                 <p>
                                     <strong>Rank:</strong> <%=target.rank%><br>
                                     <strong>Flight Hours:</strong> <%=target.hours%><br>
-                                    <strong>Last Login:</strong> <%= new Date(target.meta.llogin).toLocaleString("EN-AU", {Hour12: true})%><br>
-                                    <strong>Account Created:</strong> <%= new Date(target.meta.created).toLocaleString("EN-AU", {Hour12: true})%>
+                                    <strong>Last Login:</strong> <%= new Date(target.llogin).toLocaleString("EN-AU", {Hour12: true})%><br>
+                                    <strong>Account Created:</strong> <%= new Date(target.created).toLocaleString("EN-AU", {Hour12: true})%>
                                 </p>
                             </form>
                         </div>
