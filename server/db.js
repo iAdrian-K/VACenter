@@ -684,27 +684,29 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
  */
 function UpdateStat(name, newName, newValue){
     return new Promise((resolve, error) => {
-        db.serialize(() => {
             if (newName != null){
-                db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
-                    if (err) {
-                        newError(err.message, "Error updating stat (REF:DB32)")
-                        resolve(false)
-                    } else {
-                        resolve(true)
-                    }
+                db.serialize(() => {
+                    db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
+                        if (err) {
+                            newError(err.message, "Error updating stat (REF:DB32)")
+                            resolve(false)
+                        } else {
+                            resolve(true)
+                        }
+                    })
                 })
             } else {
-                db.run(`UPDATE stats(value) VALUES (?) WHERE name = ?`, [newValue, name], (err) => {
-                    if (err) {
-                        newError(err.message, "Error updating stat (REF:DB33)")
-                        resolve(false)
-                    } else {
-                        resolve(true)
-                    }
+                db.serialize(() => {
+                    db.run(`UPDATE stats(value) VALUES (?) WHERE name = ?`, [newValue, name], (err) => {
+                        if (err) {
+                            newError(err.message, "Error updating stat (REF:DB33)")
+                            resolve(false)
+                        } else {
+                            resolve(true)
+                        }
+                    })
                 })
             }
-        })
     })
 }
 
