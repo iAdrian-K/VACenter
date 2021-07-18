@@ -694,6 +694,16 @@ app.post('/setup', async (req,res)=>{
     }
 })
 
+app.post('/OSOR', async(req, res)=>{
+    const cookies = getAppCookies(req)
+    let user = await checkForUser(cookies);
+    if (user) {
+        await DeleteTokens(user.username);
+        res.redirect("/")
+    }else{
+        res.sendStatus(401);
+    }
+})
 
 app.post("/newPIREP", async (req, res) => {
     const cookies = getAppCookies(req)
