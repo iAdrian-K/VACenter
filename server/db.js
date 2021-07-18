@@ -153,19 +153,23 @@ function GetEvents() {
                 if (err) {
                     newError(err.message, "Error accessing all event data (REF:DB06)")
                 } else {
+                    if (events.length == 0) {
+                        resolve([])
+                    } else {
                     let eventsProcessed = 0;
-                    events.forEach(event => {
-                        event.gates = [];
-                        let gatesProcessed = 0;
-                        db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, gate) => {
-                            event.gates.push(gate)
-                        }, function() {
-                            eventsProcessed ++;
-                            if(eventsProcessed == events.length){
-                                resolve(events);
-                            }
+                        events.forEach(event => {
+                            event.gates = [];
+                            let gatesProcessed = 0;
+                            db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, gate) => {
+                                event.gates.push(gate)
+                            }, function() {
+                                eventsProcessed ++;
+                                if(eventsProcessed == events.length){
+                                    resolve(events);
+                                }
+                            })
                         })
-                    })
+                    }
                 }
             });
         });
