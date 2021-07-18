@@ -686,7 +686,7 @@ function UpdateStat(name, newName, newValue){
     return new Promise((resolve, error) => {
             if (newName == null){
                 db.serialize(() => {
-                    db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
+                    db.run(`UPDATE stats(value) VALUES (?) WHERE name = ?`, [newValue, name], (err) => {
                         if (err) {
                             newError(err.message, "Error updating stat (REF:DB32)")
                             resolve(false)
