@@ -102,7 +102,7 @@ function GetAircrafts() {
  */
 function CreateAircraft(livID, airID, livName, airName, publicName) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO aircraft(livID, airID, livName, airName, publicName) 
+        db.run(`INSERT INTO aircrafts(livID, airID, livName, airName, publicName) 
                 VALUES(?, ?, ?, ?, ?)`, [livID, airID, livName, airName, publicName], function (err) {
             if (err) {
                 newError(err.message, "Error creating new aircraft (REF:DB04)")
