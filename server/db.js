@@ -98,7 +98,7 @@ function GetAircrafts() {
  * @param {String} livName - Livery Name
  * @param {String} airName - Aircraft Name
  * @param {String} publicName - Public Name (Livery Name and Aircraft Name)
- * @returns {Promise<Boolean>} Returns boolean of query
+ * @returns {Promise<Boolean>} Returns success in boolean of query
  */
 function CreateAircraft(livID, airID, livName, airName, publicName) {
     return new Promise((resolve, error) => {
@@ -550,7 +550,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
 /**
  * Get all notifications for a user
  * @param {string} user User 
- * @returns {Promise<array>} Array of notifications for user
+ * @returns {Promise<Array.<notification>>} Array of notifications for user
  */
 function GetNotifications(user){
     return new Promise((resolve, error) => {
@@ -640,7 +640,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
 // Stats
 /**
  * Get all stats
- * @returns {Promise<array>} Array of stats for user
+ * @returns {Promise<Array.<statistic>>} Array of stats for VA
  */
  function GetStats(){
     return new Promise((resolve, error) => {
@@ -711,7 +711,7 @@ function UpdateStat(name, newName, newValue){
 // Ranks
 /**
  * Get all ranks
- * @returns {Promise<array>} Array of ranks
+ * @returns {Promise<Array.<rank>>} Array of ranks
  */
  function GetRanks(){
     return new Promise((resolve, error) => {

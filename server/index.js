@@ -43,7 +43,6 @@ const {
     GetStats, DeleteStat, UpdateStat,
     GetRanks, DeleteRank, UpdateRank, CreateRank
     } = require("./db")
-const _tplengine = require('./defaultpagevar');
 const { resolveInclude } = require('ejs');
 /**
  * @typedef {import('./types.js').user} user
@@ -85,6 +84,24 @@ const getAppCookies = (req) => {
         return {};
     }
 };
+function mode(array) {
+    if (array.length == 0)
+        return null;
+    var modeMap = {};
+    var maxEl = array[0], maxCount = 1;
+    for (var i = 0; i < array.length; i++) {
+        var el = array[i];
+        if (modeMap[el] == null)
+            modeMap[el] = 1;
+        else
+            modeMap[el]++;
+        if (modeMap[el] > maxCount) {
+            maxEl = el;
+            maxCount = modeMap[el];
+        }
+    }
+    return maxEl;
+}
 
 //Config
 let config;
@@ -102,17 +119,90 @@ function reloadConfig(){
 reloadConfig()
 setInterval(reloadConfig, 5000);
 
+let stats = {};
+
+/**
+ * Reload Stats for VA
+ * @returns {Promise}
+ */
+
+function reloadStats(){
+    return new Promise(async (resolve) => {
+        stats = await GetStats();
+        resolve(true);
+    })
+}
+
+const updateStats = async () => {
+    //Craft
+    let craftArray = [];
+    (await GetPireps()).forEach(pirep => {
+        craftArray.push(pirep.vehiclePublic)
+    })
+    console.log(mode(craftArray))
+    UpdateStat("popCraft", "popCraft", mode(craftArray));
+    //Route
+    let routeArray = [];
+    (await GetPireps()).forEach(pirep => {
+        routeArray.push(pirep.route)
+    })
+    UpdateStat("popRoute", "popRoute", mode(routeArray));
+}
+//setInterval(updateStats, 120000)
+//updateStats();
+
+let vanetCraft = new Map();
+
+async function reloadVANETData() {
+    if (config.key) {
+        //aircraft
+        const aircraftRaw = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", { "X-Api-Key": config.key }, null, null)
+        const aircraft = JSON.parse(aircraftRaw[2]).result;
+        aircraft.forEach(aircraft => {
+            if (!vanetCraft.has(aircraft.aircraftID)) {
+                const rawAirData = aircraft;
+                delete rawAirData["liveryID"]
+                delete rawAirData["liveryName"]
+                vanetCraft.set(aircraft.aircraftID, {
+                    id: aircraft.aircraftID,
+                    name: aircraft.aircraftName,
+                    livery: [],
+                    raw: rawAirData
+                })
+                const updated = vanetCraft.get(aircraft.aircraftID)
+                updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
+                vanetCraft.set(aircraft.aircraftID, updated)
+            } else {
+                const updated = vanetCraft.get(aircraft.aircraftID)
+                updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
+                vanetCraft.set(aircraft.aircraftID, updated)
+            }
+        })
+    }
+}
+setTimeout(() => {
+    reloadVANETData()
+}, 5000);
+
+
+
 //App
 const app = express();
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
-app.engine('ejs', _tplengine);
 app.listen(process.env.PORT);
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 //app.use(cookieParser());
 
 //Util Funcs
+/**
+ * GetConfig - Used for every request;
+ * @returns {Object}
+ */
+function getConfig(){
+    return require("./../config.json");
+}
 /**
  * CheckCPWD - Used for checking if a user needs to change their password.
  * @param {Object} cookies 
@@ -186,6 +276,7 @@ async function getUserWithNotifs(userObj){
 
 //Basic Routes
 app.get('*', async (req, res)=>{
+    console.log(config)
     const cookies = getAppCookies(req)
     if(req.path.slice(0,8) == "/public/"){
         if(await FileExists(path.join(__dirname, "..", req.path))){
@@ -216,7 +307,9 @@ app.get('*', async (req, res)=>{
                         if(user){
                             res.redirect("/home");
                         }else{
-                        res.render("login")
+                        res.render("login", {
+                            config: getConfig()
+                        })
                         }
                         break;
                     case "/home":
@@ -224,7 +317,8 @@ app.get('*', async (req, res)=>{
                             res.render("home", {
                                 active: req.path,
                                 title: "Dashboard",
-                                user: user
+                                user: user,
+                                config: getConfig()
                             })
                         }else{
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -240,6 +334,7 @@ app.get('*', async (req, res)=>{
                                 routes: await GetRoutes(),
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
+                                config: getConfig()
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -253,6 +348,7 @@ app.get('*', async (req, res)=>{
                                 title: "Previous Flights",
                                 user: user,
                                 pireps: await GetUsersPireps(user.username),
+                                config: getConfig()
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -265,18 +361,23 @@ app.get('*', async (req, res)=>{
                                 title: "Events",
                                 user: user,
                                 events: await GetEvents(),
+                                config: getConfig()
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
-                    case "/about":
+                    case "/aboutVA":
                         if (user) {
                             res.render("about", {
                                 active: req.path,
-                                title: "Events",
+                                title: "About",
                                 user: user,
+                                config: getConfig(),
+                                stats: stats,
+                                fleet: await GetAircrafts(),
                                 events: await GetEvents(),
+                                route: await GetRoutes()
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -288,6 +389,7 @@ app.get('*', async (req, res)=>{
                                 active: req.path,
                                 title: "Account",
                                 user: user,
+                                config: getConfig()
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -300,7 +402,8 @@ app.get('*', async (req, res)=>{
                                     active: req.path,
                                     title: "Admin Menu",
                                     user: user,
-                                    activer: "/admin"
+                                    activer: "/admin",
+                                    config: getConfig()
                                 })
                             }else{
                                 res.sendStatus(403);
@@ -310,8 +413,176 @@ app.get('*', async (req, res)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
+                    case "/admin/aircraft":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/aircraft", {
+                                    active: req.path,
+                                    title: "Admin - Aircraft",
+                                    user: user,
+                                    activer: "/admin",
+                                    aircraft: await GetAircrafts(),
+                                    listCraft: vanetCraft,
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/events":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/events", {
+                                    active: req.path,
+                                    title: "Admin - Events",
+                                    user: user,
+                                    activer: "/admin",
+                                    aircraft: await GetAircrafts(),
+                                    events: await GetEvents() ,
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/pireps":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/pireps", {
+                                    active: req.path,
+                                    title: "Admin - PIREPS",
+                                    user: user,
+                                    activer: "/admin",
+                                    aircraft: await GetAircrafts(),
+                                    pireps: await GetPireps(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/ranks":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/ranks", {
+                                    active: req.path,
+                                    title: "Admin - Ranks",
+                                    user: user,
+                                    activer: "/admin",
+                                    aircraft: await GetAircrafts(),
+                                    ranks: await GetRanks() ,
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/routes":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/routes", {
+                                    active: req.path,
+                                    title: "Admin - Routes",
+                                    user: user,
+                                    activer: "/admin",
+                                    craft: await GetAircrafts(),
+                                    ops: await GetOperators(),
+                                    routes: await GetRoutes(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/users":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/users", {
+                                    active: req.path,
+                                    title: "Admin - Users",
+                                    user: user,
+                                    activer: "/admin",
+                                    users: await GetUsers(),
+                                    ops: await GetOperators(),
+                                    routes: await GetRoutes(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                        break;
+                    case "/admin/codeshare":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/codeshare", {
+                                    active: req.path,
+                                    title: "Admin - Operators",
+                                    user: user,
+                                    activer: "/admin",
+                                    operators: await GetOperators(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/settings":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/settings", {
+                                    active: req.path,
+                                    title: "Admin - Settings",
+                                    user: user,
+                                    activer: "/admin",
+                                    operators: await GetOperators(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
                     case "/report":
-                        res.render("report")
+                        res.render("report",{
+                            config: getConfig()
+                        })
+                        break;
+                    case '/changePWD':
+                        if(user){
+                            res.render("changePWD",{
+                                config: getConfig()
+                            })
+                        }
                         break;
                     case "/setup":
                         if(config.other){
@@ -320,11 +591,16 @@ app.get('*', async (req, res)=>{
                             res.render("setup")
                         }
                         break;
+                    case "/getLivData":
+                        res.send((await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/${req.query.liv}`, { "X-Api-Key": config.key }, null, null))[2])
+                        break;
                     case "/logout":
                         res.clearCookie("authToken").redirect("/");
                         break;
                     default:
-                        res.render("404");
+                        res.render("404", {
+                            config: getConfig()
+                        });
                         break;
                 }
             }
@@ -380,6 +656,7 @@ app.post('/setup', async (req,res)=>{
                         vanetKey: config.key,
                         wholeConfig: JSON.stringify(config)
                     });
+                    CreateOperator(config.name)
                     if (regReq[1].statusCode == 200) {
                         await reloadConfig();
                         res.sendStatus(200);
