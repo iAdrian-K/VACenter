@@ -685,14 +685,25 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
 function UpdateStat(name, newName, newValue){
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
-                if (err) {
-                    newError(err.message, "Error updating stat (REF:DB32)")
-                    resolve(false)
-                } else {
-                    resolve(true)
-                }
-            })
+            if (newName != null){
+                db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
+                    if (err) {
+                        newError(err.message, "Error updating stat (REF:DB32)")
+                        resolve(false)
+                    } else {
+                        resolve(true)
+                    }
+                })
+            } else {
+                db.run(`UPDATE stats(value) VALUES (?) WHERE name = ?`, [newValue, name], (err) => {
+                    if (err) {
+                        newError(err.message, "Error updating stat (REF:DB33)")
+                        resolve(false)
+                    } else {
+                        resolve(true)
+                    }
+                })
+            }
         })
     })
 }
@@ -707,7 +718,7 @@ function UpdateStat(name, newName, newValue){
         db.serialize(() => {
             db.all(`SELECT * FROM ranks`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing rank data (REF:DB33)")
+                    newError(err.message, "Error accessing rank data (REF:DB34)")
                 } else {
                     resolve(rows);
                 }
@@ -726,7 +737,7 @@ function UpdateStat(name, newName, newValue){
         db.serialize(() => {
             db.run(`DELETE FROM ranks WHERE rank = ?`, [rank], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting stat (REF:DB34)")
+                    newError(err.message, "Error deleting stat (REF:DB35)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -748,7 +759,7 @@ function UpdateRank(name, newName, newMinH){
         db.serialize(() => {
             db.run(`UPDATE ranks(rank, minH) VALUES (?, ?) WHERE name = ?`, [newName, newMinH, name], (err) => {
                 if (err) {
-                    newError(err.message, "Error updating stat (REF:DB35)")
+                    newError(err.message, "Error updating stat (REF:DB36)")
                     resolve(false)
                 } else {
                     resolve(true)
@@ -768,7 +779,7 @@ function UpdateRank(name, newName, newMinH){
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO ranks(rank, minH) VALUES(?, ?)`, [rank, minH], function (err) {
             if (err) {
-                newError(err.message, "Error creating operator (REF:DB36)")
+                newError(err.message, "Error creating operator (REF:DB37)")
                 resolve(false)
             } else {
                 resolve(true)
@@ -788,7 +799,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB37)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB38)")
                 } else {
                     resolve(row);
                 }
