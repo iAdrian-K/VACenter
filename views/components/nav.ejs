@@ -31,7 +31,7 @@
     </a>
     <%if(user.admin == true){%>
         <a
-            class="link-light btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/admin'){%> nav-active-btn<%}else{%>text-muted<%}%>" href="/admin">
+            class="link-light btn-light text-start btn w-100 my-2 text-decoration-none <%if(active == '/admin' || locals.activer){%> nav-active-btn<%}else{%>text-muted<%}%>" href="/admin">
             <i class="bi bi-shield-shaded me-2"></i>
             Admin
         </a>
