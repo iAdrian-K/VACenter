@@ -26,6 +26,7 @@ const {
     GetRanks, DeleteRank, UpdateRank, CreateRank
 } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
+update();
 
 //Versioning
 let branch = getVersionInfo().branch;
@@ -277,7 +278,6 @@ async function getUserWithNotifs(userObj){
 
 //Basic Routes
 app.get('*', async (req, res)=>{
-    console.log(config)
     const cookies = getAppCookies(req)
     if(req.path.slice(0,8) == "/public/"){
         if(await FileExists(path.join(__dirname, "..", req.path))){
@@ -435,15 +435,18 @@ app.get('*', async (req, res)=>{
                         }
                         break;
                     case "/admin/events":
+                        
                         if (user) {
+                            
                             if (user.admin == true) {
+                                console.log(1)
                                 res.render("admin/events", {
                                     active: req.path,
                                     title: "Admin - Events",
                                     user: user,
                                     activer: "/admin",
                                     aircraft: await GetAircrafts(),
-                                    events: await GetEvents() ,
+                                    events: await GetEvents(),
                                     config: getConfig()
                                 })
                             } else {
@@ -676,4 +679,29 @@ app.post('/setup', async (req,res)=>{
         res.sendStatus(400)
     }
 })
-update();
+
+
+
+
+
+
+//Data Reqs
+//Events
+app.post("/admin/events/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.title && req.body.desc && req.body.aircraft && req.body.server && req.body.gates && req.body.depICAO && req.body.arrICAO && req.body.date){
+        let user = await checkForUser(cookies);
+        if (user) {
+            if(user.admin == true){
+                await CreateEvent(req.body.title, req.body.desc, req.body.arrICAO, req.body.depICAO, req.body.date, req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName , req.body.server, req.body.gates.split(","))
+                res.redirect("/admin/events")
+            }else{
+                res.sendStatus(403);
+            }
+        }else{
+            res.sendStatus(401);
+        }
+    }else{
+        res.sendStatus(400)
+    }
+})

@@ -61,8 +61,8 @@
                                 <form method="POST" action="/admin/events/new">
                                     <h2>Create New Event</h2>
                                     <br>
-                                    <input type="text" class="form-control mb-3" placeholder="Event Title" required="" aria-label="Title" name="Title">
-                                    <textarea class="form-control mb-3" name="Desc" placeholder="Event Description"></textarea>
+                                    <input type="text" class="form-control mb-3" placeholder="Event Title" required="" aria-label="Title" name="title">
+                                    <textarea class="form-control mb-3" name="desc" placeholder="Event Description"></textarea>
                                     <input type="text" class="form-control mb-3" placeholder="Departure ICAO" required="" aria-label="Departure ICAO" name="depICAO">
                                     <input type="text" class="form-control mb-3" placeholder="Arrival ICAO" required="" aria-label="Arrival ICAO" name="arrICAO">
                                     <label class="form-label">
@@ -88,7 +88,7 @@
                                         Gates
                                         <br><span class="text-muted"><strong>NOTE:</strong> Please format the gates with the name followed by a comma, with no space, like follows: <i>Gate1,Gate2,Gate3</i></span>
                                     </label>
-                                    <textarea class="form-control mb-3" name="Desc" placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
+                                    <textarea class="form-control mb-3" name="gates" placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
                                     <button class="btn btn-primary">Create</button>
                                 </form>
                             </div>
