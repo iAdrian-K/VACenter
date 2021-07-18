@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 var bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const rateLimit = require("express-rate-limit");
 require('dotenv').config()
 
 //Parts
@@ -106,7 +107,15 @@ function mode(array) {
 }
 
 //Config
-let config;
+let config = {
+    other: {
+        rates: 100
+    }
+};
+let limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
 /**
  * Reloads Config
  * @name Reload Config
@@ -114,12 +123,17 @@ let config;
 function reloadConfig(){
     return new Promise(async (resolve, error) => {
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
+        let limiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: config.other.rates // limit each IP to 100 requests per windowMs
+        });
+        app.use(limiter);
         resolve(true);
     })
     
 }
 reloadConfig()
-setInterval(reloadConfig, 5000);
+setInterval(reloadConfig, 15000);
 
 let stats = {};
 
@@ -680,8 +694,30 @@ app.post('/setup', async (req,res)=>{
     }
 })
 
+app.post('/OSOR', async(req, res)=>{
+    const cookies = getAppCookies(req)
+    let user = await checkForUser(cookies);
+    if (user) {
+        await DeleteTokens(user.username);
+        res.redirect("/")
+    }else{
+        res.sendStatus(401);
+    }
+})
 
-
+app.post("/newPIREP", async (req, res) => {
+    const cookies = getAppCookies(req)
+    if (req.body.route && req.body.min) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            //await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)))
+        }else{
+            res.sendStatus(401);
+        }
+    }else{
+        res.sendStatus(400);
+    }
+})
 
 
 
@@ -703,5 +739,223 @@ app.post("/admin/events/new", async function (req, res) {
         }
     }else{
         res.sendStatus(400)
+    }
+})
+app.post("/admin/events/remove", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                //await Delete
+                res.redirect("/admin/events")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
+
+//Operators
+app.post("/admin/codeshare/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.airName) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await CreateOperator(req.body.airName)
+                res.redirect("/admin/codeshare")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
+
+//Rank
+app.post("/admin/ranks/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.name && req.body.min) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await CreateRank(req.body.name, req.body.min)
+                res.redirect("/admin/ranks")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
+
+//Aircraft
+app.post("/admin/aircraft/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.airID && req.body.livID) {
+        console.log(req.body)
+        let user = await checkForUser(cookies);
+        let liv = (JSON.parse((await URLReq(MethodValues.GET, `https://api.vanet.app/public/v1/aircraft/livery/${req.body.livID}`, {'X-API-Key': config.key}, null, null))[2]).result);
+        if (user) {
+            if (user.admin == true) {
+                await CreateAircraft(req.body.livID, req.body.airID, liv.liveryName, (vanetCraft.get(req.body.airID)).name, liv.liveryName +" - "+ liv.aircraftName)
+                res.redirect("/admin/aircraft")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
+
+//Routes
+app.post("/admin/routes/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.num && req.body.aircraft && req.body.ft && req.body.depIcao && req.body.arrIcao && req.body.op) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await CreateRoute(makeid(50), req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, "0");
+                res.redirect("/admin/routes")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        console.log(req.body)
+        res.sendStatus(400)
+    }
+})
+app.post("/admin/routes/update", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.id && req.body.num && req.body.aircraft && req.body.ft && req.body.depIcao && req.body.arrIcao && req.body.op) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                if(await GetRoute(req.body.id)){
+                    //await UpdateRoute(makeid(50), req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, "0");
+                    res.redirect("/admin/routes")
+                }else{
+                    res.sendStatus(404);
+                }
+                
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        console.log(req.body)
+        res.sendStatus(400)
+    }
+})
+
+//Users
+app.post("/admin/users/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.username && req.body.password && req.body.ifc && req.body.name) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const checkForTarget = ((await GetUser(req.body.username)) == undefined)
+                if(checkForTarget){
+                    const pilotIDReq = await JSONReq("GET", `https://api.vanet.app/airline/v1/user/id/${req.body.IFC}`, { "X-Api-Key": config.key }, null, null)
+                    const pilotID = pilotIDReq[2].result;
+                    let vanetid = {
+                        status: pilotIDReq[2].status == 0 ? true : false,
+                        id: pilotIDReq[2].result != false ? pilotIDReq[2].result : null,
+                    }
+                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false)
+                    res.redirect("/admin/users")
+                }else{
+                    res.sendStatus(409);
+                }
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        console.log(req.body)
+        res.sendStatus(400)
+    }
+})
+
+//Settings
+app.post("/admin/settings/update", async function (req, res) {
+    const cookies = getAppCookies(req)
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                update().then(status=>{
+                    res.sendStatus(status == true ? 202 : 204);
+                })
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+})
+app.post("/admin/settings/rate", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if(req.body.value){
+    let user = await checkForUser(cookies);
+    if (user) {
+        if (user.admin == true) {
+            const newConfig = getConfig();
+            newConfig.other.rates = req.body.value;
+            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
+            setTimeout(()=>{
+                reloadConfig();
+                res.redirect("/admin/settings")
+            }, 1000)
+        } else {
+            res.sendStatus(403);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+    }else{
+        res.sendStatus(400);
+    }
+})
+
+app.post("/admin/settings/bg", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.value) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const newConfig = getConfig();
+                newConfig.other.bg = req.body.value;
+                fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
+                res.redirect("/admin/settings")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
     }
 })

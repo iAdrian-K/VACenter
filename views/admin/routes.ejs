@@ -59,7 +59,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/reqs/newData?t=r">
+                                <form method="POST" action="/admin/routes/new">
                                     <h2>Create new route</h2>
                                     <br>
                                     <div class="input-group mb-3">
@@ -87,7 +87,7 @@
                                     <select class="form-select mb-3" name="op">
                                         <% ops.forEach(op=>{%>
                                             <option value="<%= op.id%>">
-                                                <%= op.name%>
+                                                <%= op.operator%>
                                             </option>
                                             <%})%>
                                     </select>
@@ -113,7 +113,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/reqs/newData?t=r">
+                                <form method="POST" action="/admin/routes/update">
                                     <h2>Modify <%=config.code + route.num%></h2>
                                     <br>
                                     <div class="input-group mb-3">
@@ -138,7 +138,7 @@
                                     <select class="form-select mb-3" name="op" value="<%= route.operator %>">
                                         <% ops.forEach(op=>{%>
                                             <option value="<%= op.id%>">
-                                                <%= op.name%>
+                                                <%= op.operator%>
                                             </option>
                                             <%})%>
                                     </select>

@@ -29,7 +29,7 @@
                     <% ranks.forEach(rank=>{%>
                         <tr>
                             <th scope="row">
-                                <%= rank.name %>
+                                <%= rank.rank %>
                             </th>
                             <td>
                                 <%= rank.minH %>
@@ -56,7 +56,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/admin/reqs/newData?t=ra">
+                            <form method="POST" action="/admin/ranks/new">
                                 <label class="form-label">Rank Name:
                                     <input class="form-control mt-1" id="newAirAirSel" name="name"><br>
                                 <label class="form-label">Rank Minimum Hours:
