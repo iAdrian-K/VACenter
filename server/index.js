@@ -12,19 +12,19 @@ require('dotenv').config()
 //Parts
 const { FileWrite, FileRead, FileExists, FileRemove } = require('./fileFunctions.js')
 const { JSONReq, URLReq, MethodValues } = require("./urlreqs")
-const {
-    db, GetPPURL,
-    GetUser, GetUsers, CreateUser,
-    GetPirep, GetUsersPireps, GetPireps, CreatePirep,
-    GetEvent, GetEvents, CreateEvent,
-    GetToken, CreateToken, DeleteTokens,
-    GetAircraft, GetAircrafts, CreateAircraft,
-    GetOperator, GetOperators, CreateOperator,
-    GetRoute, GetRoutes, CreateRoute,
-    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-    GetStats, DeleteStat, UpdateStat,
-    GetRanks, DeleteRank, UpdateRank, CreateRank
-} = require("./db")
+const { 
+        db, GetPPURL,
+        GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
+        GetEvent, GetEvents, CreateEvent, DeleteEvent,
+        GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
+        GetOperator, GetOperators, CreateOperator, DeleteOperator,
+        GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
+        GetRanks, UpdateRank, CreateRank, DeleteRank,
+        GetRoute, GetRoutes, CreateRoute, UpdateRoute, DeleteRoute,
+        GetStats, UpdateStat, DeleteStat,
+        GetToken, CreateToken, DeleteTokens,
+        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser
+    } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 update();
 
