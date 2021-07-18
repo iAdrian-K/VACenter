@@ -684,7 +684,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
  */
 function UpdateStat(name, newName, newValue){
     return new Promise((resolve, error) => {
-            if (newName != null){
+            if (newName == null){
                 db.serialize(() => {
                     db.run(`UPDATE stats(name, value) VALUES (?, ?) WHERE name = ?`, [newName, newValue, name], (err) => {
                         if (err) {
