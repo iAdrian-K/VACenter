@@ -707,10 +707,10 @@ app.post('/OSOR', async(req, res)=>{
 
 app.post("/newPIREP", async (req, res) => {
     const cookies = getAppCookies(req)
-    if (req.body.name && req.body.min) {
+    if (req.body.route && req.body.min) {
         let user = await checkForUser(cookies);
         if (user) {
-            //await CreatePirep(makeid(25), )
+            //await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)))
         }else{
             res.sendStatus(401);
         }
