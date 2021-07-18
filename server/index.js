@@ -40,7 +40,8 @@ const {
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
     GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-    GetStats, DeleteStat, UpdateStat
+    GetStats, DeleteStat, UpdateStat,
+    GetRanks, DeleteRank, UpdateRank, CreateRank
     } = require("./db")
 const _tplengine = require('./defaultpagevar');
 const { resolveInclude } = require('ejs');

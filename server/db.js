@@ -676,7 +676,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
     });
 }
 /**
- * 
+ * Updates Stat
  * @param {String} name - Name of stat
  * @param {String} newName - New name for stat
  * @param {String} newValue - New value for stat
@@ -697,6 +697,86 @@ function UpdateStat(name, newName, newValue){
     })
 }
 
+// Ranks
+/**
+ * Get all ranks
+ * @returns {Promise<array>} Array of ranks
+ */
+ function GetRanks(){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM ranks`, (err, rows) => {
+                if (err) {
+                    newError(err.message, "Error accessing rank data (REF:DB33)")
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Delete rank
+ * @param {String} rank - Name of rank
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+ function DeleteRank(rank){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM ranks WHERE rank = ?`, [rank], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting stat (REF:DB34)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Update rank
+ * @param {String} name - Name of rank
+ * @param {String} newName - New name for rank
+ * @param {Number} newMinH - New minimun hours for rank
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function UpdateRank(name, newName, newMinH){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`UPDATE ranks(rank, minH) VALUES (?, ?) WHERE name = ?`, [newName, newMinH, name], (err) => {
+                if (err) {
+                    newError(err.message, "Error updating stat (REF:DB35)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Creates a new rank
+ * @param {String} rank - Name of rank
+ * @param {Number} minH - Minimum hours
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+ function CreateRank(rank, minH) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO ranks(rank, minH) VALUES(?, ?)`, [rank, minH], function (err) {
+            if (err) {
+                newError(err.message, "Error creating operator (REF:DB36)")
+                resolve(false)
+            } else {
+                resolve(true)
+            }
+        });
+    });
+}
+
 // Miscellaneous
 /**
  * Returns the Profile Picture URL of a user
@@ -708,7 +788,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB33)")
+                    newError(err.message, "Error accessing Profile Picture data (REF:DB37)")
                 } else {
                     resolve(row);
                 }
@@ -728,5 +808,6 @@ module.exports = {
     GetOperator, GetOperators, CreateOperator,
     GetRoute, GetRoutes, CreateRoute,
     GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-    GetStats, DeleteStat, UpdateStat
+    GetStats, DeleteStat, UpdateStat,
+    GetRanks, DeleteRank, UpdateRank, CreateRank
     };
