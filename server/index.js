@@ -9,9 +9,27 @@ var bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 require('dotenv').config()
 
+//Parts
+const { FileWrite, FileRead, FileExists, FileRemove } = require('./fileFunctions.js')
+const { JSONReq, URLReq, MethodValues } = require("./urlreqs")
+const {
+    db, GetPPURL,
+    GetUser, GetUsers, CreateUser,
+    GetPirep, GetUsersPireps, GetPireps, CreatePirep,
+    GetEvent, GetEvents, CreateEvent,
+    GetToken, CreateToken, DeleteTokens,
+    GetAircraft, GetAircrafts, CreateAircraft,
+    GetOperator, GetOperators, CreateOperator,
+    GetRoute, GetRoutes, CreateRoute,
+    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
+    GetStats, DeleteStat, UpdateStat,
+    GetRanks, DeleteRank, UpdateRank, CreateRank
+} = require("./db")
+const { update, checkForNewVersion, getVersionInfo } = require("./update");
+
 //Versioning
-let branch = "beta"
-let cvn = require("./../package.json").version;
+let branch = getVersionInfo().branch;
+let cvn = getVersionInfo().version;
 let cvnb = branch == "beta" ? cvn.toString() + "B" : branch == "demo" ? cvn.toString() + "D" : cvn;
 
 /**
@@ -27,23 +45,6 @@ function reloadVersion(){
 reloadVersion();
 console.log(makeid(50))
 
-//Parts
-const {FileWrite, FileRead, FileExists, FileRemove} = require('./fileFunctions.js')
-const {JSONReq, URLReq, MethodValues} = require("./urlreqs")
-const { 
-    db, GetPPURL,
-    GetUser, GetUsers, CreateUser,
-    GetPirep, GetUsersPireps, GetPireps, CreatePirep,
-    GetEvent, GetEvents, CreateEvent,
-    GetToken, CreateToken, DeleteTokens,
-    GetAircraft, GetAircrafts, CreateAircraft,
-    GetOperator, GetOperators, CreateOperator,
-    GetRoute, GetRoutes, CreateRoute,
-    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-    GetStats, DeleteStat, UpdateStat,
-    GetRanks, DeleteRank, UpdateRank, CreateRank
-    } = require("./db")
-const { resolveInclude } = require('ejs');
 /**
  * @typedef {import('./types.js').user} user
  * @typedef {import('./types.js').aircraft} aircraft
@@ -675,3 +676,4 @@ app.post('/setup', async (req,res)=>{
         res.sendStatus(400)
     }
 })
+update();
