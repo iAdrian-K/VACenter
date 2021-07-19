@@ -19,6 +19,7 @@
  * @property {boolean} cp - Change Password Flag
  * @property {boolean} revoked
  * @property {array} notifications
+ * @property {string} VANetID - the ID assigned by the VANet servers corresponding to the user's IFC profile.
  */
 
 /**
@@ -77,7 +78,7 @@
 /**
  * A PIREP Object
  * @typedef {Object} PIREP
- * @property {number} id
+ * @property {string} id
  * @property {string} vehicle
  * @property {string} vehiclePublic
  * @property {string} author
@@ -89,6 +90,7 @@
  * @property {string} comments
  * @property {number} fuel
  * @property {string} filed
+ * @property {string} status
  */
 
 /**

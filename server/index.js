@@ -21,7 +21,7 @@ const {
         GetOperator, GetOperators, CreateOperator, DeleteOperator,
         GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
         GetRanks, UpdateRank, CreateRank, DeleteRank,
-        GetRoute, GetRoutes, CreateRoute, UpdateRoute, DeleteRoute,
+        GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
         GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser
@@ -228,8 +228,10 @@ function checkForCPWD(cookies) {
     return new Promise((async resolve => {
         if (cookies.authToken) {
             const UID = await GetToken(cookies.authToken)
+            console.log(UID)
             if (UID) {
-                const user = await GetUser(UID);
+                if(UID.user){
+                const user = await GetUser(UID.user);
                 if (user) {
                     if (user.cp) {
                         resolve(true);
@@ -239,6 +241,9 @@ function checkForCPWD(cookies) {
                 } else {
                     resolve(false);
                 }
+            }else{
+                resolve(false)
+            }
             } else {
                 resolve(false);
             }
@@ -310,6 +315,7 @@ app.get('*', async (req, res)=>{
             }
         }else{
             const changePWD = await checkForCPWD(cookies);
+            console.log(changePWD)
             let user = await checkForUser(cookies);
             if(user){
                 user = await getUserWithNotifs(user);
@@ -705,12 +711,35 @@ app.post('/OSOR', async(req, res)=>{
     }
 })
 
-app.post("/newPIREP", async (req, res) => {
+app.post('/CPWD', async(req, res)=>{
     const cookies = getAppCookies(req)
-    if (req.body.route && req.body.min) {
+    if(req.body.npwd){
         let user = await checkForUser(cookies);
         if (user) {
-            //await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)))
+            if(user.cp){
+                user.password = bcrypt.hashSync(req.body.npwd, 10);
+                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked)
+                await DeleteTokens(user.username);
+                res.redirect("/");
+            }else{
+                res.sendStatus(403);
+            }
+        }else{
+            res.sendStatus(401);
+        }
+    }else{
+        res.sendStatus(400);
+    }
+})
+
+app.post("/newPIREP", async (req, res) => {
+    const cookies = getAppCookies(req)
+    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            console.log(req.body.route.slice(config.code.length, req.body.route.length));
+            await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date()).toString());
+            res.redirect("/");
         }else{
             res.sendStatus(401);
         }
@@ -741,13 +770,14 @@ app.post("/admin/events/new", async function (req, res) {
         res.sendStatus(400)
     }
 })
-app.post("/admin/events/remove", async function (req, res) {
+app.delete("/admin/events/remove", async function (req, res) {
     const cookies = getAppCookies(req)
+    console.log(req.body)
     if (req.body.id) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                //await Delete
+                await DeleteEvent(req.body.id);
                 res.redirect("/admin/events")
             } else {
                 res.sendStatus(403);
@@ -779,6 +809,25 @@ app.post("/admin/codeshare/new", async function (req, res) {
         res.sendStatus(400)
     }
 })
+app.delete("/admin/codeshare/remove", async function (req, res) {
+    console.log(req.body)
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteOperator(req.body.id);
+                res.redirect("/admin/codeshare");
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
 
 //Rank
 app.post("/admin/ranks/new", async function (req, res) {
@@ -788,6 +837,25 @@ app.post("/admin/ranks/new", async function (req, res) {
         if (user) {
             if (user.admin == true) {
                 await CreateRank(req.body.name, req.body.min)
+                res.redirect("/admin/ranks")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
+app.delete("/admin/ranks/remove", async function (req, res) {
+    console.log(req.body)
+    const cookies = getAppCookies(req)
+    if (req.body.name) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteRank(req.body.name);
                 res.redirect("/admin/ranks")
             } else {
                 res.sendStatus(403);
@@ -821,6 +889,25 @@ app.post("/admin/aircraft/new", async function (req, res) {
         res.sendStatus(400)
     }
 })
+app.delete("/admin/aircraft/remove", async function (req, res) {
+    const cookies = getAppCookies(req)
+    console.log(req.body)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteAircraft(req.body.id);
+                res.redirect("/admin/aircraft")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+}) 
 
 //Routes
 app.post("/admin/routes/new", async function (req, res) {
@@ -849,7 +936,7 @@ app.post("/admin/routes/update", async function (req, res) {
         if (user) {
             if (user.admin == true) {
                 if(await GetRoute(req.body.id)){
-                    //await UpdateRoute(makeid(50), req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, "0");
+                    await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, "0");
                     res.redirect("/admin/routes")
                 }else{
                     res.sendStatus(404);
@@ -866,11 +953,30 @@ app.post("/admin/routes/update", async function (req, res) {
         res.sendStatus(400)
     }
 })
+app.delete("/admin/routes/remove", async function (req, res) {
+    const cookies = getAppCookies(req)
+    console.log(req.body)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteRoute(req.body.id);
+                res.redirect("/admin/routes")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400)
+    }
+})
 
 //Users
 app.post("/admin/users/new", async function (req, res) {
     const cookies = getAppCookies(req)
-    if (req.body.username && req.body.password && req.body.ifc && req.body.name) {
+    if (req.body.username && req.body.password && req.body.IFC && req.body.Name) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
@@ -882,7 +988,7 @@ app.post("/admin/users/new", async function (req, res) {
                         status: pilotIDReq[2].status == 0 ? true : false,
                         id: pilotIDReq[2].result != false ? pilotIDReq[2].result : null,
                     }
-                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false)
+                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false, vanetid.id)
                     res.redirect("/admin/users")
                 }else{
                     res.sendStatus(409);
@@ -897,6 +1003,113 @@ app.post("/admin/users/new", async function (req, res) {
         console.log(req.body)
         res.sendStatus(400)
     }
+})
+app.post("/admin/users/update", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.name && req.body.uid) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
+                if (checkForTarget) {
+                    const target = await GetUser(req.body.uid)
+                    if(req.body.name != target.display){
+                        target.display = req.body.name;
+                    }
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID)
+                    res.redirect("/admin/users")
+                } else {
+                    res.sendStatus(409);
+                }
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        console.log(req.body)
+        res.sendStatus(400)
+    }
+})
+app.post("/admin/users/revoke", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.uid) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
+                if (checkForTarget) {
+                    const target = await GetUser(req.body.uid)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, true, target.VANetID)
+                    res.redirect("/admin/users")
+                } else {
+                    res.sendStatus(409);
+                }
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        console.log(req.body)
+        res.sendStatus(400)
+    }
+})
+app.post("/admin/users/unrevoke", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.uid) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
+                if (checkForTarget) {
+                    const target = await GetUser(req.body.uid)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, false, target.VANetID)
+                    res.redirect("/admin/users")
+                } else {
+                    res.sendStatus(409);
+                }
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        console.log(req.body)
+        res.sendStatus(400)
+    }
+})
+app.post("/admin/users/resetPWD", async function (req, res){
+    const cookies = getAppCookies(req)
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                if (req.body.targetUID) {
+                    let target = await GetUser(req.body.targetUID);
+                    if (target) {
+                        if (!target.cp) {
+                            target.password = bcrypt.hashSync("VACENTERBACKUP1", 10);
+                            await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked)
+                            await DeleteTokens(target.username);
+                            res.redirect("/admin/users");
+                        } else {
+                            res.sendStatus(409);
+                        }
+                    } else {
+                        res.sendStatus(404);
+                    }
+                }else{
+                    res.sendStatus(400);
+                }
+            }else{
+                res.sendStatus(403);
+            }
+        }else{
+            res.sendStatus(401);
+        }
 })
 
 //Settings
@@ -949,6 +1162,58 @@ app.post("/admin/settings/bg", async function (req, res) {
                 newConfig.other.bg = req.body.value;
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
                 res.redirect("/admin/settings")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+
+//PIREPS
+app.post("/admin/pireps/apr", async function (req, res){
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const targetPIREP = await GetPirep(req.body.id)
+                if(targetPIREP){
+                    targetPIREP.status = "a";
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed)
+                    res.redirect("/admin/pireps")
+                }else{
+                    res.sendStatus(404);
+                }
+            }else{
+                res.sendStatus(403);
+            }
+        }else{
+            res.sendStatus(401);
+        }
+    }else{
+        res.sendStatus(400);
+    }
+})
+app.post("/admin/pireps/den", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                console.log(req.body.id)
+                const targetPIREP = await GetPirep(req.body.id)
+                console.log(targetPIREP)
+                if (targetPIREP) {
+                    targetPIREP.status = "d";
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed)
+                    res.redirect("/admin/pireps")
+                } else {
+                    res.sendStatus(404);
+                }
             } else {
                 res.sendStatus(403);
             }

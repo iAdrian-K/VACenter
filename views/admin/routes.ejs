@@ -146,9 +146,9 @@
                                     <input type="text" class="form-control mb-3" placeholder="YSSY" required="" aria-label="ICAO Departure" name="depIcao" value="<%= route.depICAO%>">
                                     <label class="form-label">Arrival ICAO</label>
                                     <input type="text" class="form-control mb-3" placeholder="YMML" required="" aria-label="ICAO Arrival" name="arrIcao" value="<%= route.arrICAO%>">
-                                    <input type="hidden" value="true" name="update">
+                                    <input type="hidden" value="<%= route.id%>" name="id">
                                     <button class="btn btn-primary">Update</button>
-                                    <button class="btn btn-danger" type="button" onclick="remData('r','<%= route.id%>')">Remove</button>
+                                    <button class="btn btn-danger" type="button" onclick="remRoute('<%= route.id%>')">Remove</button>
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -168,7 +168,7 @@
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
             <%- include("./../components/mobile.ejs") %>
         <script>
-            function remData(type, id) {
+            function remRoute(id) {
                     const data = `id=${id}`;
                     const xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
@@ -178,7 +178,7 @@
                             console.log(this.responseText);
                         }
                     });
-                    xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
+                    xhr.open("DELETE", `/admin/routes/remove`);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     setTimeout(() => {

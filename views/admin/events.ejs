@@ -139,7 +139,7 @@
                                                         <%= gate.gate%>, 
                                                         <%})%><br>
                             </p>
-                            <button class="btn btn-danger" onclick="remData('e', '<%= event.id%>')"><i class="bi bi-x-circle"></i></button>
+                            <button class="btn btn-danger" onclick="remEvent('<%= event.id%>')"><i class="bi bi-x-circle"></i></button>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -149,8 +149,8 @@
             </div>
             <%})%>
                 <script>
-                    function remData(type, id) {
-                            const data = `id=${btoa(id)}`;
+                    function remEvent(id) {
+                            const data = `id=${id}`;
                             const xhr = new XMLHttpRequest();
                             xhr.withCredentials = true;
                             xhr.addEventListener("readystatechange", function () {
@@ -159,7 +159,7 @@
                                     console.log(this.responseText);
                                 }
                             });
-                            xhr.open("DELETE", `/admin/reqs/remEvent`);
+                            xhr.open("DELETE", `/admin/events/remove`);
                             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                             xhr.send(data);
                             setTimeout(() => {

@@ -256,7 +256,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
 /**
  * Returns record of specific PIREP id
  * @param {string} id - Unique id of prirep 
- * @returns {Promise<Array.<PIREP>>} Record for that prirep in an array
+ * @returns {Promise<PIREP>} Record for that prirep in an array
  */
  function GetPirep(id) {
     return new Promise((resolve, error) => {
@@ -327,7 +327,7 @@ function GetPireps() {
 function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
             if (err) {
                 newError(err.message, "Error creating PIREP (REF:DB12)")
                 resolve(false)
@@ -658,6 +658,25 @@ function CreateOperator(operator) {
             db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     newError(err.message, "Error accessing route data (REF:DB22)")
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Returns record of specific Route Name
+ * @param {string} num - Number of route 
+ * @returns {Promise<route>} Record for that route
+ */
+function GetRouteByNum(num) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM routes WHERE num = ?`, [num], (err, row) => {
+                if (err) {
+                    newError(err.message, "Error accessing route data (REF:DB223)")
                 } else {
                     resolve(row);
                 }
@@ -1048,7 +1067,7 @@ module.exports = {
     GetOperator, GetOperators, CreateOperator, DeleteOperator,
     GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
     GetRanks, UpdateRank, CreateRank, DeleteRank,
-    GetRoute, GetRoutes, CreateRoute, UpdateRoute, DeleteRoute,
+    GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser
