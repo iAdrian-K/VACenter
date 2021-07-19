@@ -22,22 +22,25 @@
             <p id="updaterStatus"></p>
             <h2>Customisation</h2>
             <hr>
-            <form action="/admin/reqs/newData?t=s" method="post">
+
             <div class="form-control shadow p-3 my-3">
                 <h4 class="text-muted">Accent Color</h4>
                 <p><strong class="text-muted">COMING SOON</strong></p>
             </div>
             <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/bg" method="post">
                 <h4>Background URL</h4>
-                <input class="form-control" type="url" name="bgurl" id="fill1" value="<%= config.other.bg%>"><br>
+                <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg%>"><br>
                 <button type="submit" class="btn btn-primary">Update</button>
+                </form>
             </div>
             <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/rate" method="post">
                 <h4>Rate Limiter Amounts</h4>
-                <input class="form-control" type="number" name="rate" value="<%= config.other.rates%>"><br>
+                <input class="form-control" type="number" name="value" value="<%= config.other.rates%>"><br>
                 <button type="submit" class="btn btn-primary">Update</button>
+                </form>
             </div>
-            </form>
 
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -85,7 +88,7 @@
                             }
                         }
                     });
-                    xhr.open("POST", `/update`);
+                    xhr.open("POST", `/admin/settings/update`);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     document.getElementById("updaterStatus").innerHTML = "Checking, please don't reload. <span class='text-muted'> this should take around 10 seconds </span>"

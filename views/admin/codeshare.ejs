@@ -16,11 +16,11 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
         <div class="float-end content bg-light-light ps-3 py-3" style="width: 80%;" id="content">
-            <h2>Current Crafts</h2>
+            <h2>Current Operators</h2>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th scope="col">Vehicle</th>
+                        <th scope="col">Name</th>
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -28,10 +28,10 @@
                     <% operators.forEach(op=>{%>
                         <tr>
                             <th scope="row">
-                                <%= op.name %>
+                                <%= op.operator %>
                             </th>
                             <td>
-                                <button class="btn btn-danger" onclick="remData('o', '<%=op.id%>')"><i
+                                <button <% if(op.operator != config.name){%>class="btn btn-danger" onclick="remCode('<%=op.id%>')"<%}else{%>class="btn btn-secondary" style="cursor: not-allowed !important;" disabled<%}%>><i
                                         class="bi bi-x-circle"></i></button>
                             </td>
 
@@ -52,7 +52,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/admin/reqs/newData?t=o">
+                            <form method="POST" action="/admin/codeshare/new">
                                 <label class="form-label">Operator Name:
                                     <input class="form-control mt-1" id="newAirAirSel" name="airName"><br>
                                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -99,7 +99,7 @@
                 xhr.send(data);
             }
             loadAircraftLivData()
-            function remData(type, id) {
+            function remCode(id) {
                 const data = `id=${id}`;
                 const xhr = new XMLHttpRequest();
                 xhr.withCredentials = true;
@@ -109,7 +109,7 @@
                         console.log(this.responseText);
                     }
                 });
-                xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
+                xhr.open("DELETE", `/admin/codeshare/remove`);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhr.send(data);
                 setTimeout(() => {

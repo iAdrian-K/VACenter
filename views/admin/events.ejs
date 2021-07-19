@@ -48,51 +48,47 @@
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     Add Event
                 </button>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                <div class="modal fade hideScroll" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">Add Event</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/reqs/newUser">
-                                    <h2>Create new account</h2>
+                                <form method="POST" action="/admin/events/new">
+                                    <h2>Create New Event</h2>
                                     <br>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1">
-                                            <%= config.code%>
-                                        </span>
-                                        <input type="text" class="form-control" placeholder="Username"
-                                            aria-label="Username" required="" aria-describedby="basic-addon1"
-                                            name="username">
-                                    </div>
-                                    <input type="text" class="form-control mb-3" placeholder="Name" required=""
-                                        aria-label="Name" name="Name">
-                                    <input type="text" class="form-control mb-3" placeholder="IFC Username" required=""
-                                        aria-label="IFC" name="IFC">
-                                    <p class="fw-bold"><span class="text-danger">CAUTION</span>: Please make sure the
-                                        IFC Name is correct, you can not
-                                        change it later. It must be case correct.</p>
-                                    <input type="password" class="form-control" placeholder="Password" required=""
-                                        aria-label="Password" aria-describedby="basic-addon1" name="password">
-                                    <div class="form-check mt-3 text-start">
-                                        <input class="form-check-input" type="checkbox" value="yespls" checked=""
-                                            disabled="" name="CPW" id="CPWCheck">
-                                        <label class="form-check-label" for="flexCheckDefault">
-                                            Require Password Change on login
-                                        </label>
-                                    </div>
-                                    <div class="form-check mt-3 text-start">
-                                        <input class="form-check-input" type="checkbox" value="true" name="admin"
-                                            id="flexCheckDefault">
-                                        <label class="form-check-label" for="flexCheckDefault">
-                                            Admin
-                                        </label>
-                                        <p><strong>CAREFUL:</strong> This is a dangerous permission to grant.</p>
-                                    </div>
+                                    <input type="text" class="form-control mb-3" placeholder="Event Title" required="" aria-label="Title" name="title">
+                                    <textarea class="form-control mb-3" name="desc" placeholder="Event Description"></textarea>
+                                    <input type="text" class="form-control mb-3" placeholder="Departure ICAO" required="" aria-label="Departure ICAO" name="depICAO">
+                                    <input type="text" class="form-control mb-3" placeholder="Arrival ICAO" required="" aria-label="Arrival ICAO" name="arrICAO">
+                                    <label class="form-label">
+                                        Departure Time<br>
+                                        <input type="datetime-local" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Time"
+                                            name="date">
+                                    </label>
+                                    <label class="form-label w-100">Aircraft
+                                    <select class="form-select mb-3" name="aircraft">
+                                        <% aircraft.forEach(vic=>{%>
+                                            <option value="<%= vic.livID%>"><%= vic.publicName%></option>    
+                                        <%})%>
+                                    </select>
+                                    </label>
+                                    <label class="form-label w-100">Server
+                                    <select class="form-select mb-3" name="server">
+                                        <option value="Expert">Expert</option>
+                                        <option value="Training">Training</option>
+                                        <option value="Casual">Casual</option>
+                                    </select>
+                                    </label>
+                                    <label class="form-label w-100">
+                                        Gates
+                                        <br><span class="text-muted"><strong>NOTE:</strong> Please format the gates with the name followed by a comma, with no space, like follows: <i>Gate1,Gate2,Gate3</i></span>
+                                    </label>
+                                    <textarea class="form-control mb-3" name="gates" placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
                                     <button class="btn btn-primary">Create</button>
                                 </form>
                             </div>
@@ -139,9 +135,11 @@
                                                 <strong><i class="bi bi-calendar2"></i> Date:</strong>
                                                 <%= new Date(event.depTime).toLocaleString("EN-AU", {Hour12: true})%><br>
                                                     <strong><i class="bi bi-card-checklist"></i> Gates:</strong>
-                                                    <%= event.gates.slice(",").join(", ") %><br>
+                                                    <% event.gates.forEach(gate=>{%>
+                                                        <%= gate.gate%>, 
+                                                        <%})%><br>
                             </p>
-                            <button class="btn btn-danger" onclick="remData('e', '<%= event.id%>')"><i class="bi bi-x-circle"></i></button>
+                            <button class="btn btn-danger" onclick="remEvent('<%= event.id%>')"><i class="bi bi-x-circle"></i></button>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -151,8 +149,8 @@
             </div>
             <%})%>
                 <script>
-                    function remData(type, id) {
-                            const data = `id=${btoa(id)}`;
+                    function remEvent(id) {
+                            const data = `id=${id}`;
                             const xhr = new XMLHttpRequest();
                             xhr.withCredentials = true;
                             xhr.addEventListener("readystatechange", function () {
@@ -161,7 +159,7 @@
                                     console.log(this.responseText);
                                 }
                             });
-                            xhr.open("DELETE", `/admin/reqs/remEvent`);
+                            xhr.open("DELETE", `/admin/events/remove`);
                             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                             xhr.send(data);
                             setTimeout(() => {

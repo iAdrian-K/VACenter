@@ -17,7 +17,8 @@
     <%- include("./components/nav.ejs")%>
         <div class="float-end content bg-light-light ps-2 pt-3" id="content" style="width: 80%;">
             <h2>VA Stats</h2>
-                <div class="row mb-2 mt-3 w-100">
+                <%if(false == true){%>
+                    <div class="row mb-2 mt-3 w-100">
                         <div class="col text-center position-relative rounded text-light p-3 m-3 shadow tm-3 bg-blurple"
                             style="min-width: 200px;">
                             <label class="w-100 text-light-light"><i class="bi bi-clock"></i> Total Flight Hours</label><br><br>
@@ -37,7 +38,8 @@
                                 <%= stats.popular.aircraft %>
                             </h1>
                         </div>
-                </div>
+                    </div>
+                <%}%>
             <h2 class="mt-5">VA Fleet</h2>
             <div class="table-responsive">
             <table class="table table-striped">
