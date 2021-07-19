@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Admin || <%= config.name %>
+        Admin || <%= config.display %>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
@@ -28,7 +28,7 @@
                     </thead>
                     <tbody>
                         <% users.forEach(target=>{%>
-                            <tr style="<% if(target.revoked){%>background-color:rgba(255, 0, 0, 0.2) !important;<%}%> cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=target.username.split("=")[0]%>" <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
+                            <tr style="<% if(target.revoked){%>background-color:rgba(255, 0, 0, 0.2) !important;<%}%> cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=target.username%>" <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
                                 <th scope="row">
                                     <%= target.username %>
                                 </th>
@@ -97,36 +97,36 @@
         </div>
         <% users.forEach(target=>{%>
             <!-- Modal -->
-            <div class="modal fade" id="modal-<%=target.username.split("=")[0]%>" tabindex="-1" aria-labelledby="exampleModalLabel"
+            <div class="modal fade" id="modal-<%=target.username%>" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">
-                                <%= config.code + Buffer.from(target.username, 'base64' ).toString() %>
+                                <%= config.code + target.username %>
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <h4>User <%= config.code + Buffer.from(target.username, 'base64' ).toString() %>
+                            <h4>User <%= config.code + target.username %>
                             </h4>
                             <hr>
-                            <form class="form-control p-3" method="POST" action="/admin/reqs/updateUser">
+                            <form class="form-control p-3" method="POST" action="/admin/users/update">
                                 <h5>User Options</h5>
-                                <input type="hidden" value="<%= Buffer.from(target.username, 'base64').toString() %>" name="uid">
+                                <input type="hidden" value="<%= target.username%>" name="uid">
                                 <label>Username: 
                                 <input class="form-control" type="text"
-                                    value="<%= Buffer.from(target.username, 'base64').toString() %>" disabled>
+                                    value="<%=target.username %>" disabled>
                                 </label><br><br>
                                 <label>Name:
-                                    <input class="form-control" type="text" value="<%= target.name%>" name="name">
+                                    <input class="form-control" type="text" value="<%= target.display%>" name="name">
                                 </label><br><br>
                                 <button class="btn btn-primary">Change</button>
                             </form>
-                            <form class="form-control p-3" method="POST" action="/admin/reqs/resetPWD">
+                            <form class="form-control p-3" method="POST" action="/admin/users/resetPWD">
                                 <h5>Security</h5>
                                 <input type="hidden" name="targetUID" value="<%=target.username%>">
-                                <% if(target.cp || target.admin !=false){%>
+                                <% if(target.cp == true || target.admin == true){%>
                                     <button class="btn btn-danger" disabled>Reset PWD</button>
                                     <%}else{%>
                                         <button class="btn btn-danger">Reset PWD</button>
@@ -138,10 +138,11 @@
                                 <br>
                                 <label>Revoke/Reinstate User: </label>
                                 <% if(target.revoked){%>
-                                    <button onclick="unrevokeUser('<%= target.username%>')" class="btn btn-success"><i
-                                            class="bi bi-check-circle"></i></button>
-                                    <%}else if(target.username !=user.username){%>
-                                        <button onclick="revokeUser('<%= target.username%>')" class="btn btn-danger"><i
+                                    <button onclick="unrevokeUser('<%= target.username%>')" type="button" class="btn btn-success"><i
+                                            class="bi bi-check-circle"></i></button><br>
+                                            <strong>The users password will be set to: <i>VACENTER_REVOKED_PASSWORD</i> </strong>
+                                    <%}else if(target.username != user.username){%>
+                                        <button onclick="revokeUser('<%= target.username%>')" type="button" class="btn btn-danger"><i
                                                 class="bi bi-x-circle"></i></button>
                                         <%}else{%>
                                             <button class="btn btn-danger" disabled><i class="bi bi-x-circle"></i></button>
@@ -169,7 +170,7 @@
                     const data = `uid=${encodeURIComponent(user)}`;
                     const xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
-                    xhr.open("DELETE", "/admin/reqs/remUser");
+                    xhr.open("POST", "/admin/users/revoke");
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     setTimeout(() => {
@@ -180,7 +181,7 @@
                     const data = `uid=${encodeURIComponent(user)}`;
                     const xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
-                    xhr.open("PUT", "/admin/reqs/unremUser");
+                    xhr.open("POST", "/admin/users/unrevoke");
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     setTimeout(() => {

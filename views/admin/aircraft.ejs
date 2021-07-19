@@ -31,7 +31,7 @@
                                 <%= vic.publicName %>
                             </th>
                             <td>
-                                <button class="btn btn-danger" onclick="remData('a', '<%=vic.livID%>')"><i class="bi bi-x-circle"></i></button>
+                                <button class="btn btn-danger" onclick="remCraft('<%=vic.livID%>')"><i class="bi bi-x-circle"></i></button>
                             </td>
                         
                         </tr>
@@ -109,7 +109,7 @@
                     xhr.send(data);
                 }
                 loadAircraftLivData()
-            function remData(type, id) {
+            function remCraft(id) {
                     const data = `id=${id}`;
                     const xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
@@ -119,7 +119,7 @@
                             console.log(this.responseText);
                         }
                     });
-                    xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
+                    xhr.open("DELETE", `/admin/aircraft/remove`);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     setTimeout(() => {

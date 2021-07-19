@@ -35,7 +35,7 @@
                                 <%= pirep.route %>
                             </th>
                             <td>
-                                <%= config.code + Buffer.from(pirep.author, 'base64').toString() %>
+                                <%= config.code + pirep.author %>
                             </td>
                             <td>
                                 <%= pirep.vehiclePublic %>
@@ -77,8 +77,8 @@
                                     </p>
                                 </div>
                                 <% if(pirep.status == "n"){%>
-                                    <button type="button" class="btn btn-success" onclick="addData('p', '<%= pirep.id%>')">Accept</button>
-                                    <button type="button" class="btn btn-danger" onclick="remData('p', '<%= pirep.id%>')">Deny</button>
+                                    <button type="button" class="btn btn-success" onclick="appPirep('<%= pirep.id%>')">Accept</button>
+                                    <button type="button" class="btn btn-danger" onclick="remPirep('<%= pirep.id%>')">Deny</button>
                                 <%}else if(pirep.status =="d"){%>
                                     <button type="button" class="btn btn-danger" disabled>Already Actioned (Denied)</button>
                                 <%}else if(pirep.status =="a"){%>
@@ -104,7 +104,7 @@
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <%- include("./../components/mobile.ejs") %>
             <script>
-                function addData(type, id) {
+                function appPirep(id) {
                     const data = `id=${id}`;
                     const xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
@@ -114,14 +114,14 @@
                             console.log(this.responseText);
                         }
                     });
-                    xhr.open("POST", `/admin/reqs/newData?t=${type}`);
+                    xhr.open("POST", `/admin/pireps/apr`);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);
                 }
-                function remData(type, id) {
+                function remPirep(id) {
                     const data = `id=${id}`;
                     const xhr = new XMLHttpRequest();
                     xhr.withCredentials = true;
@@ -131,7 +131,7 @@
                             console.log(this.responseText);
                         }
                     });
-                    xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
+                    xhr.open("POST", `/admin/pireps/den`);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
                     setTimeout(() => {
