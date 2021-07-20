@@ -80,7 +80,9 @@
                                                 <strong><i class="bi bi-calendar2"></i> Date:</strong>
                                                 <%= new Date(event.depTime).toLocaleString("EN-AU", {Hour12: true})%><br>
                                                     <strong><i class="bi bi-card-checklist"></i> Gates:</strong>
-                                                    <%= event.gates.slice(",").join(", ") %><br>
+                                                    <% event.gates.forEach(gate =>{%>
+                                                        <%= gate.gate %>,    
+                                                    <%})%><br>
                                                         </p>
                                                     </div>
                                                     <div class=" modal-footer">
