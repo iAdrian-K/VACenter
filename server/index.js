@@ -1183,8 +1183,16 @@ app.post("/admin/pireps/apr", async function (req, res){
                 const targetPIREP = await GetPirep(req.body.id)
                 if(targetPIREP){
                     targetPIREP.status = "a";
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed)
-                    res.redirect("/admin/pireps")
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed);
+                    const owner = await GetUser(targetPIREP.author);
+                    if(owner){
+                        owner.hours = owner.hours + (targetPIREP.flightTime / 60);
+                        await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID)
+                        res.redirect("/admin/pireps")
+                    }else{
+                        res.sendStatus(500);
+                    }
+                    
                 }else{
                     res.sendStatus(404);
                 }
