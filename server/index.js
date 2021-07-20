@@ -32,16 +32,13 @@ update();
 //Versioning
 let branch = getVersionInfo().branch;
 let cvn = getVersionInfo().version;
-let cvnb = branch == "beta" ? cvn.toString() + "B" : branch == "demo" ? cvn.toString() + "D" : cvn;
-
+let cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}`)
 /**
  * Used for checking the version info
  */
 function reloadVersion(){
-    // @ts-ignore
-    cvn = require("./../package.json").version;
-    cvnb = branch == "beta" ? cvn.toString() + "B" : branch == "demo" ? cvn.toString() + "D" : cvn;
-    console.log(cvnb)
+    cvn = getVersionInfo().version;
+    cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}`)
 }
 
 reloadVersion();
@@ -587,7 +584,8 @@ app.get('*', async (req, res)=>{
                                     user: user,
                                     activer: "/admin",
                                     operators: await GetOperators(),
-                                    config: getConfig()
+                                    config: getConfig(),
+                                    cv: cvnb
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -737,7 +735,6 @@ app.post("/newPIREP", async (req, res) => {
     if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments) {
         let user = await checkForUser(cookies);
         if (user) {
-            console.log(req.body.route.slice(config.code.length, req.body.route.length));
             await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date()).toString());
             res.redirect("/");
         }else{
