@@ -49,25 +49,31 @@ function update(){
         console.log(updateTest)
         if(updateTest[0] == true){
             console.log(`Updating to ${updateTest[1]}`);
-            resolve(true);
-            
             const req = await URLReq(MethodValues.GET, "https://admin.va-center.com/updateFile", null, null, null);
+            let filesProcessed = 0;
             JSON.parse(req[2]).branches[cversion.branch].releases[updateTest[1]].FilesChanged.forEach(async file =>{
                 const fileRaw = (await URLReq(MethodValues.GET, `https://raw.githubusercontent.com/VACenter/VACenter/${cversion.branch}/${file}`, null, null, null))[2];
                 fs.writeFileSync(`${__dirname}/../${file}`, fileRaw);
                 console.log(file)
+                filesProcessed ++;
             });
-            const packageObj = require('./../package.json')
-            packageObj.version = cversion.version;
-            fs.writeFileSync(`${__dirname}/../package.json`, JSON.stringify(packageObj, null, 2));
-            const packagelock = require('./../package-lock.json')
-            packagelock.version = cversion.version;
-            fs.writeFileSync(`${__dirname}/../package-lock.json`, JSON.stringify(packagelock, null, 2));
-            const versionFile = getVersionInfo();
-            versionFile.version = updateTest[1];
-            fs.writeFileSync(`${__dirname}/../version.json`, JSON.stringify(versionFile, null, 2));
-            console.log("RESTARTING")
-            process.exit(11);
+            setInterval(() => {
+                if (filesProcessed == JSON.parse(req[2]).branches[cversion.branch].releases[updateTest[1]].FilesChanged.length){
+                    resolve(true);
+                    const packageObj = require('./../package.json')
+                    packageObj.version = cversion.version;
+                    fs.writeFileSync(`${__dirname}/../package.json`, JSON.stringify(packageObj, null, 2));
+                    const packagelock = require('./../package-lock.json')
+                    packagelock.version = cversion.version;
+                    fs.writeFileSync(`${__dirname}/../package-lock.json`, JSON.stringify(packagelock, null, 2));
+                    const versionFile = getVersionInfo();
+                    versionFile.version = updateTest[1];
+                    fs.writeFileSync(`${__dirname}/../version.json`, JSON.stringify(versionFile, null, 2));
+                    console.log("RESTARTING")
+                    process.exit(11);
+                }
+            }, 1000);
+            
         }else{
             resolve(false);
         }
