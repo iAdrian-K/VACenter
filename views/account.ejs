@@ -15,7 +15,7 @@
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-        <div class="float-end content bg-light-light ps-3 pt-3" style="width: 80%;">
+        <div class="float-end content bg-light-light ps-3 pt-3" style="width: 80%;" id="content">
             <div class="container">
                 <h2>Account Information</h2>
                 <hr>
@@ -112,6 +112,7 @@
                         })
                 })()
         </script>
+        <%- include("components/mobile.ejs") %>
 </body>
 
 </html>
