@@ -709,6 +709,27 @@ app.post('/OSOR', async(req, res)=>{
     }
 })
 
+app.post('/user/update', async(req, res) =>{
+    const cookies = getAppCookies(req)
+    if (req.body.display && req.body.url) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if(user.display != req.body.display){
+                user.display = req.body.display;
+            }
+            if(user.profileURL != req.body.url){
+                user.profileURL = req.body.url
+            }
+            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID)
+            res.redirect("/account")
+        }else{
+            res.sendStatus(401);
+        }
+    }else{
+        res.sendStatus(400);
+    }
+})
+
 app.post('/CPWD', async(req, res)=>{
     const cookies = getAppCookies(req)
     if(req.body.npwd){
