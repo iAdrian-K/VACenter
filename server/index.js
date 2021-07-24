@@ -122,8 +122,9 @@ function reloadConfig(){
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
         let limiter = rateLimit({
             windowMs: 15 * 60 * 1000, // 15 minutes
-            max: config.other.rates // limit each IP to 100 requests per windowMs
+            max: (config.other) ? (config.other.rates ? config.other.rates : 100) : 100 // limit each IP to 100 requests per windowMs
         });
+        console.log((config.other) ? (config.other.rates ? config.other.rates : 100) : 100)
         app.use(limiter);
         resolve(true);
     })
