@@ -59,7 +59,6 @@ function update(){
             });
             setInterval(() => {
                 if (filesProcessed == JSON.parse(req[2]).branches[cversion.branch].releases[updateTest[1]].FilesChanged.length){
-                    resolve(true);
                     const packageObj = require('./../package.json')
                     packageObj.version = cversion.version;
                     fs.writeFileSync(`${__dirname}/../package.json`, JSON.stringify(packageObj, null, 2));
@@ -73,7 +72,7 @@ function update(){
                     process.exit(11);
                 }
             }, 1000);
-            
+            resolve(true);
         }else{
             resolve(false);
         }
