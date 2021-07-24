@@ -756,8 +756,12 @@ app.post("/newPIREP", async (req, res) => {
     if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments) {
         let user = await checkForUser(cookies);
         if (user) {
-            await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date()).toString());
-            res.redirect("/");
+            if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))){
+                await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date()).toString());
+                res.redirect("/");
+            }else{
+                res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
+            }
         }else{
             res.sendStatus(401);
         }
