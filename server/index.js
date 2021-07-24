@@ -146,6 +146,39 @@ function reloadStats(){
     })
 }
 
+function compareRanks(a, b) {
+    if (a.minH < b.minH) {
+        return -1;
+    }
+    if (a.minH > b.minH) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * 
+ * @param {user} ownerObj 
+ * @returns {Promise<(any)>}
+ */
+const testRank = async (ownerObj) =>{
+    return new Promise(async resolve =>{
+        if(ownerObj){
+            const ranks = await GetRanks();
+            ranks.sort( compareRanks );
+            for (var i = 0; i < ranks.length; i++) { 
+                let rank = ranks[i];
+                if(ownerObj.hours > rank.minH){
+                    ownerObj.rank = rank.rank;
+                }
+            }
+            resolve(ownerObj.rank);
+        }else{
+            resolve(false);
+        }
+    })
+}
+
 const updateStats = async () => {
     //Craft
     let craftArray = [];
@@ -1209,6 +1242,7 @@ app.post("/admin/pireps/apr", async function (req, res){
                     const owner = await GetUser(targetPIREP.author);
                     if(owner){
                         owner.hours = owner.hours + (targetPIREP.flightTime / 60);
+                        owner.rank = await testRank(owner)
                         await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID)
                         res.redirect("/admin/pireps")
                     }else{
