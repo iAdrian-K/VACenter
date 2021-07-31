@@ -20,7 +20,7 @@
             <hr>
             <span><strong>Current Version:</strong> <%= cv%></span>
             <button class="btn btn-primary" onclick="update()">Check for updates</button><br><br>
-            <p id="updaterStatus"></p>
+            <p id="updaterStatus">This can take ~30 seconds</p>
             <h2>Customisation</h2>
             <hr>
 
@@ -82,17 +82,21 @@
                                     }, 2500);
                                 }, 10000);
                             } else if (this.status == 204) {
+                                console.log("pain")
                                 document.getElementById("updaterStatus").innerHTML = "Status: <span class='text-secondary'>No update available.</span>"
                                 setTimeout(() => {
                                     document.getElementById("updaterStatus").innerHTML = ""
-                                }, 2500);
+                                    window.location.reload();
+                                }, 5000);
+                            }else{
+                                alert(this.status)
                             }
                         }
                     });
                     xhr.open("POST", `/admin/settings/update`);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.send(data);
-                    document.getElementById("updaterStatus").innerHTML = "Checking, please don't reload. <span class='text-muted'> this should take around 10 seconds </span>"
+                    document.getElementById("updaterStatus").innerHTML = "Checking, please don't reload. <span class='text-muted'> this should take around 30 seconds </span>"
 
                 }
         </script>

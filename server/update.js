@@ -57,6 +57,7 @@ function update(){
                 console.log(file)
                 filesProcessed ++;
             });
+            resolve(true);
             setInterval(() => {
                 if (filesProcessed == JSON.parse(req[2]).branches[cversion.branch].releases[updateTest[1]].FilesChanged.length){
                     const packageObj = require('./../package.json')
@@ -72,7 +73,6 @@ function update(){
                     process.exit(11);
                 }
             }, 1000);
-            resolve(true);
         }else{
             resolve(false);
         }

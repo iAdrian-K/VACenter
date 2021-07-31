@@ -1175,6 +1175,7 @@ app.post("/admin/settings/update", async function (req, res) {
         if (user) {
             if (user.admin == true) {
                 update().then(status=>{
+                    console.log(status);
                     res.sendStatus(status == true ? 202 : 204);
                 })
             } else {
