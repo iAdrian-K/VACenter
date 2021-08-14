@@ -447,24 +447,6 @@ app.get('*', async (req, res)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
-                    case "/admin":
-                        if (user) {
-                            if(user.admin == true){
-                                res.render("admin/selector", {
-                                    active: req.path,
-                                    title: "Admin Menu",
-                                    user: user,
-                                    activer: "/admin",
-                                    config: getConfig()
-                                })
-                            }else{
-                                res.sendStatus(403);
-                            }
-                            
-                        } else {
-                            res.clearCookie("authToken").redirect("/?r=ii");
-                        }
-                        break;
                     case "/admin/aircraft":
                         if (user) {
                             if (user.admin == true) {
