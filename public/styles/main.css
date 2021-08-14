@@ -16,3 +16,8 @@ border-color: rgb(208, 207, 253) !important;
   background-color: rgb(209, 209, 209);
   border-color: rgb(209, 209, 209);
 }
+
+#content{
+  margin-top: 2.5vh;
+  padding-bottom: 7.5vh;
+}

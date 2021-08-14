@@ -15,7 +15,10 @@
     <%- include("./components/nav.ejs")%>
     <div class="w-100 content bg-light-light pt-3" id="content">
         <div class="container">
+            <h1>Welcome <%= user.display%> to <%= config.name %></h1>
+            <br>
             <h2>Recent Activity</h2>
+            <hr>
             <div class="row mt-2 ms-0 w-100">
                 <% user.notifications.forEach(notif =>{%>
                         <div class="col position-relative rounded bg-light p-3 shadow m-3" style="min-width: 200px;">
@@ -26,6 +29,50 @@
                             </p>
                         </div>
                 <%})%>
+                <% if(user.notifications.length == 0){%>
+                    <h5>No Activity Found</h5>
+                <%}%>
+            </div>
+            <br>
+            <h2>Recommended Flights</h2>
+            <hr>
+            <h5>This feature is not available yet.</h5>
+            <br>
+            <h2>Your Flights</h2>
+            <hr>
+            <div class="row row-cols-3 g-3 mt-2 ms-0 w-100">
+                <% user.pireps.forEach(pirep=>{%>
+                    <div class="col">
+                        <div class="rounded bg-light p-3 shadow">
+                            <h4><i class="bi bi-file-bar-graph-fill"></i>
+                                <%= pirep.depICAO%> <i class="bi bi-chevron-right"></i> <%= pirep.arrICAO %>
+                            </h4>
+                            <p class="mb-5">
+                                <%= pirep.route%><br>
+                                <%= (pirep.flightTime)/60%> hours<br>
+                                <%= pirep.vehiclePublic %>
+                            </p>
+                            <p>
+                                <% if(pirep.status == "a"){%>
+                                    <span class="text-success"><i class="bi bi-check-circle"></i> Approved</span>    
+                                <%}else if(pirep.status == "d"){%>
+                                    <span class="text-danger"><i class="bi bi-x-circle"></i> Denied</span>    
+                                <%}else if(pirep.status == "n"){%>
+                                    <span class="text-dark"><i class="bi bi-clock"></i> Awaiting Action</span>    
+                                <%}else{%>
+                                    <span class="text-primary">Error! Please report this PIREP <%= pirep.id%></span>    
+                                <%}%>
+                            </p>
+                            <p class="text-muted">
+                                <%= new Date(pirep.filed).toLocaleString('en-AU', { hour12: true })%>
+                            </p>
+                            
+                        </div>
+                    </div>
+                    <%})%>
+                        <% if(user.pireps.length==0){%>
+                            <h5>No PIREPS Found</h5>
+                        <%}%>
             </div>
         </div>
     </div>

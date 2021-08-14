@@ -316,12 +316,19 @@ function checkForUser(cookies){
 /**
  * Add a users notifications to an object
  * @param {user} userObj 
- * @returns {Promise<user>} User with Notifs
+ * @param {array} flags
+ * @returns {Promise<user>} User with Flagged data
  */
-async function getUserWithNotifs(userObj){
+async function getUserWithObjs(userObj, flags){
     return new Promise((async resolve => {
-        const notfs = await GetNotifications(userObj.username)
-        userObj.notifications = notfs;
+        if(flags.includes('notifications')){
+            const notfs = await GetNotifications(userObj.username)
+            userObj.notifications = notfs;
+        }
+        if(flags.includes('pireps')){
+            const pireps = await GetUsersPireps(userObj.username)
+            userObj.pireps = pireps;
+        }
         resolve(userObj);
     }))
 }
@@ -349,7 +356,7 @@ app.get('*', async (req, res)=>{
             console.log(changePWD)
             let user = await checkForUser(cookies);
             if(user){
-                user = await getUserWithNotifs(user);
+                user = await getUserWithObjs(user, ["notifications", "pireps"]);
             }
             if(changePWD == true && req.path != "/changePWD"){
                 res.redirect('/changePWD');
