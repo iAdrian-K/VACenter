@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Home || <%= config.name %>
+        Previous Flights || <%= config.name %>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
@@ -17,7 +17,8 @@
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-        <div class="w-100 content bg-light-light ps-3 pt-3 mb-4" id="content">
+        <div class="w-100 content bg-light-light px-5 pt-3 mb-4" id="content">
+            <h2>Previous Flights</h2>
             <p class="text-muted">Click on a pirep to see more.</p>
             <div class="container">
                 <div class="table-responsive">
@@ -25,7 +26,7 @@
                     <thead>
                         <tr>
                             <th scope="col">Route</th>
-                            <th scope="col">Date (Filed)</th>
+                            <th scope="col">Airline</th>
                             <th scope="col">Aircraft</th>
                             <th scope="col">Status</th>
                         </tr>
@@ -34,7 +35,7 @@
                         <% pireps.forEach(pirep =>{%>
                             <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
                                 <th scope="row"><%= pirep.route %></th>
-                                <td><%= new Date(pirep.filed).toLocaleString("EN-AU", {Hour12: true}) %></td>
+                                <td><%= pirep.airline %></td>
                                 <td><%= pirep.vehiclePublic %></td>
                                 <td>
                                     <% if (pirep.status == 'a'){%>
@@ -72,7 +73,7 @@
                                                             <strong><i class="bi bi-person"></i> User: </strong>
                                                             <%=config.code + pirep.author%><br>
                                                                 <strong><i class="bi bi-calendar-date"></i> Flight Date: </strong>
-                                                                <%= new Date(pirep.departureT).toLocaleDateString() %><br>
+                                                                <%= new Date(pirep.filed).toLocaleDateString() %><br>
                                                                     <strong><i class="fa fa-plane"></i> Vehicle: </strong>
                                                                     <%= pirep.vehiclePublic%><br>
                                                                         <strong><i class="bi bi-shop"></i> Airline: </strong>

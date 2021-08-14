@@ -780,7 +780,7 @@ app.post("/newPIREP", async (req, res) => {
         let user = await checkForUser(cookies);
         if (user) {
             if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))){
-                await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date()).toString());
+                await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString());
                 res.redirect("/");
             }else{
                 res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
