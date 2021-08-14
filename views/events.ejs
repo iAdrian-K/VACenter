@@ -15,7 +15,8 @@
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-        <div class="w-100 content bg-light-light ps-3 pt-3 mb-4" id="content">
+        <div class="w-100 content bg-light-light px-5 pt-3 mb-4" id="content">
+            <h2>Events</h2>
             <p class="text-muted">Click on an event to see more.</p>
             <div class="container">
                 <div class="table-responsive">
@@ -80,7 +81,7 @@
                                                 <strong><i class="bi bi-calendar2"></i> Date:</strong>
                                                 <%= new Date(event.depTime).toLocaleString("EN-AU", {Hour12: true})%><br>
                                                     <strong><i class="bi bi-card-checklist"></i> Gates:</strong>
-                                                    <% event.gates.forEach(gate =>{%>
+                                                    <% (event.gates.sort()).forEach(gate =>{%>
                                                         <%= gate.gate %>,    
                                                     <%})%><br>
                                                         </p>
