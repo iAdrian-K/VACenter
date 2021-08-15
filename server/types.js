@@ -122,6 +122,7 @@
  * @property {string} route
  * @property {string} depTime
  * @property {string} arrTime
+ * @property {route} routeObj
  */
 
 /**

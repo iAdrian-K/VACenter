@@ -60,7 +60,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/routes/new">
+                                <form method="POST" action="/admin/routes/new" id="nrform">
                                     <h2>Create new route</h2>
                                     <br>
                                     <div class="input-group mb-3">
@@ -97,7 +97,7 @@
                                     <div id="departureSlots">
 
                                     </div>
-                                    <button class="btn btn-success mb-3 ms-1" onclick="addDepSlot()">Add Time</button>
+                                    <button class="btn btn-success mb-3 ms-1" type="button" onclick="addDepSlot()">Add Time</button>
                                     <br>
                                     <label class="form-label text-muted">Minimum Rank</label>
                                     <select class="form-select" name="minH">
@@ -211,6 +211,17 @@
                     }
                 }
         </script>
+                <script>
+                    document.addEventListener('load', () => {
+                        document.getElementById("nrform").on("keypress", function (event) {
+                            var keyPressed = event.keyCode || event.which;
+                            if (keyPressed === 13) {
+                                event.preventDefault();
+                                return false;
+                            }
+                        });
+                    })
+                </script>
 </body>
 
 </html>

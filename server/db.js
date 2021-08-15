@@ -1058,6 +1058,22 @@ function GetSlots() {
     });
 }
 
+function GetSlotsWithRoutes(){
+    return new Promise((resolve, error) => {
+        GetSlots().then((slots) => {
+            slots.forEach(async slot => {
+                slot.routeObj = await GetRoute(slot.route);
+                console.log(slot)
+            })
+            setTimeout(() => {
+                resolve(slots);
+            }, 500)
+          
+
+        });
+    })
+}
+
 /**
  * Delete slot
  * @param {String} slot - id of slot
@@ -1163,6 +1179,5 @@ module.exports = {
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-    CreateSlot, GetSlots, UpdateSlot, DeleteSlot
+    CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlotsWithRoutes
     };
-    

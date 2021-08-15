@@ -25,7 +25,7 @@ const {
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
         GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-        GetSlots, UpdateSlot, CreateSlot, DeleteSlot
+        GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 update();
@@ -394,6 +394,7 @@ app.get('*', async (req, res)=>{
                                 routes: await GetRoutes(),
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
+                                slots: await GetSlotsWithRoutes(),
                                 config: getConfig()
                             })
                         } else {
@@ -965,7 +966,7 @@ app.post("/admin/routes/new", async function (req, res) {
             if (user.admin == true) {
                 let routeID = makeid(50)
                 await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, req.body.minH);
-                Object.keys(req.body).forEach(function (k, v) {
+                Object.keys(req.body).forEach(async function (k, v) {
                     if(k.slice(0,5) == "slot_"){
                         CreateSlot(`routeID_slot_${k[6]}`, routeID, `${v}`, `NF_${v}`);
                     }
