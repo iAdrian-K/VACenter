@@ -703,7 +703,7 @@ app.post('/setup', async (req,res)=>{
                 bg: "/public/images/stockBG2.jpg",
                 logo: "",
                 rates: 100,
-                navColor: null,
+                navColor: ["light", "light"],
                 ident: makeid(25)
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
