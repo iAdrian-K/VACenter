@@ -1228,6 +1228,34 @@ app.post("/admin/settings/bg", async function (req, res) {
     }
 })
 
+app.post("/admin/settings/accent", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.accent) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                console.log(req.body)
+                const newConfig = getConfig();
+                newConfig.other.navColor = [];
+                newConfig.other.navColor.push(req.body.accent);
+                if(req.body.accent == "light"){
+                    newConfig.other.navColor.push("light");
+                }else{
+                    newConfig.other.navColor.push("dark");
+                }
+                fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+                res.redirect("/admin/settings")
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+
 //PIREPS
 app.post("/admin/pireps/apr", async function (req, res){
     const cookies = getAppCookies(req)

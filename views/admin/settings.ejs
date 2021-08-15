@@ -25,8 +25,25 @@
             <hr>
 
             <div class="form-control shadow p-3 my-3">
-                <h4 class="text-muted">Accent Color</h4>
-                <p><strong class="text-muted">COMING SOON</strong></p>
+                <form action="/admin/settings/accent" method="post">
+                    <h4 class="text-muted">Accent Color</h4>
+                    <input type="radio" class="btn-check" name="accent" value="primary" id="primary" autocomplete="off">
+                    <label class="btn btn-primary my-2" for="primary">Blue</label>
+                    <input type="radio" class="btn-check" name="accent" value="secondary" id="secondary" autocomplete="off">
+                    <label class="btn btn-secondary my-2" for="secondary">Grey</label>
+                    <input type="radio" class="btn-check" name="accent" value="danger" id="danger" autocomplete="off">
+                    <label class="btn btn-danger my-2" for="danger">Red</label>
+                    <input type="radio" class="btn-check" name="accent" value="success" id="success" autocomplete="off">
+                    <label class="btn btn-success my-2" for="success">Green</label>
+                    <input type="radio" class="btn-check" name="accent" value="warning" id="warning" autocomplete="off">
+                    <label class="btn btn-warning my-2" for="warning">Yellow</label>
+                    <input type="radio" class="btn-check" name="accent" value="light" id="light" autocomplete="off">
+                    <label class="btn btn-light my-2" for="light">White</label>
+                    <input type="radio" class="btn-check" name="accent" value="dark" id="dark" autocomplete="off">
+                    <label class="btn btn-dark my-2" for="dark">Dark</label>
+                    <br><br>
+                    <button class="btn btn-primary" type="submit">Submit new Color</button>
+                </form>
             </div>
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/bg" method="post">
