@@ -49,6 +49,7 @@ function update(){
         console.log(updateTest)
         if(updateTest[0] == true){
             console.log(`Updating to ${updateTest[1]}`);
+            resolve(true);
             const req = await URLReq(MethodValues.GET, "https://admin.va-center.com/updateFile", null, null, null);
             let filesProcessed = 0;
             JSON.parse(req[2]).branches[cversion.branch].releases[updateTest[1]].FilesChanged.forEach(async file =>{
@@ -57,7 +58,6 @@ function update(){
                 console.log(file)
                 filesProcessed ++;
             });
-            resolve(true);
             setInterval(() => {
                 if (filesProcessed == JSON.parse(req[2]).branches[cversion.branch].releases[updateTest[1]].FilesChanged.length){
                     const packageObj = require('./../package.json')

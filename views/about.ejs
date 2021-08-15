@@ -68,8 +68,9 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Suggested Aircraft</th>
+                        <th scope="col">Route Number</th>
+                        <th scope="col">Departure ICAO</th>
+                        <th scope="col">Arrival ICAO</th>
                         <th scope="col">Operator</th>
                     </tr>
                 </thead>
@@ -77,13 +78,16 @@
                     <% route.forEach(route=>{%>
                         <tr>
                             <th scope="row">
-                                <%= route.name %>
+                                <%= route.num %>
                             </th>
                             <td>
-                                <strong>COMING SOON</strong>
+                                <%= route.depICAO %>
                             </td>
                             <td>
-                                <strong>COMING SOON</strong>
+                                <%= route.arrICAO %>
+                            </td>
+                            <td>
+                                <%= route.operatorPublic %>
                             </td>
                         </tr>
                         <%})%>
