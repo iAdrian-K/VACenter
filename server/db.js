@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
+const bcrypt = require('bcrypt');
 
 function newError(error, title) {
     const requestSPECIAL = require('request');
@@ -1038,6 +1039,97 @@ function UpdateRank(name, newName, newMinH){
     });
 }
 
+// Slots
+/**
+ * Get all slots
+ * @returns {Promise<Array.<slot>>} Array of ranks
+ */
+function GetSlots() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM slots`, (err, rows) => {
+                if (err) {
+                    newError(err.message, "Error accessing slot data (REF:DB69)")
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Delete slot
+ * @param {String} slot - id of slot
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function DeleteSlot(slot) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM slots WHERE id = ?`, [slot], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting slot (REF:DB420)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Update Slot
+ * @param {String} id - id of slot
+ * @param {String} route - route of slot
+ * @param {String} newDepTime - New Departure time for slot
+ * @param {String} newArrTime - New arrival time for slot
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function UpdateSlot(id, route, newDepTime, newArrTime) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`UPDATE slots SET
+                    route = ?,
+                    depTime = ?,
+                    arrTime = ?
+                    WHERE id = ?`, [route, newDepTime, newArrTime, id], (err) => {
+                if (err) {
+                    newError(err.message, "Error updating slot (REF:DB360)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Creates a new slot
+ * @param {String} id - ID
+ * @param {String} route - Route Name
+ * @param {String} depTime - Departure Time
+ * @param {String} arrTime - Arrival Time
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function CreateSlot(id, route, depTime, arrTime) {
+    if(id && route && depTime && arrTime){
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO slots(route, depTime, arrTime) VALUES(?, ?, ?)`, [route, depTime, arrTime], function (err) {
+            if (err) {
+                newError(err.message, "Error creating slot (REF:DB720)")
+                resolve(false)
+            } else {
+                resolve(true)
+            }
+        });
+    });
+    }else{
+        console.log(id, route, depTime, arrTime)
+    }
+}
+
 // Miscellaneous
 /**
  * Returns the Profile Picture URL of a user
@@ -1070,5 +1162,7 @@ module.exports = {
     GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
-    GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser
+    GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
+    CreateSlot, GetSlots, UpdateSlot, DeleteSlot
     };
+    

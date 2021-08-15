@@ -36,7 +36,9 @@
                                 <input list="routes" id="route" name="route" class="mb-3 form-control" placeholder="Route">
                                 <datalist id="routes">
                                     <% routes.forEach(route=>{%>
-                                        <option value="<%= config.code + route.num %>">
+                                        <% if(parseInt(route.minH) <= user.hours){%>
+                                            <option value="<%= config.code + route.num %>"></option>
+                                        <%}%>
                                     <%})%>
                                 </datalist>
                                 <label class="form-label">Aircraft</label>

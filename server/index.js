@@ -24,7 +24,8 @@ const {
         GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
-        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser
+        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
+        GetSlots, UpdateSlot, CreateSlot, DeleteSlot
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 update();
@@ -548,6 +549,7 @@ app.get('*', async (req, res)=>{
                                     craft: await GetAircrafts(),
                                     ops: await GetOperators(),
                                     routes: await GetRoutes(),
+                                    ranks: await GetRanks(),
                                     config: getConfig()
                                 })
                             } else {
@@ -957,11 +959,17 @@ app.delete("/admin/aircraft/remove", async function (req, res) {
 //Routes
 app.post("/admin/routes/new", async function (req, res) {
     const cookies = getAppCookies(req)
-    if (req.body.num && req.body.aircraft && req.body.ft && req.body.depIcao && req.body.arrIcao && req.body.op) {
+    if (req.body.num && req.body.aircraft && req.body.ft && req.body.depIcao && req.body.arrIcao && req.body.op && req.body.minH) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await CreateRoute(makeid(50), req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, "0");
+                let routeID = makeid(50)
+                await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, req.body.minH);
+                Object.keys(req.body).forEach(function (k, v) {
+                    if(k.slice(0,5) == "slot_"){
+                        CreateSlot(`routeID_slot_${k[6]}`, routeID, `${v}`, `NF_${v}`);
+                    }
+                });
                 res.redirect("/admin/routes")
             } else {
                 res.sendStatus(403);
