@@ -30,6 +30,16 @@ const {
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 update();
 
+async function reloadUserRanks(){
+    (await GetUsers()).forEach(async user =>{
+        //@ts-ignore
+        user.rank = await testRank(user);
+        //@ts-ignore
+        UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked)
+    })
+}
+reloadUserRanks()
+
 //Versioning
 let branch = getVersionInfo().branch;
 let cvn = getVersionInfo().version;
@@ -170,7 +180,9 @@ const testRank = async (ownerObj) =>{
             ranks.sort( compareRanks );
             for (var i = 0; i < ranks.length; i++) { 
                 let rank = ranks[i];
-                if(ownerObj.hours > rank.minH){
+                console.log(rank)
+                console.log(ownerObj.hours >= rank.minH)
+                if(ownerObj.hours >= rank.minH){
                     ownerObj.rank = rank.rank;
                 }
             }
@@ -202,6 +214,7 @@ const updateStats = async () => {
 let vanetCraft = new Map();
 
 async function reloadVANETData() {
+    
     if (config.key) {
         //aircraft
         const aircraftRaw = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", { "X-Api-Key": config.key }, null, null)
@@ -1042,7 +1055,10 @@ app.post("/admin/users/new", async function (req, res) {
                         status: pilotIDReq[2].status == 0 ? true : false,
                         id: pilotIDReq[2].result != false ? pilotIDReq[2].result : null,
                     }
+
                     await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false, vanetid.id)
+                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false, vanetid.id)
+                    
                     res.redirect("/admin/users")
                 }else{
                     res.sendStatus(409);
