@@ -79,7 +79,7 @@
             <br><br>
             <h3>Click for more info</h3>
             <% slots.forEach(slot =>{%>
-                <% if((slot.routeObj.ft / 60) <= user.hours){%>
+                <% if((slot.routeObj.minRank / 60) <= user.hours){%>
                 <div class="form-control w-100 my-3 px-5 py-3" data-bs-toggle="modal" data-bs-target="#slotm-<%= slot.id%>">
                     <h3><%= slot.routeObj.operatorPublic + " - " + slot.routeObj.num%></h3>
                     <hr>
