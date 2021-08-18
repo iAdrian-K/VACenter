@@ -93,7 +93,9 @@ function update(){
                                         console.error([response2.statusCode, response2.body])
                                     }
                                 })
+                            }
                         }
+                    })
                 }
             }, 1000);
         }else{
