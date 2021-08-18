@@ -69,8 +69,31 @@ function update(){
                     const versionFile = getVersionInfo();
                     versionFile.version = updateTest[1];
                     fs.writeFileSync(`${__dirname}/../version.json`, JSON.stringify(versionFile, null, 2));
-                    console.log("RESTARTING")
-                    process.exit(11);
+                    request(options, function (error, response, body) {
+                        if (error) newError(error, `${config.code} - updateError`);
+                        fs.writeFileSync(`${filePath}`, body)
+                        proccessed++;
+                        if (proccessed === json.branches[currentBranch].releases[version].FilesChanged.length) {
+                            if (config.other.toldVACenter == true) {
+                                const addition = currentBranch == "beta" ? "B" : ""
+                                const options2 = {
+                                    method: 'POST',
+                                    url: 'https://admin.va-center.com/stats/updateInstance',
+                                    form: { id: config.other.ident, version: `${version}${addition}` }
+                                };
+
+                                request(options2, function (error2, response2, body2) {
+                                    if (error2) {
+                                        newError(error2, `${config.code} - updateError`)
+                                    }
+                                    if (response2.statusCode == 200) {
+                                        console.log("RESTARTING")
+                                        process.exit(11);
+                                    } else {
+                                        console.error([response2.statusCode, response2.body])
+                                    }
+                                })
+                        }
                 }
             }, 1000);
         }else{
