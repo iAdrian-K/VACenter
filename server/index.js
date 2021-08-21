@@ -254,6 +254,10 @@ app.set('views', path.join(__dirname, '/../views'));
 app.listen(process.env.PORT);
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use(function(req,res,next){
+    res.locals.version = cvnb;
+    next();
+})
 //app.use(cookieParser());
 
 //Util Funcs
@@ -381,7 +385,8 @@ app.get('*', async (req, res)=>{
                             res.redirect("/home");
                         }else{
                         res.render("login", {
-                            config: getConfig()
+                            config: getConfig(),
+                            version: cvnb
                         })
                         }
                         break;
