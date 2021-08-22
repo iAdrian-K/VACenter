@@ -5,13 +5,21 @@ const request = require("request");
 const sqlite3 = require('sqlite3').verbose();
 
 const { JSONReq, URLReq, MethodValues } = require("./urlreqs")
+const {
+    db, GetPPURL,
+    GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
+    GetEvent, GetEvents, CreateEvent, DeleteEvent,
+    GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
+    GetOperator, GetOperators, CreateOperator, DeleteOperator,
+    GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
+    GetRanks, UpdateRank, CreateRank, DeleteRank,
+    GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
+    GetStats, UpdateStat, DeleteStat,
+    GetToken, CreateToken, DeleteTokens,
+    GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
+    GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes
+} = require("./db");
 
-let db = new sqlite3.Database('./database.db', (err) => {
-    if (err) {
-        newError(err.message, "Error accessing database (REF:DB01)")
-    }
-    console.log('Connected to the database.');
-});
 function dynamicSort(property) {
     var sortOrder = 1;
     if (property[0] === "-") {
