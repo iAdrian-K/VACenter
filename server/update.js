@@ -221,9 +221,9 @@ function update(){
             })
             order.sort(compareVersionsOrder);
 
-            Object.entries(order).forEach(([key, value]) => {
+            order.forEach((value) => {
                 console.log(15)
-                console.log(key)
+                console.log(value.num)
                 let queriesRan = 0;
                 let dirsRan = 0;
                 let remsRan = 0;
@@ -232,6 +232,7 @@ function update(){
                 //Run Queries
                 value.dbQueries.sort(dynamicSort("num"));
                 value.dbQueries.forEach((query =>{
+                    console.log(16)
                     db.serialize(() => {
                         db.run(query)
                     })
