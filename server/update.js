@@ -12,6 +12,21 @@ let db = new sqlite3.Database('./database.db', (err) => {
     }
     console.log('Connected to the database.');
 });
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if (property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function (a, b) {
+        /* next line works with strings and numbers, 
+         * and you may want to customize it to your needs
+         */
+        var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
+
 
 function newError(error, title) {
     const requestSPECIAL = require('request');
@@ -203,6 +218,7 @@ function update(){
                 let writesRan = 0;
 
                 //Run Queries
+                value.dbQueries.sort(dynamicSort("num"));
                 value.dbQueries.forEach((query =>{
                     db.run(query)
                     queriesRan++
