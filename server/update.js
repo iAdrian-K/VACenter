@@ -220,7 +220,9 @@ function update(){
                 //Run Queries
                 value.dbQueries.sort(dynamicSort("num"));
                 value.dbQueries.forEach((query =>{
-                    db.run(query)
+                    db.serialize(() => {
+                        db.run(query)
+                    })
                     queriesRan++
                 }))
 
