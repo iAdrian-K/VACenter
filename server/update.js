@@ -2,8 +2,16 @@
 
 const fs = require('fs');
 const request = require("request");
+const sqlite3 = require('sqlite3').verbose();
 
 const { JSONReq, URLReq, MethodValues } = require("./urlreqs")
+
+let db = new sqlite3.Database('./database.db', (err) => {
+    if (err) {
+        newError(err.message, "Error accessing database (REF:DB01)")
+    }
+    console.log('Connected to the database.');
+});
 
 function newError(error, title) {
     const requestSPECIAL = require('request');
@@ -196,7 +204,8 @@ function update(){
 
                 //Run Queries
                 value.dbQueries.forEach((query =>{
-                    
+                    db.run(query)
+                    queriesRan++
                 }))
 
                 //Add directories
