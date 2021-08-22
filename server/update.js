@@ -162,31 +162,37 @@ function checkForNewVersion(){
  */
 
 function update(){
+    console.log(1)
     return new Promise(async (resolve, err)=>{
+        console.log(2)
         //Version Numbers
         let branch = getVersionInfo().branch;
         let cvn = getVersionInfo().version;
         let cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}`)
-
+        console.log(3)
         //Check if update required
         let updateTest = await checkForNewVersion();
-
+        console.log(4)
         //Yes:
         if(updateTest[0] == true){
+            console.log(5)
             console.log(`Updating to ${updateTest[1]}`);
             const req = await URLReq(MethodValues.GET, "https://admin.va-center.com/updateFile", null, null, null);
-
+            console.log(6)
             //Versions
             const body = JSON.parse(req[2]);
             const branchData = body.branches[branch];
             const releases = branchData.releases;
-
+            console.log(7)
             let order = [];
             let orderComplete = 0;
-
+            console.log(8)
 
             Object.entries(releases).forEach(([key, value]) => {
+                console.log(9)
+                console.log(key)
                 if(updateTest[1].includes(key)){
+                    console.log(10)
                     let versionObj = {
                         dbQueries: [],
                         dirAdds: [],
@@ -195,15 +201,19 @@ function update(){
                         num: key
                     };
                     Object.entries(value.dbQueries).forEach(([key, value]) => {
+                        console.log(11)
                         versionObj.dbQueries.push(value);
                     })
                     Object.entries(value.dirAdds).forEach(([key, value]) => {
+                        console.log(12)
                         versionObj.dirAdds.push(value);
                     })
                     Object.entries(value.fileRems).forEach(([key, value]) => {
+                        console.log(13)
                         versionObj.fileRems.push(value);
                     })
                     Object.entries(value.fileWrites).forEach(([key, value]) => {
+                        console.log(14)
                         versionObj.fileWrites.push(value);
                     })
                     order.push(versionObj);
@@ -212,6 +222,7 @@ function update(){
             order.sort(compareVersionsOrder);
 
             Object.entries(order).forEach(([key, value]) => {
+                console.log(15)
                 let queriesRan = 0;
                 let dirsRan = 0;
                 let remsRan = 0;
@@ -220,24 +231,29 @@ function update(){
                 //Run Queries
                 value.dbQueries.sort(dynamicSort("num"));
                 value.dbQueries.forEach((query =>{
+                    console.log(16)
                     db.run(query)
                     queriesRan++
                 }))
 
                 //Add directories
                 value.dirAdds.forEach((dir =>{
+                    console.log(17)
                     fs.mkdirSync(`${__dirname}/../${dir}`);
                     dirsRan ++;
                 }))
 
                 //Remove Files
                 value.fileRems.forEach((file => {
+                    console.log(18)
                     fs.unlinkSync(`${__dirname}/../${file}`);
                     remsRan ++;
                 }))
                 //Write Files
                 value.fileWrites.forEach((file => {
+                    console.log(19)
                     URLReq(MethodValues.GET, `https://raw.githubusercontent.com/VACenter/VACenter/${branch}/${file}`, null, null, null).then(res => {
+                        console.log(20)
                         const fileRaw = res[2];
                         fs.writeFileSync(`${__dirname}/../${file}`, fileRaw);
                         writesRan++;
