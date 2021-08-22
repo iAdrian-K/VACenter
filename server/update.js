@@ -17,7 +17,7 @@ const {
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-    GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes
+    GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes, run
 } = require("./db");
 
 function dynamicSort(property) {
@@ -108,9 +108,9 @@ function compareVersionsOrder(a, b) {
     if (!z.match(/[l|m]/g)) {
         return 0;
     } else if (z.split('e').join('')[0] == "m") {
-        return 1;
-    } else {
         return -1;
+    } else {
+        return 1;
     }
 }
 function count(obj) { return Object.keys(obj).length; }
@@ -239,12 +239,10 @@ function update(){
 
                 //Run Queries
                 value.dbQueries.sort(dynamicSort("num"));
-                value.dbQueries.forEach((query =>{
+                value.dbQueries.forEach((async query =>{
                     console.log(16)
-                    db.serialize(() => {
-                        db.run(query)
-                    })
-                    queriesRan++
+                    await run(query);
+                    queriesRan++;
                 }))
 
                 //Add directories
