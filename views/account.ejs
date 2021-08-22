@@ -16,7 +16,14 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
         <div class="w-100 content bg-light-light ps-3 pt-3 mb-4" id="content">
+            
             <div class="container">
+                
+                <h1>
+                    <img src="<%= user.profileURL%>" style="height:0.8em"; class="rounded align-text-bottom mb-2">
+                    <%= user.display%>
+                </h1>
+                <h4><%= config.code + user.id%></h4>
                 <h2>Account Information</h2>
                 <hr>
                 <form class="row g-3 shadow p-3 border rounded mt-2 w-75 needs-validation" novalidate method="POST" action="/updateUser">
