@@ -174,7 +174,7 @@
                             content: "input",
                             icon: "warning",
                             button: {
-                                text: "Setup",
+                                text: "Update",
                                 closeModal: false
                             },
                             dangerMode: true,
@@ -187,7 +187,6 @@
 
                                     xhr.addEventListener("readystatechange", function () {
                                         if (this.readyState === this.DONE) {
-                                            alert(this.status)
                                             if(this.status == 202){
                                                 swal("Updated! Reloading now.", {
                                                     icon: "success",
