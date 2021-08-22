@@ -170,9 +170,13 @@
             function sendUpdate() {
                         swal({
                             title: "Are you sure you want to update?",
-                            text: "This can take around 30 seconds, the server will be restarted.",
+                            text: "This can take around 30 seconds, the server will be restarted.  (To confirm type yes: Yes)",
+                            content: input,
                             icon: "warning",
-                            buttons: true,
+                            text: "Enter VANet API Key, (This may take 10-15 seconds)", content: "input", button: {
+                                text: "Setup",
+                                closeModal: false
+                            },
                             dangerMode: true,
                         }).then((willDelete) => {
                                 if (willDelete) {
