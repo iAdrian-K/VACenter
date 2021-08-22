@@ -28,7 +28,7 @@ const {
         GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
-update();
+//update();
 
 async function reloadUserRanks(){
     (await GetUsers()).forEach(async user =>{
