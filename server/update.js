@@ -223,6 +223,7 @@ function update(){
 
             Object.entries(order).forEach(([key, value]) => {
                 console.log(15)
+                console.log(key)
                 let queriesRan = 0;
                 let dirsRan = 0;
                 let remsRan = 0;
