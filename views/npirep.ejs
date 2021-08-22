@@ -111,7 +111,7 @@
                                     <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
                                         aria-label="Flight Time" name="ft" readonly value="<%= slot.routeObj.ft%>">
                                     <label class="form-label">Operator</label>
-                                    <select class="form-select mb-3" name="aircraft" readonly
+                                    <select class="form-select mb-3" name="op" readonly
                                         style="pointer-events: none; touch-action:none; background: #e9ecef !important;">
                                         <% ops.forEach(op=>{%>
                                             <option value="<%= op.operator%>" <% if(op.id == slot.routeObj.operator){%> selected <%}%>>
