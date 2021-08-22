@@ -108,9 +108,9 @@ function compareVersionsOrder(a, b) {
     if (!z.match(/[l|m]/g)) {
         return 0;
     } else if (z.split('e').join('')[0] == "m") {
-        return -1;
-    } else {
         return 1;
+    } else {
+        return -1;
     }
 }
 function count(obj) { return Object.keys(obj).length; }
@@ -241,21 +241,26 @@ function update(){
                 value.dbQueries.sort(dynamicSort("num"));
                 value.dbQueries.forEach((async query =>{
                     console.log(16)
-                    await run(query);
+                    await run(query.value);
                     queriesRan++;
                 }))
 
                 //Add directories
                 value.dirAdds.forEach((dir =>{
                     console.log(17)
-                    fs.mkdirSync(`${__dirname}/../${dir}`);
+                    if (fs.existsSync(`${__dirname}/../${dir}`) == false){
+                        fs.mkdirSync(`${__dirname}/../${dir}`);
+                    }
                     dirsRan ++;
                 }))
 
                 //Remove Files
                 value.fileRems.forEach((file => {
                     console.log(18)
-                    fs.unlinkSync(`${__dirname}/../${file}`);
+                    if (fs.existsSync(`${__dirname}/../${file}`) == true) {
+                        fs.unlinkSync(`${__dirname}/../${file}`);
+                    }
+                    
                     remsRan ++;
                 }))
                 //Write Files
@@ -277,23 +282,26 @@ function update(){
                 }, 1000)
             })
 
-            setInterval(() => {
+            let updateFinChecker = setInterval(() => {
                 if(orderComplete == order.length){
                     resolve(true);
-                    
+                    console.log(21);
                     //Update Version info
                         //Package.json
                         const packageObj = require('./../package.json')
                         packageObj.version = order[order.length - 1].num;
                         fs.writeFileSync(`${__dirname}/../package.json`, JSON.stringify(packageObj, null, 2));
+                        console.log(22);
                         //Package-lock.json
                         const packagelock = require('./../package-lock.json')
                         packagelock.version = order[order.length - 1].num;
                         fs.writeFileSync(`${__dirname}/../package-lock.json`, JSON.stringify(packagelock, null, 2));
+                        console.log(23);
                         //VersionFile
                         const versionFile = getVersionInfo();
                         versionFile.version = order[order.length - 1].num;
                         fs.writeFileSync(`${__dirname}/../version.json`, JSON.stringify(versionFile, null, 2));
+                        console.log(24);
 
                     //Tell Instance Manager
                     const addition = branch == "beta" ? "B" : ""
@@ -302,14 +310,20 @@ function update(){
                         url: 'https://admin.va-center.com/stats/updateInstance',
                         form: { id: require("./../config.json").other.ident, version: `${order[order.length - 1].num}${addition}` }
                     };
+                    console.log(25);
                     request(options, function (error, response, body) {
                         if (error) {
                             newError(error, `${require("./../config.json").code} - updateError`)
+                            clearInterval(updateFinChecker)
                         }
+                        console.log(26);
                         if (response.statusCode == 200) {
+                            clearInterval(updateFinChecker)
+                            console.log(27);
                             console.log("RESTARTING")
                             process.exit(11);
                         } else {
+                            clearInterval(updateFinChecker)
                             console.error([response.statusCode, response.body])
                         }
                     })
