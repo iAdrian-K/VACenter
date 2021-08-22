@@ -1176,7 +1176,7 @@ function GetPPURL(username){
         return new Promise((resolve, error) => {
             db.exec(query, function (err) {
                 if (err) {
-                    newError(err.message, "Error creating slot (REF:DB52)")
+                    newError(err.message, "Error running custom queries (REF:DB52)")
                     resolve(false)
                 } else {
                     resolve(true)
