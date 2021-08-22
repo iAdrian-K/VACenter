@@ -135,7 +135,6 @@ function reloadConfig(){
             windowMs: 15 * 60 * 1000, // 15 minutes
             max: (config.other) ? (config.other.rates ? config.other.rates : 100) : 100 // limit each IP to 100 requests per windowMs
         });
-        console.log((config.other) ? (config.other.rates ? config.other.rates : 100) : 100)
         app.use(limiter);
         resolve(true);
     })
@@ -180,8 +179,6 @@ const testRank = async (ownerObj) =>{
             ranks.sort( compareRanks );
             for (var i = 0; i < ranks.length; i++) { 
                 let rank = ranks[i];
-                console.log(rank)
-                console.log(ownerObj.hours >= rank.minH)
                 if(ownerObj.hours >= rank.minH){
                     ownerObj.rank = rank.rank;
                 }
@@ -199,7 +196,6 @@ const updateStats = async () => {
     (await GetPireps()).forEach(pirep => {
         craftArray.push(pirep.vehiclePublic)
     })
-    console.log(mode(craftArray))
     UpdateStat("popCraft", "popCraft", mode(craftArray));
     //Route
     let routeArray = [];
@@ -277,7 +273,6 @@ function checkForCPWD(cookies) {
     return new Promise((async resolve => {
         if (cookies.authToken) {
             const UID = await GetToken(cookies.authToken)
-            console.log(UID)
             if (UID) {
                 if(UID.user){
                 const user = await GetUser(UID.user);
@@ -371,7 +366,6 @@ app.get('*', async (req, res)=>{
             }
         }else{
             const changePWD = await checkForCPWD(cookies);
-            console.log(changePWD)
             let user = await checkForUser(cookies);
             if(user){
                 user = await getUserWithObjs(user, ["notifications", "pireps"]);
@@ -499,7 +493,6 @@ app.get('*', async (req, res)=>{
                         if (user) {
                             
                             if (user.admin == true) {
-                                console.log(1)
                                 res.render("admin/events", {
                                     active: req.path,
                                     title: "Admin - Events",
@@ -838,7 +831,6 @@ app.post("/admin/events/new", async function (req, res) {
 })
 app.delete("/admin/events/remove", async function (req, res) {
     const cookies = getAppCookies(req)
-    console.log(req.body)
     if (req.body.id) {
         let user = await checkForUser(cookies);
         if (user) {
@@ -876,7 +868,6 @@ app.post("/admin/codeshare/new", async function (req, res) {
     }
 })
 app.delete("/admin/codeshare/remove", async function (req, res) {
-    console.log(req.body)
     const cookies = getAppCookies(req)
     if (req.body.id) {
         let user = await checkForUser(cookies);
@@ -915,7 +906,6 @@ app.post("/admin/ranks/new", async function (req, res) {
     }
 })
 app.delete("/admin/ranks/remove", async function (req, res) {
-    console.log(req.body)
     const cookies = getAppCookies(req)
     if (req.body.name) {
         let user = await checkForUser(cookies);
@@ -938,7 +928,6 @@ app.delete("/admin/ranks/remove", async function (req, res) {
 app.post("/admin/aircraft/new", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.airID && req.body.livID) {
-        console.log(req.body)
         let user = await checkForUser(cookies);
         let liv = (JSON.parse((await URLReq(MethodValues.GET, `https://api.vanet.app/public/v1/aircraft/livery/${req.body.livID}`, {'X-API-Key': config.key}, null, null))[2]).result);
         if (user) {
@@ -957,7 +946,6 @@ app.post("/admin/aircraft/new", async function (req, res) {
 })
 app.delete("/admin/aircraft/remove", async function (req, res) {
     const cookies = getAppCookies(req)
-    console.log(req.body)
     if (req.body.id) {
         let user = await checkForUser(cookies);
         if (user) {
@@ -997,7 +985,6 @@ app.post("/admin/routes/new", async function (req, res) {
             res.sendStatus(401);
         }
     } else {
-        console.log(req.body)
         res.sendStatus(400)
     }
 })
@@ -1021,13 +1008,11 @@ app.post("/admin/routes/update", async function (req, res) {
             res.sendStatus(401);
         }
     } else {
-        console.log(req.body)
         res.sendStatus(400)
     }
 })
 app.delete("/admin/routes/remove", async function (req, res) {
     const cookies = getAppCookies(req)
-    console.log(req.body)
     if (req.body.id) {
         let user = await checkForUser(cookies);
         if (user) {
@@ -1075,7 +1060,6 @@ app.post("/admin/users/new", async function (req, res) {
             res.sendStatus(401);
         }
     } else {
-        console.log(req.body)
         res.sendStatus(400)
     }
 })
@@ -1103,7 +1087,6 @@ app.post("/admin/users/update", async function (req, res) {
             res.sendStatus(401);
         }
     } else {
-        console.log(req.body)
         res.sendStatus(400)
     }
 })
@@ -1128,7 +1111,6 @@ app.post("/admin/users/revoke", async function (req, res) {
             res.sendStatus(401);
         }
     } else {
-        console.log(req.body)
         res.sendStatus(400)
     }
 })
@@ -1153,7 +1135,6 @@ app.post("/admin/users/unrevoke", async function (req, res) {
             res.sendStatus(401);
         }
     } else {
-        console.log(req.body)
         res.sendStatus(400)
     }
 })
@@ -1255,7 +1236,6 @@ app.post("/admin/settings/accent", async function (req, res) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                console.log(req.body)
                 const newConfig = getConfig();
                 newConfig.other.navColor = [];
                 newConfig.other.navColor.push(req.body.accent);
@@ -1317,9 +1297,7 @@ app.post("/admin/pireps/den", async function (req, res) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                console.log(req.body.id)
                 const targetPIREP = await GetPirep(req.body.id)
-                console.log(targetPIREP)
                 if (targetPIREP) {
                     targetPIREP.status = "d";
                     await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed)
