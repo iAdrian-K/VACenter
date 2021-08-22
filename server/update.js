@@ -63,7 +63,7 @@ function compareVersionsOrder(a, b) {
     let y = b.num.split('.').map(e => parseInt(e));
     let z = "";
     let i;
-    
+
     for (i = 0; i < x.length; i++) {
         if (x[i] === y[i]) {
             z += "e";
@@ -195,7 +195,9 @@ function update(){
                 let writesRan = 0;
 
                 //Run Queries
-                //TEDDY
+                value.dbQueries.forEach((query =>{
+                    
+                }))
 
                 //Add directories
                 value.dirAdds.forEach((dir =>{
