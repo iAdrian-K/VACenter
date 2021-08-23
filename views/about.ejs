@@ -16,7 +16,7 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-5 pt-3" id="content">
-            <h2>VA Stats</h2>
+            <h1>VA Stats</h1>
                 <%if(false == true){%>
                     <div class="row mb-2 mt-3 w-100">
                         <div class="col text-center position-relative rounded text-light p-3 m-3 shadow tm-3 bg-blurple"
@@ -40,7 +40,45 @@
                         </div>
                     </div>
                 <%}%>
+            <h2>Quick Stats</h2>
+            <hr>
+            <div class="w-100 row gx-3">
+                <div class="col">
+                    <div class="bg-primary text-light rounded text-center p-3">
+                        <h1>
+                            <%= stats.totalHours %>
+                        </h1>
+                        <h4>Total Flight Hours</h4>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-success text-light rounded text-center p-3">
+                        <h1>
+                            <%= config.code%><%= stats.leadPilot[0] %>
+                        </h1>
+                        <h4>Lead Pilot (Flight Hours)</h4>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-info text-light rounded text-center p-3">
+                        <h1>
+                            <%= stats.pirepsLength %>
+                        </h1>
+                        <h4>PIREPS Filed</h4>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-danger text-light rounded text-center p-3">
+                        <h5>
+                            <%= stats.popularCraft %>
+                        </h5>
+                        <h4>Most common aircraft</h4>
+                    </div>
+                </div>
+            </div>
+            <br>
             <h2 class="mt-5">VA Fleet</h2>
+            <hr>
             <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
