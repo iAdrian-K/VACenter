@@ -13,8 +13,7 @@
 </head>
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-    <div class="w-100 content bg-light-light pt-3" id="content">
-        <div class="container">
+    <div class="w-100 content bg-light-light px-5 pt-3 mb-4" id="content">
             <h1>Welcome <%= user.display%> to <%= config.name %></h1>
             <br>
             <h2>Recent Activity</h2>
@@ -32,6 +31,41 @@
                 <% if(user.notifications.length == 0){%>
                     <h5>No Activity Found</h5>
                 <%}%>
+            </div>
+            <br>
+            <h2>Quick Stats</h2>
+            <hr>
+            <div class="w-100 row gx-3">
+                <div class="col">
+                    <div class="bg-primary text-light rounded text-center p-3">
+                        <h1><%= user.rank%></h1>
+                        <h4>Rank</h4>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-success text-light rounded text-center p-3">
+                        <h1>
+                            <%= user.hours%>
+                        </h1>
+                        <h4>Flight Hours</h4>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-info text-light rounded text-center p-3">
+                        <h1>
+                            <%= user.pireps.length %>
+                        </h1>
+                        <h4>PIREPS Filed</h4>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="bg-danger text-light rounded text-center p-3">
+                        <h5>
+                            <%= mode(user.pireps) %>
+                        </h5>
+                        <h4>Most common aircraft</h4>
+                    </div>
+                </div>
             </div>
             <br>
             <h2>Recommended Flights</h2>
@@ -74,8 +108,6 @@
                             <h5>No PIREPS Found</h5>
                         <%}%>
             </div>
-            
-        </div>
         
     </div>
     <%- include('components/footer.ejs') %>
