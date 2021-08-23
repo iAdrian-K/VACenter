@@ -75,7 +75,8 @@
             <h2>Your Flights</h2>
             <hr>
             <div class="row row-cols-3 g-3 mt-2 ms-0 w-100">
-                <% user.pireps.forEach(pirep=>{%>
+                <% const keeper = [...user.pireps]%>
+                <% user.pireps.splice(0,9).forEach(pirep=>{%>
                     <div class="col">
                         <div class="rounded bg-light p-3 shadow">
                             <h4><i class="bi bi-file-bar-graph-fill"></i>
@@ -104,7 +105,7 @@
                         </div>
                     </div>
                     <%})%>
-                        <% if(user.pireps.length==0){%>
+                        <% if(keeper.length==0){%>
                             <h5>No PIREPS Found</h5>
                         <%}%>
             </div>
