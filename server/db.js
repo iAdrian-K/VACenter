@@ -42,6 +42,7 @@ function newError(error, title) {
  * @typedef {import('./types.js').route} route
  * @typedef {import('./types.js').slot} slot
  * @typedef {import('./types.js').statistic} statistic
+ * @typedef {import('./types.js').link} link
  */
 
 const sqlite3 = require('sqlite3').verbose();
@@ -1186,6 +1187,64 @@ function GetPPURL(username){
     }
 }
 
+// Links
+/**
+ * Get all links
+ * @returns {Promise<Array.<link>>} Array of Links
+ */
+function GetLinks() {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM links`, (err, rows) => {
+                if (err) {
+                    newError(err.message, "Error accessing link data (REF:DB53)")
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Delete link
+ * @param {number} id - ID of link
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function DeleteLink(id) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM links WHERE id = ?`, [id], (err) => {
+                if (err) {
+                    newError(err.message, "Error deleting link (REF:DB54)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Creates a new link
+ * @param {String} title - Title of link
+ * @param {String} url - URL of link
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function CreateLink(title, url) {
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO links(title, url) VALUES(?, ?)`, [title, url], function (err) {
+            if (err) {
+                newError(err.message, "Error creating Link (REF:DB56)")
+                resolve(false)
+            } else {
+                resolve(true)
+            }
+        });
+    });
+}
+
 
 module.exports = { 
     db, GetPPURL, run,
@@ -1199,5 +1258,6 @@ module.exports = {
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-    CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlotsWithRoutes
+    CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlotsWithRoutes,
+    GetLinks, CreateLink, DeleteLink
     };

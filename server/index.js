@@ -14,7 +14,7 @@ require('dotenv').config()
 const { FileWrite, FileRead, FileExists, FileRemove } = require('./fileFunctions.js')
 const { JSONReq, URLReq, MethodValues } = require("./urlreqs")
 const { 
-        db, GetPPURL, run,
+        db, GetPPURL,
         GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
         GetEvent, GetEvents, CreateEvent, DeleteEvent,
         GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
@@ -25,7 +25,8 @@ const {
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
         GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-        GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes
+        GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlotsWithRoutes, run,
+        GetLinks, CreateLink, DeleteLink
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 //update();
@@ -67,6 +68,7 @@ console.log(makeid(50))
  * @typedef {import('./types.js').route} route
  * @typedef {import('./types.js').slot} slot
  * @typedef {import('./types.js').statistic} statistic
+ * @typedef {import('./types.js').link} link
  */
 function makeid(length) {
     var result = '';
@@ -193,19 +195,37 @@ const testRank = async (ownerObj) =>{
 const updateStats = async () => {
     //Craft
     let craftArray = [];
+    stats.popularCraft = "";
     (await GetPireps()).forEach(pirep => {
         craftArray.push(pirep.vehiclePublic)
     })
-    UpdateStat("popCraft", "popCraft", mode(craftArray));
-    //Route
-    let routeArray = [];
-    (await GetPireps()).forEach(pirep => {
-        routeArray.push(pirep.route)
+    stats.popularCraft = mode(craftArray);
+    //Lead Pilots
+    stats.leadPilot = ["Unknown", 0];
+    (await GetUsers()).forEach(user => {
+        if(stats.leadPilot[0] == "Unknown"){
+            // @ts-ignore
+            stats.leadPilot = [user.username, user.hours];
+        }
+        // @ts-ignore
+        if(user.hours > stats.leadPilot[1]){
+            // @ts-ignore
+            stats.leadPilot = [user.username, user.hours];
+        }
+        
     })
-    UpdateStat("popRoute", "popRoute", mode(routeArray));
+    //Hours + PIREPS
+    stats.totalHours = 0;
+    stats.pirepsLength = 0;
+    (await GetPireps()).forEach(pirep =>{
+        stats.pirepsLength++;
+        if(pirep.status == "a"){
+            stats.totalHours = stats.totalHours + (pirep.flightTime)/60
+        }
+    })
 }
-//setInterval(updateStats, 120000)
-//updateStats();
+setInterval(updateStats, 120000)
+updateStats();
 
 let vanetCraft = new Map();
 
@@ -390,7 +410,25 @@ app.get('*', async (req, res)=>{
                                 active: req.path,
                                 title: "Dashboard",
                                 user: user,
-                                config: getConfig()
+                                config: getConfig(),
+                                mode: function(array) {
+                                    if (array.length == 0)
+                                        return "None";
+                                    var modeMap = {};
+                                    var maxEl = array[0], maxCount = 1;
+                                    for (var i = 0; i < array.length; i++) {
+                                        var el = array[i].vehiclePublic;
+                                        if (modeMap[el] == null)
+                                            modeMap[el] = 1;
+                                        else
+                                            modeMap[el]++;
+                                        if (modeMap[el] > maxCount) {
+                                            maxEl = el;
+                                            maxCount = modeMap[el];
+                                        }
+                                    }
+                                    return maxEl;
+                                }
                             })
                         }else{
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -434,6 +472,19 @@ app.get('*', async (req, res)=>{
                                 title: "Events",
                                 user: user,
                                 events: await GetEvents(),
+                                config: getConfig()
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/links":
+                        if (user) {
+                            res.render("links", {
+                                active: req.path,
+                                title: "Links",
+                                user: user,
+                                links: await GetLinks(),
                                 config: getConfig()
                             })
                         } else {
@@ -593,6 +644,25 @@ app.get('*', async (req, res)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
+                        break;
+                    case "/admin/links":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/links", {
+                                    active: req.path,
+                                    title: "Admin - Links",
+                                    user: user,
+                                    activer: "/admin",
+                                    links: await GetLinks(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
                         break;
                     case "/admin/codeshare":
                         if (user) {
@@ -1305,6 +1375,44 @@ app.post("/admin/pireps/den", async function (req, res) {
                 } else {
                     res.sendStatus(404);
                 }
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+
+//Links
+app.post("/admin/links/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.title && req.body.url) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                    await CreateLink(req.body.title, req.body.url);
+                    res.redirect("/admin/links");
+            }else{
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+app.post("/admin/links/rem", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteLink(parseInt(req.body.id));
+                res.redirect("/admin/links");
             } else {
                 res.sendStatus(403);
             }

@@ -139,5 +139,13 @@
  * @property {any} value
  */
 
+/**
+ * A link Object
+ * @typedef {Object} link
+ * @property {number} id
+ * @property {string} title
+ * @property {string} link
+ */
+
 //@ts-ignore
-module.exports = {user, aircraft, event, gate, notification, operator, PIREP, rank, route, slot, token, statistic}
+module.exports = {user, aircraft, event, gate, notification, operator, PIREP, rank, route, slot, token, statistic, link}
