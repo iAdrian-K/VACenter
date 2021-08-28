@@ -43,7 +43,7 @@
                                 <label class="form-label">Aircraft</label>
                                 <select class="form-select mb-3" name="aircraft">
                                     <% craft.forEach(vic=>{%>
-                                        <option value="<%= vic.livID%>">
+                                        <option value="<%= vic.publicName%>">
                                             <%= vic.publicName%>
                                         </option>
                                         <%})%>
@@ -100,12 +100,12 @@
                                     <label for="myBrowser">Type to search for a route:</label>
                                     <input list="routes" id="route" name="route" readonly class="mb-3 form-control" placeholder="Route" value="<%= config.code + slot.routeObj.num%>">
                                     <label class="form-label">Aircraft</label>
-                                    <select class="form-select mb-3" name="aircraft" readonly style="pointer-events: none; touch-action:none; background: #e9ecef !important;">
-                                        <% craft.forEach(vic=>{%>
-                                            <option value="<%= vic.livID%>" <% if(vic.livID == slot.routeObj.aircraft){%> selected <%}%>>
-                                                <%= vic.publicName%>
+                                    <select class="form-select mb-3" name="aircraft">
+                                        <% slot.routeObj.aircraftPublic.split(', ').forEach(vic=>{%>
+                                            <option value="<%= vic %>">
+                                                <%= vic %>
                                             </option>
-                                            <%})%>
+                                        <%})%>
                                     </select>
                                     <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
                                     <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""

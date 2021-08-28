@@ -863,12 +863,26 @@ app.post("/newPIREP", async (req, res) => {
     if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments) {
         let user = await checkForUser(cookies);
         if (user) {
-            if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))){
-                await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString());
-                res.redirect("/");
+            let list = await GetAircrafts();
+            let backup = req.body.aircraft;
+            req.body.aircraft = null;
+            list.forEach(vic =>{
+                if(vic.publicName == backup){
+                    req.body.aircraft = vic.livID;
+                    return;
+                }
+            })
+            if(req.body.aircraft){
+                if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
+                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString());
+                    res.redirect("/");
+                } else {
+                    res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
+                }
             }else{
-                res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
+                res.status(404).send("No aircraft found.")
             }
+            
         }else{
             res.sendStatus(401);
         }
@@ -1040,14 +1054,32 @@ app.post("/admin/routes/new", async function (req, res) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                let routeID = makeid(50)
-                await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, req.body.minH);
-                Object.keys(req.body).forEach(async function (k, v) {
-                    if(k.slice(0,5) == "slot_"){
-                        CreateSlot(`routeID_slot_${k[6]}`, routeID, `${v}`, `NF_${v}`);
+                let routeID = makeid(50);
+                let vehiclePublic = [];
+                let counter = 0;
+                if (Array.isArray(req.body.aircraft) == false) {
+                    let backup = req.body.aircraft;
+                    req.body.aircraft = []
+                    req.body.aircraft.push(backup);
+                }
+                req.body.aircraft.forEach(async vic =>{
+                    vehiclePublic.push((await GetAircraft(vic)).publicName)
+                    counter++;
+                })
+                let checker = setInterval(async ()=>{
+                    if(counter == req.body.aircraft.length) {
+                        clearInterval(checker);
+                        let vehiclePublicList = vehiclePublic.join(", ");
+                        console.log(vehiclePublicList);
+                        await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.minH);
+                        Object.keys(req.body).forEach(async function (k, v) {
+                            if (k.slice(0, 5) == "slot_") {
+                                CreateSlot(`routeID_slot_${k[6]}`, routeID, `${v}`, `NF_${v}`);
+                            }
+                        });
+                        res.redirect("/admin/routes")
                     }
-                });
-                res.redirect("/admin/routes")
+                }, 250)
             } else {
                 res.sendStatus(403);
             }
@@ -1065,8 +1097,26 @@ app.post("/admin/routes/update", async function (req, res) {
         if (user) {
             if (user.admin == true) {
                 if(await GetRoute(req.body.id)){
-                    await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft, req.body.depIcao, req.body.arrIcao, (await GetAircraft(req.body.aircraft)).publicName, (await GetOperator(req.body.op)).operator, "0");
-                    res.redirect("/admin/routes")
+                    let vehiclePublic = [];
+                    let counter = 0;
+                    if(Array.isArray(req.body.aircraft) == false){
+                        let backup = req.body.aircraft;
+                        req.body.aircraft = []
+                        req.body.aircraft.push(backup);
+                    }
+                    req.body.aircraft.forEach(async vic => {
+                        vehiclePublic.push((await GetAircraft(vic)).publicName)
+                        counter++;
+                    })
+                    let checker = setInterval(async () => {
+                        if (counter == req.body.aircraft.length) {
+                            clearInterval(checker);
+                            let vehiclePublicList = vehiclePublic.join(", ");
+                            console.log(vehiclePublicList);
+                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, "0");
+                            res.redirect("/admin/routes")
+                        }
+                    }, 250)
                 }else{
                     res.sendStatus(404);
                 }

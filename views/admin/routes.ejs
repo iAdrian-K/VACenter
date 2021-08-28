@@ -70,8 +70,8 @@
                                         <input type="text" class="form-control" placeholder="Route Number" aria-label="Username" required=""
                                             aria-describedby="basic-addon1" name="num">
                                     </div>
-                                    <label class="form-label">Aircraft</label>
-                                    <select class="form-select mb-3" name="aircraft">
+                                    <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
+                                    <select class="form-select mb-3" name="aircraft" multiple required>
                                         <% craft.forEach(vic=>{%>
                                             <option value="<%= vic.livID%>"><%= vic.publicName%></option>    
                                         <%})%>
@@ -134,8 +134,8 @@
                                         <input type="text" class="form-control text-secondary" placeholder="Route Number" aria-label="Username" required=""
                                             aria-describedby="basic-addon1" name="num" value="<%= route.num%>" readonly>
                                     </div>
-                                    <label class="form-label">Aircraft</label>
-                                    <select class="form-select mb-3" value="<%= route.aircraft%>" name="aircraft">
+                                    <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
+                                    <select class="form-select mb-3" name="aircraft" multiple required>
                                         <% craft.forEach(vic=>{%>
                                             <option value="<%= vic.livID%>">
                                                 <%= vic.publicName%>
