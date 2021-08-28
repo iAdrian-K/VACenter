@@ -93,6 +93,7 @@
  * @property {string} filed
  * @property {string} status
  * @property {string} rejectReason
+ * @property {string} [pirepImg]
  */
 
 /**

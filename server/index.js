@@ -8,7 +8,55 @@ const express = require('express');
 var bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const rateLimit = require("express-rate-limit");
+const checkDiskSpace = require("check-disk-space").default;
+var multer = require('multer');
+const OS = require('os');
 require('dotenv').config()
+const tinify = require("tinify");
+tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
+
+//Storage
+let store = [];
+let rootPath = "";
+switch(OS.type()){
+    case "Windows_NT":
+        rootPath = ((__dirname).split(':'))[0] + ":/";
+        break;
+    case "Darwin":
+        rootPath = "/";
+        break;
+    case "Linux":
+        rootPath = "/";
+        break;
+}
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, `${__dirname}/../data/images/`)
+    },
+    filename: function (req, file, cb) {
+        cb(null, `${Date.now()}`) //Appending extension
+    }
+})
+var upload = multer({ storage: storage });
+
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+console.log(formatBytes(1073741824, 2))
+checkDiskSpace(rootPath).then((diskSpace) => {
+    console.log(diskSpace)
+    store.push(((diskSpace.size - diskSpace.free) / diskSpace.size ) * 100)
+    store.push(formatBytes((diskSpace.size - diskSpace.free), 2))
+    store.push(formatBytes(diskSpace.size, 2))
+})
 
 //Parts
 const { FileWrite, FileRead, FileExists, FileRemove } = require('./fileFunctions.js')
@@ -375,6 +423,13 @@ app.get('*', async (req, res)=>{
         }else{
             res.sendStatus(404);
         }
+    }else if(req.path.slice(0,6) == "/data/"){
+        console.log(path.join(__dirname, "..", req.path))
+        if(await FileExists(path.join(__dirname, "..", req.path))){
+            res.sendFile(path.join(__dirname, "..", req.path));
+        }else{
+            res.sendStatus(404);
+        }
     }else{
 
         //Check for setup
@@ -692,7 +747,8 @@ app.get('*', async (req, res)=>{
                                     activer: "/admin",
                                     operators: await GetOperators(),
                                     config: getConfig(),
-                                    cv: cvnb
+                                    cv: cvnb,
+                                    store: store
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -772,7 +828,8 @@ app.post('/setup', async (req,res)=>{
                 logo: "",
                 rates: 100,
                 navColor: ["light", "light"],
-                ident: makeid(25)
+                ident: makeid(25),
+                pirepPics: false
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(async () => {
@@ -858,9 +915,10 @@ app.post('/CPWD', async(req, res)=>{
     }
 })
 
-app.post("/newPIREP", async (req, res) => {
+app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
+    console.log(req.file);
     const cookies = getAppCookies(req)
-    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments) {
+    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments && (config.other.pirepImg == true ? req.file.path : true)) {
         let user = await checkForUser(cookies);
         if (user) {
             let list = await GetAircrafts();
@@ -874,7 +932,18 @@ app.post("/newPIREP", async (req, res) => {
             })
             if(req.body.aircraft){
                 if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
-                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString());
+                    if(req.file){
+                    fs.readFile(req.file.path, function (err, sourceData) {
+                        if (err) throw err;
+                        tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                            if (err) throw err;
+                            fs.unlinkSync(`${req.file.path}`);
+                            req.file.path = req.file.path + ".webp";
+                            fs.writeFileSync(`${req.file.path}`, resultData);
+                        })
+                    })
+                    }
+                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
                     res.redirect("/");
                 } else {
                     res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
@@ -1328,7 +1397,26 @@ app.post("/admin/settings/rate", async function (req, res) {
         res.sendStatus(400);
     }
 })
-
+app.post("/admin/settings/pirepPic", async function (req, res) {
+    const cookies = getAppCookies(req)
+    let user = await checkForUser(cookies);
+    if (user) {
+        if (user.admin == true) {
+            console.log(req.body)
+            const newConfig = getConfig();
+            newConfig.other.pirepPic = req.body.state == "on" ? true: false;
+            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
+            setTimeout(() => {
+                reloadConfig();
+                res.redirect("/admin/settings")
+            }, 1000)
+        } else {
+            res.sendStatus(403);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+})
 app.post("/admin/settings/bg", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.value) {

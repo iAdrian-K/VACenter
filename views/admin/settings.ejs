@@ -63,6 +63,24 @@
                 <button type="submit" class="btn btn-primary">Update</button>
                 </form>
             </div>
+            <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/pirepPic" method="post">
+                    <h4>PIREP Pictures</h4>
+                    <p>Allow Pilots to submit pictures of their Flights</p>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.pirepPic == true){%>checked<%}%>>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Allow Pictures</label>
+                    </div>
+                    <br>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
+                    </div>
+                    <br>
+                    <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span>
+                    <br><br>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
 
         </div>
         <%- include('./../components/footer.ejs') %>

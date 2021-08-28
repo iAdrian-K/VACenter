@@ -28,7 +28,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/newPIREP">
+                            <form method="POST" action="/newPIREP" enctype="multipart/form-data">
                                 <h2>Create new PIREP</h2>
                                 <br>
                                 <label for="myBrowser">Type to search for a route:</label>
@@ -67,6 +67,10 @@
                                     name="depT">
                                 <label class="form-label">Comments</label><br>
                                 <textarea class="form-control-plaintext border border-secondary rounded mb-3 p-2" name="comments"></textarea>
+                                <% if(config.other.pirepPic == true){%>
+                                    <label class="form-label">PIREP Pictures</label><br>
+                                    <input class="form-control mb-3" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
+                                <%}%>
                                 <button class="btn btn-primary">Create</button>
                             </form>
                         </div>

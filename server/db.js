@@ -324,12 +324,13 @@ function GetPireps() {
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
+ * @param {string} [img] - ID of IMG
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
+function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, img) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason) 
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null], function (err) {
+        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, pirepImg)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null, (img ? img : null)], function (err) {
             if (err) {
                 newError(err.message, "Error creating PIREP (REF:DB14)")
                 resolve(false)
@@ -355,9 +356,10 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
+ * @param {string} [img] - PIREP Image
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason) {
+ function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE pireps SET 
                 vehicle = ?,
@@ -372,8 +374,9 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
                 status = ?,
                 fuel = ?,
                 filed = ?,
-                rejectReason = ? 
-                WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, id], function (err) {
+                rejectReason = ?,
+                pirepImg = ?
+                WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, (img?img:null), id], function (err) {
             if (err) {
                 newError(err.message, "Error updating PIREP (REF:DB15)")
                 resolve(false)

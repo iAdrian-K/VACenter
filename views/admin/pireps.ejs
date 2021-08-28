@@ -77,6 +77,14 @@
                                         <p class="form-control p-2">
                                             <%= pirep.comments %><br>
                                         </p>
+                                        <% if(config.other.pirepPic == true){%>
+                                            
+                                            <strong><i class="bi bi-image"></i> Image: </strong><br>
+                                            <div class="w-100 text-center">
+                                            <img src='<%= pirep.pirepImg%>.webp' style="width: 75%;" class="rounded mx-auto text-center">
+                                            </div>
+                                        <%}%>
+                                        
                                     </p>
                                 </div>
                                 <% if(pirep.status == "n"){%>
