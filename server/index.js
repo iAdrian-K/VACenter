@@ -1412,16 +1412,24 @@ app.post("/admin/pireps/apr", async function (req, res){
     }
 })
 app.post("/admin/pireps/den", async function (req, res) {
+    console.log(req.body)
     const cookies = getAppCookies(req)
-    if (req.body.id) {
+    if (req.body.id && req.body.rejectReason) {
+        console.log(req.body)
         let user = await checkForUser(cookies);
         if (user) {
+            console.log(req.body)
             if (user.admin == true) {
+                console.log(req.body)
                 const targetPIREP = await GetPirep(req.body.id)
                 if (targetPIREP) {
+                    console.log(req.body)
                     targetPIREP.status = "d";
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed)
+                    targetPIREP.rejectReason = Buffer.from(req.body.rejectReason, 'base64').toString()
+                    console.log(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, targetPIREP.rejectReason)
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, targetPIREP.rejectReason)
                     res.redirect("/admin/pireps")
+                    console.log(req.body)
                 } else {
                     res.sendStatus(404);
                 }

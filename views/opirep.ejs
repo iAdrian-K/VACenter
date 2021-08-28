@@ -89,6 +89,11 @@
                                                             <span class="badge bg-success">Accepted</span>
                                                             <%}else if(pirep.status=="d" ){%>
                                                                 <span class="badge bg-danger">Rejected</span>
+                                                                <br><br>
+                                                                <h5>Reject Reason:</h5>
+                                                                <p>
+                                                                    <%= pirep.rejectReason%>
+                                                                </p>
                                                                 <%}else{%>
                                                                     <span class="badge bg-secondary">Awaiting</span>
                                                                     <%}%>

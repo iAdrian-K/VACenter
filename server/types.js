@@ -92,6 +92,7 @@
  * @property {number} fuel
  * @property {string} filed
  * @property {string} status
+ * @property {string} rejectReason
  */
 
 /**

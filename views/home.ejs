@@ -91,7 +91,8 @@
                                 <% if(pirep.status == "a"){%>
                                     <span class="text-success"><i class="bi bi-check-circle"></i> Approved</span>    
                                 <%}else if(pirep.status == "d"){%>
-                                    <span class="text-danger"><i class="bi bi-x-circle"></i> Denied</span>    
+                                    <span class="text-danger"><i class="bi bi-x-circle"></i> Denied</span><br>
+                                    <p><span class="fw-bold">Reject Reason:</span> <%= pirep.rejectReason %></p>
                                 <%}else if(pirep.status == "n"){%>
                                     <span class="text-dark"><i class="bi bi-clock"></i> Awaiting Action</span>    
                                 <%}else{%>

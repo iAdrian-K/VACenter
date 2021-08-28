@@ -11,6 +11,11 @@
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+    <style>
+        .swal-modal{
+            z-index: 1000;
+        }
+    </style>
     <%- include("./../components/head.ejs")%>
 </head>
 
@@ -47,7 +52,7 @@
             </table>
             <br>
             <% pireps.forEach(pirep=>{%>
-                <div class="modal fade" id="modal-<%=pirep.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal fade" id="modal-<%=pirep.id%>" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -79,6 +84,9 @@
                                     <button type="button" class="btn btn-danger" onclick="remPirep('<%= pirep.id%>')">Deny</button>
                                 <%}else if(pirep.status =="d"){%>
                                     <button type="button" class="btn btn-danger" disabled>Already Actioned (Denied)</button>
+                                    <br><br>
+                                    <h5>Reject Reason:</h5>
+                                    <p><%= pirep.rejectReason%></p>
                                 <%}else if(pirep.status =="a"){%>
                                     <button type="button" class="btn btn-success" disabled>Already Actioned (Accepted)</button>
                                 <%}else{%>            
@@ -98,9 +106,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
-            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         
             <script>
                 function appPirep(id) {
@@ -121,21 +127,43 @@
                     }, 1500);
                 }
                 function remPirep(id) {
-                    const data = `id=${id}`;
-                    const xhr = new XMLHttpRequest();
-                    xhr.withCredentials = true;
-                    xhr.addEventListener("readystatechange", function () {
-                        console.log(this)
-                        if (this.readyState === this.DONE) {
-                            console.log(this.responseText);
+                    swal({
+                        title: "Rejection Reason",
+                        text: "Please provide a rejection reason to the pilot.",
+                        content: {
+                            element: "input",
+                            attributes: {
+                                placeholder: "Rejection Reason",
+                                type: "text",
+                            },
+                        },
+                        icon: "info",
+                        button: {
+                            text: "Reject",
+                            closeModal: false
+                        },
+                        dangerMode: true,
+                    }).then((reason) => {
+                        if (reason) {
+                            const data = `id=${id}&rejectReason=${window.btoa(reason)}`;
+                            const xhr = new XMLHttpRequest();
+                            xhr.withCredentials = true;
+                            xhr.addEventListener("readystatechange", function () {
+                                console.log(this)
+                                if (this.readyState === this.DONE) {
+                                    console.log(this.responseText);
+                                }
+                            });
+                            xhr.open("POST", `/admin/pireps/den`);
+                            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            xhr.send(data);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        }else{
+                            swal("Error", "No Reject Reason was provided.", "error");        
                         }
-                    });
-                    xhr.open("POST", `/admin/pireps/den`);
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    xhr.send(data);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
+                    })
                 }
             </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"

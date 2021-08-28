@@ -328,8 +328,8 @@ function GetPireps() {
  */
 function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) 
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed], function (err) {
+        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason) 
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null], function (err) {
             if (err) {
                 newError(err.message, "Error creating PIREP (REF:DB14)")
                 resolve(false)
@@ -357,7 +357,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @param {string} filed - Time of creation
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed) {
+ function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE pireps SET 
                 vehicle = ?,
@@ -371,8 +371,9 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
                 comments = ?,
                 status = ?,
                 fuel = ?,
-                filed = ? 
-                WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, id], function (err) {
+                filed = ?,
+                rejectReason = ? 
+                WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, id], function (err) {
             if (err) {
                 newError(err.message, "Error updating PIREP (REF:DB15)")
                 resolve(false)
