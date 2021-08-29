@@ -461,11 +461,16 @@ app.get('*', async (req, res)=>{
                         break;
                     case "/home":
                         if(user){
+                            let vics = [];
+                            (await GetUsersPireps(user.username)).forEach(pirep => {
+                                vics.push(pirep.vehiclePublic)
+                            })
                             res.render("home", {
                                 active: req.path,
                                 title: "Dashboard",
                                 user: user,
                                 config: getConfig(),
+                                vics: vics,
                                 mode: function(array) {
                                     if (array.length == 0)
                                         return "None";
@@ -815,6 +820,7 @@ app.post("/login", async (req,res) =>{
 
 //setup
 app.post('/setup', async (req,res)=>{
+    if ((!config.code)){
     if(req.body.key){
         const Req = await URLReq(MethodValues.GET, "https://api.vanet.app/airline/v1/profile", { 'X-Api-Key': req.body.key}, null, null)
         if(Req[0]){
@@ -827,7 +833,7 @@ app.post('/setup', async (req,res)=>{
                 bg: "/public/images/stockBG2.jpg",
                 logo: "",
                 rates: 100,
-                navColor: ["light", "light"],
+                navColor: ["dark", "dark"],
                 ident: makeid(25),
                 pirepPics: false
             }
@@ -859,6 +865,41 @@ app.post('/setup', async (req,res)=>{
         }
     }else{
         res.sendStatus(400)
+    }
+    }
+})
+app.post('/setupNVN', async (req, res) => {
+    if (req.body.data) {
+        const data = JSON.parse(req.body.data);
+            const newConfig = {
+                code: data.code,
+                name: data.name
+            };
+            newConfig.key = req.body.key;
+            newConfig.other = {
+                bg: "/public/images/stockBG2.jpg",
+                logo: "",
+                rates: 100,
+                navColor: ["dark", "dark"],
+                ident: makeid(25),
+                pirepPics: data.pirepPictures
+            }
+            await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+            setTimeout(async () => {
+                await reloadConfig();
+                setTimeout(async () => {
+                    const regReq = await URLReq(MethodValues.POST, "https://admin.va-center.com/stats/regInstance", null, null, {
+                        id: config.other.ident,
+                        version: `${cvnb}`,
+                        airline: config.name,
+                        vanetKey: config.key,
+                        wholeConfig: JSON.stringify(config)
+                    });
+                    CreateOperator(config.name)
+                    res.sendStatus(200);
+                }, 1000);
+
+            }, 2000);
     }
 })
 

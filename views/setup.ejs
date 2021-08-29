@@ -19,25 +19,100 @@
             min-height: 100vh;
             height: auto;
         }
-    
-        .loginContainer {
-            background-color: rgba(255, 255, 255, .5);
+        .blur{
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            z-index: 0;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+        }
+        .loginContainer {
+            background-color: rgba(255, 255, 255, 1);
             position: relative;
-            width: 50%;
-            margin-top: 10vh;
+            width: 60%;
+            top: 50%;
+            transform: translateY(-50%);
             margin-left: auto;
             margin-right: auto;
         }
     </style>
 </head>
 <body class="pt-1">
-    <div class="loginContainer w-50 h-auto mx-auto rounded">
-        <div class="p-5 pb-3 text-center text-dark h-auto">
-            <h2><strong class="fw-bolder">Setup VACenter</strong></h2>
-            <p>Welcome to VACenter! You have made an amazing choice in selecting us as your new crew center. To setup VACenter you just need to provice your <a class="link-primary" href="https://vanet.app" target="_blank">VANet</a> API Key.</p>
-            <button class="btn btn-primary" onclick="setup()">Setup VACenter</button>
+    <div class="blur"></div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2" id="page0">
+        <div class="p-5 text-center text-dark h-auto">
+            <img src="https://va-center.com/public/images/logo.webp" style="width: 10%;">
+            <br><br>
+            <h2><strong class="fw-bolder">Welcome to VACenter</strong></h2>
+            <p>VACenter is a next generation crew center for Virtual Airlines. VACenter is a crew center with some amazing features, check out our <a class="link link-primary" href="https://va-center.com" target="_blank">website</a> for more info.</p>
+            <button class="btn btn-primary" onclick="progressPage()">Setup VACenter</button>
+        </div>
+    </div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2 d-none" id="page1">
+        <div class="p-4 text-center text-dark h-auto">
+            <img src="https://vanet.app/logo.png" style="width: 10%;">
+            <br><br>
+            <h2><strong class="fw-bolder">Quick Setup</strong></h2>
+            <p>VACenter can integrate with <a class="link link-primary" href="https://vanet.app" target="_blank">VANet</a> to quickly setup your crew center.</p>
+            <button class="btn btn-primary" onclick="setup()">Quick Setup</button>
+            <br><br>
+            <a class="link link-primary" onclick="progressPage()">Manual Setup</a>
+        </div>
+    </div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2 d-none" id="page2">
+        <div class="p-4 text-center text-dark h-auto">
+            <h1 class="display-1 text-primary">
+                <i class="bi bi-type" class="display-1 text-primary"></i>
+            </h1>
+            <h2><strong class="fw-bolder">VA Name</strong></h2>
+            <p>This is the name of your VA.</p>
+            <button class="btn btn-primary" onclick="setVAName()">Set Name</button>
+        </div>
+    </div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2 d-none" id="page3">
+        <div class="p-4 text-center text-dark h-auto">
+            <h1 class="display-1 text-primary">
+                <i class="bi bi-info-circle" class="display-1 text-primary"></i>
+            </h1>
+            <h2><strong class="fw-bolder">VA Code</strong></h2>
+            <p>This is the 4 character code of your VA. (Example: Qantas Virtual would be QFVA, Air Tahiti Nui Virtual would be ATNV)</p>
+            <button class="btn btn-primary" onclick="setVACode()">Set Code</button>
+        </div>
+    </div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2 d-none" id="page4">
+        <div class="p-4 text-center text-dark h-auto">
+            <h1 class="display-1 text-primary">
+                <i class="bi bi-image" class="display-1 text-primary"></i>
+            </h1>
+            <h2><strong class="fw-bolder">PIREP Images</strong></h2>
+            <p>Do you want your Pilots to be able to submit pictures of their flights?</p>
+            <div class="form-check form-switch text-center">
+                <label class="form-check-label" for="flexSwitchCheckDefault">
+                    <input class="form-check-input text-center" type="checkbox" id="flexSwitchCheckDefault" name="state"> Allow Pictures
+                </label>
+            </div>
+            <br>
+            <button class="btn btn-primary" onclick="setPICS()">Set State</button>
+        </div>
+    </div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2 d-none" id="page5">
+        <div class="p-4 text-center text-dark h-auto">
+            <h1 class="display-1 text-primary">
+                <i class="bi bi-image" class="display-1 text-primary"></i>
+            </h1>
+            <h2><strong class="fw-bolder">Review</strong></h2>
+            <p>Please review the state of your VACenter, some of these options can not be changed later.</p>
+            <div class="form-control shadow p-4 mx-auto w-75">
+                <h3>VACenter</h3>
+                <p>
+                    <strong>Name:</strong> <span id="reviewName">null</span><br>
+                    <strong>Code:</strong> <span id="reviewCode">null</span><br>
+                    <strong>Allow Pirep Images:</strong> <span id="reviewImg">null</span><br>
+                </p>
+            </div>
+            <br>
+            <button class="btn btn-primary" onclick="setupNVN()">Setup</button>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
@@ -45,6 +120,81 @@
         crossorigin="anonymous"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
+        let page = 0;
+        let pages = ['page0', 'page1', 'page2', 'page3', 'page4', 'page5'];
+        let options = {
+            name: '',
+            code: '',
+            pirepPictures: '',
+
+        };
+        function clearPages(){
+            pages.forEach(page =>{
+                document.getElementById(`${page}`).classList.add("d-none")
+            })
+        }
+        let progressPage = function() {
+            page++;
+            clearPages();
+            document.getElementById(`page${page}`).classList.remove("d-none");
+            if(page == 5){
+                document.getElementById(`reviewName`).innerHTML = options.name;
+                document.getElementById(`reviewCode`).innerHTML = options.code;
+                document.getElementById(`reviewImg`).innerHTML = options.pirepPictures == true ? "True" : "False";
+            }
+        }
+
+        function setVAName(){
+            swal({
+                text: "Enter VA Name", content: "input", button: {
+                    text: "Set"
+                }
+            }).then((value =>{
+                if(value){
+                    options.name = value;
+                    progressPage();
+                }else{
+                    swal({
+                        text: "We couldn't set the name, we will need to restart!", icon: "error", button: {
+                            text: "Restart"
+                        }
+                    }).then((value =>{
+                        window.location.reload();
+                    }));
+                }
+                
+            }))
+        }
+        
+        function setVACode(){
+            swal({
+                text: "Enter VA Code", content: "input", button: {
+                    text: "Set"
+                }
+            }).then((value =>{
+                if(value){
+                    options.code = value;
+                    progressPage();
+                }else{
+                    swal({
+                        text: "We couldn't set the code, we will need to restart!", icon: "error", button: {
+                            text: "Restart"
+                        }
+                    }).then((value =>{
+                        window.location.reload();
+                    }));
+                }
+                
+            }))
+        }
+        
+        function setPICS(){
+            //alert(document.getElementById("flexSwitchCheckDefault").checked)
+            options.pirepPictures = document.getElementById("flexSwitchCheckDefault").checked;
+            progressPage()
+        }
+
+      
         function setup() {
             swal({text: "Enter VANet API Key, (This may take 10-15 seconds)", content: "input", button: {
                 text: "Setup",
@@ -75,6 +225,49 @@
                     xhr.send(data);
                 }else{
                     return swal("Oh no!", "You didn't enter a key", 'error');
+                }
+            })
+        }
+        
+        
+        function setupNVN(){
+            swal({
+                title: "Are you sure you want to setup VACenter?",
+                text: "This can take around 15 seconds, this page will be reloaded.  (To confirm type yes: Yes)",
+                content: "input",
+                icon: "warning",
+                button: {
+                    text: "Update",
+                    closeModal: false
+                },
+                dangerMode: true,
+            }).then((willSetup) => {
+                if(willSetup == "Yes"){
+                    //alert(options.pirepPictures)
+                    const data = `data=${JSON.stringify(options)}`;
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+
+                    xhr.addEventListener("readystatechange", function () {
+                        if (this.readyState === this.DONE) {
+                            if (this.status == 200) {
+                                setTimeout(() => {
+                                    window.location.href = "/"
+                                }, 2500);
+                                return swal("Hooray", "Your VANet was successfully linked!", "success");
+                            } else {
+                                return swal("Oh no!", "There was an error linking your VANet!", "error")
+                            }
+                        }
+                    });
+
+                    xhr.open("POST", "/setupNVN");
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                    xhr.send(data);
+                }else {
+                    swal("Aborted setup", "The setup was aborted", 'error');
                 }
             })
         }
