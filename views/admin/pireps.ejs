@@ -81,7 +81,12 @@
                                             
                                             <strong><i class="bi bi-image"></i> Image: </strong><br>
                                             <div class="w-100 text-center">
-                                            <img src='<%= pirep.pirepImg%>.webp' style="width: 75%;" class="rounded mx-auto text-center">
+                                            <% if(pirep.pirepImg == "REMOVED"){%>  
+                                                <p class="fw-bold">Image Removed in accorance to the image removal policy set in settings.</p>
+                                            <%}else{%>
+                                                <img src='<%= pirep.pirepImg%>.webp' style="width: 75%;" class="rounded mx-auto text-center">
+                                            <%}%>
+                                            
                                             </div>
                                         <%}%>
                                         

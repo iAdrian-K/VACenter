@@ -76,7 +76,9 @@
                         <div class="progress-bar" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
                     </div>
                     <br>
-                    <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span>
+                    <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
+                    <hr>
+                    <label>Pireps will be removed <input step="any" type="number" class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
                     <br><br>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>

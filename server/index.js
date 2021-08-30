@@ -471,24 +471,7 @@ app.get('*', async (req, res)=>{
                                 user: user,
                                 config: getConfig(),
                                 vics: vics,
-                                mode: function(array) {
-                                    if (array.length == 0)
-                                        return "None";
-                                    var modeMap = {};
-                                    var maxEl = array[0], maxCount = 1;
-                                    for (var i = 0; i < array.length; i++) {
-                                        var el = array[i].vehiclePublic;
-                                        if (modeMap[el] == null)
-                                            modeMap[el] = 1;
-                                        else
-                                            modeMap[el]++;
-                                        if (modeMap[el] > maxCount) {
-                                            maxEl = el;
-                                            maxCount = modeMap[el];
-                                        }
-                                    }
-                                    return maxEl;
-                                }
+                                mode: mode
                             })
                         }else{
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -835,7 +818,8 @@ app.post('/setup', async (req,res)=>{
                 rates: 100,
                 navColor: ["dark", "dark"],
                 ident: makeid(25),
-                pirepPics: false
+                pirepPic: false,
+                pirepPicExpire: 86400000,
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(async () => {
@@ -882,7 +866,8 @@ app.post('/setupNVN', async (req, res) => {
                 rates: 100,
                 navColor: ["dark", "dark"],
                 ident: makeid(25),
-                pirepPics: data.pirepPictures
+                pirepPic: data.pirepPictures,
+                pirepPicExpire: 86400000,
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(async () => {
@@ -1443,14 +1428,17 @@ app.post("/admin/settings/pirepPic", async function (req, res) {
     let user = await checkForUser(cookies);
     if (user) {
         if (user.admin == true) {
-            console.log(req.body)
-            const newConfig = getConfig();
-            newConfig.other.pirepPic = req.body.state == "on" ? true: false;
-            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
-            setTimeout(() => {
-                reloadConfig();
-                res.redirect("/admin/settings")
-            }, 1000)
+            if(req.body.imgExpireDays){
+                console.log(req.body)
+                const newConfig = getConfig();
+                newConfig.other.pirepPic = req.body.state == "on" ? true: false;
+                newConfig.other.pirepPicExpire = ((((parseFloat(req.body.imgExpireDays) * 24) * 60) * 60) * 1000);
+                fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
+                setTimeout(() => {
+                    reloadConfig();
+                    res.redirect("/admin/settings")
+                }, 1000)
+            }
         } else {
             res.sendStatus(403);
         }
@@ -1516,7 +1504,13 @@ app.post("/admin/pireps/apr", async function (req, res){
                 const targetPIREP = await GetPirep(req.body.id)
                 if(targetPIREP){
                     targetPIREP.status = "a";
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed);
+                    if(config.other.pirepPic == true){
+                        setTimeout(() => {
+                            FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, targetPIREP.status, targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
+                        }, config.other.pirepPicExpire);
+                    }
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed,null, targetPIREP.pirepImg);
                     const owner = await GetUser(targetPIREP.author);
                     if(owner){
                         owner.hours = owner.hours + (targetPIREP.flightTime / 60);
@@ -1556,7 +1550,13 @@ app.post("/admin/pireps/den", async function (req, res) {
                     targetPIREP.status = "d";
                     targetPIREP.rejectReason = Buffer.from(req.body.rejectReason, 'base64').toString()
                     console.log(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, targetPIREP.rejectReason)
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, targetPIREP.rejectReason)
+                    if (config.other.pirepPic == true) {
+                        setTimeout(() => {
+                            FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
+                        }, config.other.pirepPicExpire);
+                    }
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, null, targetPIREP.pirepImg);
                     res.redirect("/admin/pireps")
                     console.log(req.body)
                 } else {

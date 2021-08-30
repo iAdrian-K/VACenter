@@ -360,6 +360,8 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @returns {Promise<Boolean>} Returns boolean of query
  */
  function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
+     console.log(img);
+     console.log((img ? img : null));
     return new Promise((resolve, error) => {
         db.run(`UPDATE pireps SET 
                 vehicle = ?,
