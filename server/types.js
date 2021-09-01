@@ -149,5 +149,19 @@
  * @property {string} link
  */
 
+/**
+ * A Flight Session Object
+ * @typedef {Object} fsession
+ * @property {number} id
+ * @property {string} pilot
+ * @property {string} route
+ * @property {string} slotID
+ * @property {string} aircraft
+ * @property {string} depTime
+ * @property {string} arrTime
+ * @property {number|boolean} active
+ * @property {string} state 
+ */
+
 //@ts-ignore
-module.exports = {user, aircraft, event, gate, notification, operator, PIREP, rank, route, slot, token, statistic, link}
+module.exports = {user, aircraft, event, gate, notification, operator, PIREP, rank, route, slot, token, statistic, link, fsession}

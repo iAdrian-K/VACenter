@@ -43,6 +43,7 @@ function newError(error, title) {
  * @typedef {import('./types.js').slot} slot
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
+ * @typedef {import('./types.js').fsession} fsession
  */
 
 const sqlite3 = require('sqlite3').verbose();
@@ -324,7 +325,7 @@ function GetPireps() {
  * @param {string} status - "N": Pending, "A": Approved, "D": Denided
  * @param {number} fuel - Fuel used
  * @param {string} filed - Time of creation
- * @param {string} [img] - ID of IMG
+ * @param {string|Boolean} [img] - ID of IMG
  * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, img) {
@@ -360,8 +361,6 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @returns {Promise<Boolean>} Returns boolean of query
  */
  function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
-     console.log(img);
-     console.log((img ? img : null));
     return new Promise((resolve, error) => {
         db.run(`UPDATE pireps SET 
                 vehicle = ?,
@@ -1064,13 +1063,30 @@ function GetSlots() {
         });
     });
 }
+/**
+ * Gets slot from ID 
+ * @param {string} ID 
+ * @returns {Promise<slot>} Slot object
+ */
+function GetSlot(ID) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM slots WHERE id = ?`, [ID], (err, row) => {
+                if (err) {
+                    newError(err.message, "Error accessing slot data (REF:DB59)")
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
 
 function GetSlotsWithRoutes(){
     return new Promise((resolve, error) => {
         GetSlots().then((slots) => {
             slots.forEach(async slot => {
                 slot.routeObj = await GetRoute(slot.route);
-                console.log(slot)
             })
             setTimeout(() => {
                 resolve(slots);
@@ -1251,6 +1267,126 @@ function CreateLink(title, url) {
     });
 }
 
+// Flight Sessions
+/**
+ * Creates a session
+ * @param {string} pilot - Username of pilot
+ * @param {string} route - Num of route
+ * @param {string} slotID - ID of slot
+ * @param {string} depTime - Departure Time of slot
+ * @returns {Promise<number>} Returns ID of session or -1 if error
+ */
+function CreateSession(pilot, route, slotID, depTime){
+    return new Promise((resolve, error) => {
+        db.run(`INSERT INTO flightSessions(pilot, route, slotID, aircraft, depTime, arrTime, active, state) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [pilot, route, slotID, null, depTime, null, 1, "NI"], function (err,row) {
+            if (err) {
+                newError(err.message, "Error creating Session (REF:DB57)")
+                resolve(-1)
+            } else {
+                resolve(this.lastID)
+            }
+        });
+    });
+}
+/**
+ * Returns record of specific Session ID
+ * @param {number} ID 
+ * @returns {Promise<fsession>} Flight Session Object
+ */
+function GetSession(ID){
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM flightSessions WHERE id = ?`, [ID], (err, row) => {
+                if (err) {
+                    newError(err.message, "Error accessing session data (REF:DB58)")
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
+/**
+ * Get a pilots sessions
+ * @param {string} pilot 
+ * @returns {Promise<Array<fsession>>} Object of the current pilots flights
+ */
+function GetSessionByPilot(pilot) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.all(`SELECT * FROM flightSessions WHERE pilot = ?`, [pilot], (err, row) => {
+                if (err) {
+                    newError(err.message, "Error accessing session data (REF:DB60)")
+                } else {
+                    console.log(row)
+                    if(Array.isArray(row)){
+                        resolve(row);
+                    }else{
+                        resolve([row]);
+                    }
+                    
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Updates a session
+ * @param {string} id 
+ * @param {string} pilot
+ * @param {string} route
+ * @param {string} slotID
+ * @param {string} aircraft
+ * @param {string} depTime
+ * @param {string} arrTime
+ * @param {number} active 
+ * @param {string} state
+ * @returns {Promise<Boolean>} Boolean of success or failure
+ */
+function UpdateSession(id, pilot, route, slotID, aircraft, depTime, arrTime, active, state) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            console.log([pilot, route, slotID, aircraft, depTime, arrTime, active, state, id])
+            db.run(`UPDATE flightSessions SET
+                    pilot = ?,
+                    route = ?,
+                    slotID = ?,
+                    aircraft = ?,
+                    depTime = ?,
+                    arrTime = ?,
+                    active = ?,
+                    state = ?
+                    WHERE id = ?`, [pilot, route, slotID, aircraft, depTime, arrTime, active, state, id], (err) => {
+                if (err) {
+                    newError(err.message, "Error updating session (REF:DB62)")
+                    resolve(false)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Deletes a Session
+ * @param {string} ID 
+ * @returns {Promise<Boolean>} Returns boolean of query
+ */
+function DeleteSession(ID) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.run(`DELETE FROM flightSessions WHERE id = ?`, [ID], (err) => {
+                if (err) {
+                    newError(err.message, "Error accessing session data (REF:DB61)")
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    });
+}
 
 module.exports = { 
     db, GetPPURL, run,
@@ -1264,6 +1400,7 @@ module.exports = {
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-    CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlotsWithRoutes,
-    GetLinks, CreateLink, DeleteLink
+    CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlot, GetSlotsWithRoutes,
+    GetLinks, CreateLink, DeleteLink,
+    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
     };

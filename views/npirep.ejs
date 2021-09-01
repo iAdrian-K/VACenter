@@ -83,7 +83,7 @@
             </div>
             <br><br>
             <h3>Click for more info</h3>
-            <table data-toggle="table" data-search="true" data-show-columns="true">
+            <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
                 <thead>
                     <tr class="tr-class-2">
                         <th data-field="route">Route</th>
@@ -95,12 +95,10 @@
                 </thead>
                 <tbody>
                     <% slots.forEach(slot=>{%>
-                        <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%>" data-title="<%=slot.route.id%>"
-                            data-object='{"key": "value"}' style="cursor: pointer;" data-bs-toggle="modal"
-                            data-bs-target="#modal-<%=slot.id%>">
+                        <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%> pirepClickable" data-title="<%=slot.routeObj.num%>" title="<%= slot.routeObj.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openSlot('<%=slot.id%>','<%= slot.routeObj.num%>')">
                             <td id="td-id-<%=slot.id %>" class="td-class-<%=slot.id %>" data-title="<%= slot.routeObj.num%>">
                                 <strong>
-                                    <%= config.code%><%= slot.routeObj.num%>
+                                    <%= (slot.routeObj.opObj ? (slot.routeObj.opObj.code ? slot.routeObj.opObj.code : config.code ) : config.code) %><%= slot.routeObj.num%>
                                 </strong>
                             </td>
                             <td data-text="<%= slot.routeObj.depICAO %>">
@@ -121,15 +119,53 @@
             </table>
         </div>
         <%- include('components/footer.ejs') %>
+        </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
             crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
             integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script>
+            $('#mainTable').on('click-row.bs.table', function (row, el, field){
+                console.log(el)
+                openSlot(el._id.split("-")[2], el._data.title)
+            })
+            function openSlot(id, routeNumber){
+                if("<%= allowNSession.toString()%>" == "true"){
+                    swal({
+                        title: `Do you want to fly route: <%= config.code%>${routeNumber}?`,
+                        text: "You will be taken to a seperate screen to track progress on your flight.",
+                        icon: "warning",
+                        buttons: {
+                            cancel: "Cancel!",
+                            go: {
+                                text: "Go",
+                                value: true,
+                                dangerMode: true,
+                                closeModal: false
+                            }
+                        },
+                        dangerMode: 'go'
+                    }).then(acceptFlight => {
+                        if (acceptFlight) {
+                            window.location.href = `/newSlotUI?slot=${id}`
+                        }
+                    })
+                }else{
+                    swal({
+                        title: "Oh no!",
+                        text:"We can't start a new session due to Session <%= activeFlight.id%> already running. Either cancel it, or go to the home screen to resume it.",
+                        icon: 'error'
+                    })
+                }
+                
+            }
+        </script>
         
 </body>
 
