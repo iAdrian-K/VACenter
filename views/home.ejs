@@ -79,7 +79,7 @@
                             </h4>
                             <p class="mb-5">
                                 <%= pirep.route%><br>
-                                <%= (pirep.flightTime)/60%> hours<br>
+                                <%= ((pirep.flightTime)/60).toFixed(2)%> hours<br>
                                 <%= pirep.vehiclePublic %>
                             </p>
                             <p>

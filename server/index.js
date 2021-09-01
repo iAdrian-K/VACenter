@@ -607,7 +607,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
             const session = await GetSession(sesID);
             if (session) {
                 const route = await GetRoute(session.route);
-                if (req.file) {
+                if (req.file && req.body.comments && req.body.fuel) {
                     fs.readFile(req.file.path, function (err, sourceData) {
                         if (err) throw err;
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
@@ -618,7 +618,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                 }
-                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, route.num.toString(), parseInt(session.arrTime), req.body.comments, "n", req.body.fuel, new Date().toString(), (config.other.pirepImg == true ? req.file.path : true) )
+                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments, "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
                 UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, session.depTime, session.arrTime, 0, "PF")
                 res.redirect("/home");
             } else {

@@ -69,7 +69,7 @@
         case "FF":%>
             <h1 class="display-6 fw-bold">Flight Finished</h1>
             <p class="text-muted">Live Map not available at this time.</p>
-            <p>Congratulations! You flew for <%= session.arrTime.toFixed(2)%> minutes. Please enter the following information to create the PIREP:</p>
+            <p>Congratulations! You flew for <%= parseFloat(session.arrTime).toFixed(2)%> minutes. Please enter the following information to create the PIREP:</p>
             <form method="POST" action="/finSlot?ses=<%= session.id%>" enctype="multipart/form-data">
                 <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
                 <input type="number" class="form-control mb-3" placeholder="Fuel used (kg)" required="" aria-label="Flight Time"

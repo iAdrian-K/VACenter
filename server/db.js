@@ -1278,7 +1278,7 @@ function CreateLink(title, url) {
  */
 function CreateSession(pilot, route, slotID, depTime){
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO flightSessions(pilot, route, slotID, aircraft, depTime, arrTime, active, state) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [pilot, route, slotID, null, depTime, null, 1, "NI"], function (err,row) {
+        db.run(`INSERT INTO flightSessions(pilot, route, slotID, aircraft, depTime, arrTime, active, state) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [pilot, route, slotID, null, depTime, 0, 1, "NI"], function (err,row) {
             if (err) {
                 newError(err.message, "Error creating Session (REF:DB57)")
                 resolve(-1)
