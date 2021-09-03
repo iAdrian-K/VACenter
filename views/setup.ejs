@@ -36,6 +36,9 @@
             margin-left: auto;
             margin-right: auto;
         }
+        .link-primary{
+            cursor: pointer !important;
+        }
     </style>
 </head>
 <body class="pt-1">
@@ -255,7 +258,7 @@
                                 setTimeout(() => {
                                     window.location.href = "/"
                                 }, 2500);
-                                return swal("Hooray", "Your VANet was successfully linked!", "success");
+                                return swal("Hooray", "Your VACenter was successfully setup!", "success");
                             } else {
                                 return swal("Oh no!", "There was an error linking your VANet!", "error")
                             }
