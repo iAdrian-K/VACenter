@@ -76,6 +76,7 @@ const {
     CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
+const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
 //update();
 
 async function reloadUserRanks(){
@@ -277,37 +278,11 @@ updateStats();
 
 let vanetCraft = new Map();
 
-async function reloadVANETData() {
-    
-    if (config.key) {
-        //aircraft
-        const aircraftRaw = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", { "X-Api-Key": config.key }, null, null)
-        const aircraft = JSON.parse(aircraftRaw[2]).result;
-        aircraft.forEach(aircraft => {
-            if (!vanetCraft.has(aircraft.aircraftID)) {
-                const rawAirData = aircraft;
-                delete rawAirData["liveryID"]
-                delete rawAirData["liveryName"]
-                vanetCraft.set(aircraft.aircraftID, {
-                    id: aircraft.aircraftID,
-                    name: aircraft.aircraftName,
-                    livery: [],
-                    raw: rawAirData
-                })
-                const updated = vanetCraft.get(aircraft.aircraftID)
-                updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
-                vanetCraft.set(aircraft.aircraftID, updated)
-            } else {
-                const updated = vanetCraft.get(aircraft.aircraftID)
-                updated.livery.push({ id: aircraft.liveryID, name: aircraft.LiverName })
-                vanetCraft.set(aircraft.aircraftID, updated)
-            }
-        })
-    }
-}
-setTimeout(() => {
-    reloadVANETData()
-}, 5000);
+
+setInterval(async () => {
+    const VANetData = await getVANetData();
+    vanetCraft = VANetData[0];
+}, 86400000);
 
 
 
@@ -1169,6 +1144,7 @@ app.post('/CPWD', async(req, res)=>{
         let user = await checkForUser(cookies);
         if (user) {
             if(user.cp){
+//                if(bcrypt.comuser.password)
                 user.password = bcrypt.hashSync(req.body.npwd, 10);
                 await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked)
                 await DeleteTokens(user.username);
@@ -1211,6 +1187,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                     }
+                    await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
                     await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
                     res.redirect("/");
                 } else {
@@ -1497,11 +1474,10 @@ app.post("/admin/users/new", async function (req, res) {
             if (user.admin == true) {
                 const checkForTarget = ((await GetUser(req.body.username)) == undefined)
                 if(checkForTarget){
-                    const pilotIDReq = await JSONReq("GET", `https://api.vanet.app/airline/v1/user/id/${req.body.IFC}`, { "X-Api-Key": config.key }, null, null)
-                    const pilotID = pilotIDReq[2].result;
+                    const pilotID = await getVANetUser(req.body.IFC)
                     let vanetid = {
-                        status: pilotIDReq[2].status == 0 ? true : false,
-                        id: pilotIDReq[2].result != false ? pilotIDReq[2].result : null,
+                        status: pilotID ? true: false,
+                        id: pilotID ? pilotID : null,
                     }
 
                     await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false, vanetid.id)
