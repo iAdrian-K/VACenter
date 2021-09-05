@@ -957,7 +957,7 @@ app.get('*', async (req, res)=>{
                     case "/admin/settings":
                         if (user) {
                             if (user.admin == true) {
-                                res.render("admin/settings", {
+                                res.setHeader("Access-Control-Allow-Origin", "*").render("admin/settings", {
                                     active: req.path,
                                     title: "Admin - Settings",
                                     user: user,

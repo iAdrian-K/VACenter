@@ -15,13 +15,13 @@
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
-        <div class="w-100 content bg-light-light px-5 py-3" id="content">
+        <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
             <h2>Updates</h2>
             <hr>
             <span><strong>Current Version:</strong> <%= cv%></span>
             <br><br>
             <p id="statusTitle" class="fw-bold"></p>
-            <div class="form-control px-5 py-3 h-auto w-100" id="updateContainer">
+            <div class="form-control px-3 px-md-5 py-3 h-auto w-100" id="updateContainer">
                 <p class="fw-bold mt-2" id="statusStatus">Getting Updates, standby</p>
             </div>
             <br>
@@ -135,7 +135,7 @@
                                 const title = document.createElement("h3");
                                 const desc = document.createElement("p");
 
-                                container.className = "form-control p-2 w-100 my-2 shadow";
+                                container.className = "form-control p-3 w-100 my-2 shadow";
                                 
                                 title.innerHTML = value.title ? value.title : "Unknown Title"
                                 desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found` 
