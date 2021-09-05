@@ -30,7 +30,7 @@
             <br>
             <h2>Quick Stats</h2>
             <hr>
-            <div class="w-100 row gx-3">
+            <div class="w-100 row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
                 <div class="col">
                     <div class="bg-primary text-light rounded text-center p-3">
                         <h1><%= user.rank%></h1>
@@ -69,7 +69,7 @@
             <br>
             <h2>Your Flights</h2>
             <hr>
-            <div class="row row-cols-3 g-3 mt-2 ms-0 w-100">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-2 ms-0 w-100">
                 <% const keeper = [...user.pireps]%>
                 <% user.pireps.splice(0,9).forEach(pirep=>{%>
                     <div class="col">
