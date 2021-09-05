@@ -15,7 +15,7 @@
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
-        <div class="w-100 content bg-light-light ps-3 pt-3 mb-4" id="content">
+        <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
             
             <div class="container">
                 
@@ -26,7 +26,7 @@
                 <h4><%= config.code + user.username%></h4>
                 <h2>Account Information</h2>
                 <hr>
-                <form class="row g-3 shadow p-3 border rounded mt-2 w-75 needs-validation" novalidate method="POST" action="/updateUser">
+                <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST" action="/updateUser">
                     <div class="col-md-4">
                         <label for="validationCustom01" class="form-label">Name</label>
                         <input type="text" class="form-control" id="validationCustom01" value="<%= user.display %>" name="name" required>
@@ -55,9 +55,9 @@
                 <h2>Security</h2>
                 <hr>
                 <form action="/OSOR" method="POST">
-                    <button class="btn btn-primary" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign out everywhere</button>
-                </form>
-                <form class="row g-3 shadow p-3 border rounded mt-2 w-75 needs-validation" novalidate method="POST"
+                    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign out everywhere</button>
+                </form><br>
+                <form class="row g-3 mx-0 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST"
                     action="/CPWD" onsubmit="if((document.getElementById('validationPwd1').value == document.getElementById('validationPwd2').value)==false){alert('Passwords do not match.')}; return document.getElementById('validationPwd1').value == document.getElementById('validationPwd2').value;">
                     <div class="col-md-4">
                         <label for="validationPwd1" class="form-label">New Password</label>
@@ -88,7 +88,7 @@
                 <hr>
                 <div class="form-control p-3 mb-5">
                     <p>
-                        <strong>Flight Hours: </strong><%= user.hours%><br>
+                        <strong>Flight Hours: </strong><%= user.hours.toFixed(2)%><br>
                         <strong>Rank: </strong><%= user.rank%><br>
                         <strong>Account Created: </strong><%= new Date(user.created).toLocaleString(); %><br>
                     </p>
