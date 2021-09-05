@@ -307,7 +307,7 @@ function update(){
                     const addition = branch == "beta" ? "B" : ""
                     const options = {
                         method: 'POST',
-                        url: 'https://admin.va-center.com/stats/updateInstance',
+                        url: 'https://admin.va-center.com/stats/instance/update',
                         form: { id: require("./../config.json").other.ident, version: `${order[order.length - 1].num}${addition}` }
                     };
                     console.log(25);
@@ -320,8 +320,17 @@ function update(){
                         if (response.statusCode == 200) {
                             clearInterval(updateFinChecker)
                             console.log(27);
-                            console.log("RESTARTING")
-                            process.exit(11);
+                            const {exec} = require("child_process")
+                            exec("npm i", function (error, stdout, stderr){
+                                if(error){
+                                    console.error(`Error: ${error}`)
+                                }else if(stderr){
+                                    console.warn(`Warning: ${stderr}`)
+                                }else{
+                                    console.log("RESTARTING")
+                                    process.exit(11);
+                                }
+                            })
                         } else {
                             clearInterval(updateFinChecker)
                             console.error([response.statusCode, response.body])
