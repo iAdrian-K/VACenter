@@ -42,10 +42,16 @@
     </style>
 </head>
 <body class="pt-1">
-    <div class="blur"></div>
-    <div class="loginContainer h-auto mx-auto rounded mb-2" id="page0">
+    <div class="blur d-none d-md-block"></div>
+    <div class="w-100 h-100 bg-light text-dark text-center p-3 d-block d-md-none" style="z-index: 1000;">
+        <h1><i class="text-danger bi bi-exclamation-circle display-1"></i><br><br>
+            Not Avaliable
+        </h1>
+        <p>Setup is only possible on desktop, please visit this page from a desktop.</p>
+    </div>
+    <div class="loginContainer h-auto mx-auto rounded mb-2 d-none d-md-block" id="page0">
         <div class="p-5 text-center text-dark h-auto">
-            <img src="https://va-center.com/public/images/logo.webp" style="width: 10%;">
+            <img src="https://va-center.com/public/images/logo.webp" style="width: 10%; min-width: 60px;">
             <br><br>
             <h2><strong class="fw-bolder">Welcome to VACenter</strong></h2>
             <p>VACenter is a next generation crew center for Virtual Airlines. VACenter is a crew center with some amazing features, check out our <a class="link link-primary" href="https://va-center.com" target="_blank">website</a> for more info.</p>
@@ -133,6 +139,9 @@
         };
         function clearPages(){
             pages.forEach(page =>{
+                if(page == 'page0'){
+                document.getElementById(`${page}`).classList.remove("d-md-block")    
+                }
                 document.getElementById(`${page}`).classList.add("d-none")
             })
         }
