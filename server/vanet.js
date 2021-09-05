@@ -68,27 +68,36 @@ function repeater(list, action){
  * Gets data from VANet
  * @returns {Promise<Array>} Array consisting of VANet Data
  */
+const AircraftMap = new Map();
 function getVANetData(){
     return new Promise(async (resolve, reject) =>{
         if(config.key){
-            const AircraftRequest = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", {}, null, null);
+            const AircraftRequest = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", {"X-Api-Key": config.key}, null, null);
             const Aircraft = JSON.parse(AircraftRequest[2]).result;
-            const AircraftMap = new Map();
-            console.log(AircraftRequest[2])
             const AircraftArray = await repeater(Aircraft, function (item) {
-                const itemH = JSON.parse(JSON.stringify(item));
-                item = {
-                    id: itemH.aircraftID,
-                    name: itemH.aircraftName,
-                    livery: [],
-                    raw: itemH
-                };
-                item.livery.push({ id: itemH.liveryID, name: itemH.LiverName })
-                AircraftMap.set(item.id, item)
+                console.log(item.liveryName)
+                if(AircraftMap.has(item.aircraftID)){
+                    const mapEl = AircraftMap.get(item.aircraftID);
+                    mapEl.livery.push({ id: item.liveryID, name: item.liveryName })
+                    AircraftMap.set(mapEl.id, mapEl)
+                }else{
+                    const data = {
+                        id: item.aircraftID,
+                        name: item.aircraftName,
+                        livery: [{ id: item.liveryID, name: item.liveryName }],
+                        raw: item
+                    };
+                    AircraftMap.set(data.id, data)
+                }
             });
-            resolve([AircraftMap]);
+            resolve(AircraftMap);
         }else{
-            reject("No API Key provided.")
+            console.log("rgwhiuohgsuoh")
+            await reloadConfig();
+            const apiReq = await URLReq("GET", "https://api.va-center.com/VVCL/getAircraft", {"Content-Type": "application/x-www-form-urlencoded"}, null, {id: config.other.ident});
+            const requestRes = apiReq[2];
+            resolve(jsonToMap(requestRes));
+            
         }
     })
 }
@@ -150,3 +159,10 @@ function createVANetPirep(pilotID, depICAO, arrICAO, date, fuel, ft, aircraftLiv
 }
 
 module.exports = {getVANetData, getVANetUser, createVANetPirep}
+
+function mapToJson(map) {
+    return JSON.stringify([...map]);
+}
+function jsonToMap(jsonStr) {
+    return new Map(JSON.parse(jsonStr));
+}

@@ -283,6 +283,17 @@ setInterval(async () => {
     const VANetData = await getVANetData();
     vanetCraft = VANetData[0];
 }, 86400000);
+setTimeout(async () => {
+    if (config.other) {
+        if(config.other.ident){
+            vanetCraft = await getVANetData();
+            console.log(vanetCraft);
+        }
+    } else {
+        console.log("NO IDENT")
+    }
+}, 5000);
+
 
 
 
@@ -983,7 +994,7 @@ app.get('*', async (req, res)=>{
                         }
                         break;
                     case "/getLivData":
-                        res.send((await URLReq("GET", `https://api.vanet.app/public/v1/aircraft/${req.query.liv}`, { "X-Api-Key": config.key }, null, null))[2])
+                        res.send(JSON.stringify(vanetCraft.get(req.query.liv)))
                         break;
                     case "/logout":
                         res.clearCookie("authToken").redirect("/");
@@ -1043,13 +1054,18 @@ app.post('/setup', async (req,res)=>{
             setTimeout(async () => {
                 await reloadConfig();
                 setTimeout(async () => {
-                    const regReq = await URLReq(MethodValues.POST, "https://admin.va-center.com/stats/regInstance", null, null, {
-                        id: config.other.ident,
+                    const regReq = await URLReq(MethodValues.POST, "https://admin.va-center.com/stats/instances/new", null, null, {
                         version: `${cvnb}`,
                         airline: config.name,
                         vanetKey: config.key,
+                        type: "VANET",
                         wholeConfig: JSON.stringify(config)
                     });
+                    config.other.ident = regReq[2];
+                    await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2));
+                    setTimeout(async () => {
+                        vanetCraft = await getVANetData();
+                    }, 1000)
                     CreateOperator(config.name)
                     if (regReq[1].statusCode == 200) {
                         await reloadConfig();
@@ -1091,13 +1107,16 @@ app.post('/setupNVN', async (req, res) => {
             setTimeout(async () => {
                 await reloadConfig();
                 setTimeout(async () => {
-                    const regReq = await URLReq(MethodValues.POST, "https://admin.va-center.com/stats/regInstance", null, null, {
-                        id: config.other.ident,
+                    const regReq = await URLReq(MethodValues.POST, "https://admin.va-center.com/stats/instances/new", null, null, {
                         version: `${cvnb}`,
                         airline: config.name,
                         vanetKey: config.key,
+                        type: "NVANET",
                         wholeConfig: JSON.stringify(config)
                     });
+                    config.other.ident = regReq[2];
+                    await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2));
+                    vanetCraft = await getVANetData();
                     CreateOperator(config.name)
                     res.sendStatus(200);
                 }, 1000);
@@ -1327,16 +1346,31 @@ app.post("/admin/aircraft/new", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.airID && req.body.livID) {
         let user = await checkForUser(cookies);
-        let liv = (JSON.parse((await URLReq(MethodValues.GET, `https://api.vanet.app/public/v1/aircraft/livery/${req.body.livID}`, {'X-API-Key': config.key}, null, null))[2]).result);
-        if (user) {
-            if (user.admin == true) {
-                await CreateAircraft(req.body.livID, req.body.airID, liv.liveryName, (vanetCraft.get(req.body.airID)).name, liv.liveryName +" - "+ liv.aircraftName)
-                res.redirect("/admin/aircraft")
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
+        let aircraft = vanetCraft.get(req.body.airID)
+        if(aircraft){
+            let checker = false;
+            aircraft.livery.forEach(async liv => {
+                if (liv.id == req.body.livID) {
+                    checker = true;
+                    if (user) {
+                        if (user.admin == true) {
+                            await CreateAircraft(req.body.livID, req.body.airID, liv.name, (vanetCraft.get(req.body.airID)).name, liv.name + " - " + (vanetCraft.get(req.body.airID)).name)
+                            res.redirect("/admin/aircraft")
+                        } else {
+                            res.sendStatus(403);
+                        }
+                    } else {
+                        res.sendStatus(401);
+                    }
+                }
+            });
+            setTimeout(() => {
+                if(checker == false){
+                    res.sendStatus(404);
+                }
+            }, 10000);
+        }else{
+            res.sendStatus(404);
         }
     } else {
         res.sendStatus(400)

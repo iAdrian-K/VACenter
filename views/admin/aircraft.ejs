@@ -93,12 +93,13 @@
                         if (this.readyState === this.DONE) {
                             console.log(this)
                             if (this.status == 200) {
-                                const data = JSON.parse(this.responseText).result;
+                                const data = JSON.parse(this.responseText);
+                                console.log(data)
                                 document.getElementById("newAirLivSel").innerHTML = "";
-                                data.forEach(liv => {
+                                data.livery.forEach(liv => {
                                     const el = document.createElement("option")
-                                    el.value = liv.liveryID;
-                                    el.innerHTML = liv.liveryName;
+                                    el.value = liv.id;
+                                    el.innerHTML = liv.name;
                                     document.getElementById("newAirLivSel").appendChild(el)
                                 })
                             } else {
