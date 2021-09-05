@@ -216,11 +216,11 @@ function update(){
                         console.log(12)
                         versionObj.dirAdds.push(value);
                     })
-                    Object.entries(value.fileRems).forEach(([key, value]) => {
+                    Object.entries(value.filesRemoved).forEach(([key, value]) => {
                         console.log(13)
                         versionObj.fileRems.push(value);
                     })
-                    Object.entries(value.fileWrites).forEach(([key, value]) => {
+                    Object.entries(value.filesChanged).forEach(([key, value]) => {
                         console.log(14)
                         versionObj.fileWrites.push(value);
                     })
@@ -307,7 +307,7 @@ function update(){
                     const addition = branch == "beta" ? "B" : ""
                     const options = {
                         method: 'POST',
-                        url: 'https://admin.va-center.com/stats/instance/update',
+                        url: 'https://admin.va-center.com/stats/instances/update',
                         form: { id: require("./../config.json").other.ident, version: `${order[order.length - 1].num}${addition}` }
                     };
                     console.log(25);
@@ -326,6 +326,8 @@ function update(){
                                     console.error(`Error: ${error}`)
                                 }else if(stderr){
                                     console.warn(`Warning: ${stderr}`)
+                                    console.log("RESTARTING")
+                                    process.exit(11);
                                 }else{
                                     console.log("RESTARTING")
                                     process.exit(11);
@@ -333,6 +335,7 @@ function update(){
                             })
                         } else {
                             clearInterval(updateFinChecker)
+                            newError([response.statusCode, response.body], `${require("./../config.json").code} - updateError`)
                             console.error([response.statusCode, response.body])
                         }
                     })

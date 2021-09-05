@@ -205,12 +205,16 @@
                                     xhr.addEventListener("readystatechange", function () {
                                         if (this.readyState === this.DONE) {
                                             if(this.status == 202){
-                                                swal("Updated! Reloading now.", {
+                                                swal({
+                                                    title: "Success!",
+                                                    text: "Updated! Please standby. This should take 30 seconds, the window will then reload.",
                                                     icon: "success",
+                                                    showConfirmButton: false,
+                                                    showCancelButton: false
                                                 });
                                                 setTimeout(() => {
                                                     window.location.reload();
-                                                }, 5000);
+                                                }, 30000);
                                             }else{
                                                 swal({
                                                     title: "Update Failed!",
