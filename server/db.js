@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 const bcrypt = require('bcrypt');
+const chalk = require('chalk');
 
 function newError(error, title) {
     const requestSPECIAL = require('request');
@@ -25,8 +26,7 @@ function newError(error, title) {
     };
 
     request(options2, function (error2, response2, body2) {
-        console.log("NEW REPORT")
-        console.log(options2.form)
+        console.log(chalk.red("NEW REPORT"));
     })
 }
 
@@ -55,7 +55,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         newError(err.message, "Error accessing database (REF:DB01)")
     }
-    console.log('Connected to the database.');
+    console.log(chalk.blue('Connected to the database.'));
 });
 
 // Aircrafts
@@ -1164,8 +1164,6 @@ function CreateSlot(id, route, depTime, arrTime) {
             }
         });
     });
-    }else{
-        console.log(id, route, depTime, arrTime)
     }
 }
 
@@ -1318,7 +1316,6 @@ function GetSessionByPilot(pilot) {
                 if (err) {
                     newError(err.message, "Error accessing session data (REF:DB60)")
                 } else {
-                    console.log(row)
                     if(Array.isArray(row)){
                         resolve(row);
                     }else{
@@ -1347,7 +1344,6 @@ function GetSessionByPilot(pilot) {
 function UpdateSession(id, pilot, route, slotID, aircraft, depTime, arrTime, active, state) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            console.log([pilot, route, slotID, aircraft, depTime, arrTime, active, state, id])
             db.run(`UPDATE flightSessions SET
                     pilot = ?,
                     route = ?,

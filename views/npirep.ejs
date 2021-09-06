@@ -30,6 +30,9 @@
                         </div>
                         <div class="modal-body">
                             <form method="POST" action="/newPIREP" enctype="multipart/form-data">
+                                <% if(config.key&&!(user.vanetID)){%>
+                                    <p class="text-danger mb-3">Your account can not communicate with VANet servers. This PIREP will not be sent to VANet.</p>    
+                                <%}%>
                                 <h2>Create new PIREP</h2>
                                 <br>
                                 <label for="myBrowser">Type to search for a route:</label>

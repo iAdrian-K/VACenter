@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const chalk = require('chalk');
 const express = require('express');
 var bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
@@ -102,7 +103,6 @@ function reloadVersion(){
 }
 
 reloadVersion();
-console.log(makeid(50))
 
 /**
  * @typedef {import('./types.js').user} user
@@ -287,10 +287,7 @@ setTimeout(async () => {
     if (config.other) {
         if(config.other.ident){
             vanetCraft = await getVANetData();
-            console.log(vanetCraft);
         }
-    } else {
-        console.log("NO IDENT")
     }
 }, 5000);
 
@@ -301,7 +298,10 @@ setTimeout(async () => {
 const app = express();
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
-app.listen(process.env.PORT);
+console.log(chalk.green("Starting VACenter"))
+app.listen(process.env.PORT, () =>{
+    console.log(chalk.green("Listening on port " + process.env.PORT));
+});
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(function(req,res,next){
@@ -662,10 +662,7 @@ app.get('*', async (req, res)=>{
                             let vics = [];
                             let currentSession = null;
                             (await GetSessionByPilot(user.username)).every(session => {
-                                console.log("TEST1235")
-                                console.log(session.active)
                                 if (session.active) {
-                                    console.log("hruefodj")
                                     currentSession = session;
                                     return false;
                                 }
@@ -695,18 +692,13 @@ app.get('*', async (req, res)=>{
                             };
                             let activeFlightBool = false;
                             (await GetSessionByPilot(user.username)).every(session => {
-                                console.log("TEST1235")
-                                console.log(session.active)
                                 if(session.active){
-                                    console.log("hruefodj")
                                     activeFlightBool = true;
                                     activeFlight = session;
                                     return false;
                                 }
                                 return true;
                             })
-                            console.log(activeFlight)
-                            console.log("TEST")
                             res.render("npirep", {
                                 active: req.path,
                                 title: "New Flight",
@@ -1207,7 +1199,10 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                     }
-                    await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
+                    if(config.key && user.VANetID){
+                        await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
+                    }
+                    
                     await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
                     res.redirect("/");
                 } else {
@@ -1421,10 +1416,8 @@ app.post("/admin/routes/new", async function (req, res) {
                         let vehiclePublicList = vehiclePublic.join(", ");
                         await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.minH);
                         Object.keys(req.body).forEach(async function (k, v) {
-                            console.log(req.body);
                             if (k.slice(0, 5) == "slot_") {
                                 const value = req.body[k]
-                                console.log(value)
                                 CreateSlot(`routeID_slot_${k[6]}`, routeID, `${value}`, `NF_${v}`);
                             }
                         });
@@ -1509,7 +1502,7 @@ app.post("/admin/users/new", async function (req, res) {
             if (user.admin == true) {
                 const checkForTarget = ((await GetUser(req.body.username)) == undefined)
                 if(checkForTarget){
-                    const pilotID = await getVANetUser(req.body.IFC)
+                    const pilotID = (await getVANetUser(req.body.IFC));
                     let vanetid = {
                         status: pilotID ? true: false,
                         id: pilotID ? pilotID : null,
@@ -1635,6 +1628,26 @@ app.post("/admin/users/resetPWD", async function (req, res){
         }else{
             res.sendStatus(401);
         }
+})
+app.post("/users/linkVANet", async function (req, res){
+    const cookies = getAppCookies(req)
+    let user = await checkForUser(cookies);
+    if (user) {
+        if (req.body.ifcname) {
+            try{
+                const pilotID = (await getVANetUser(req.body.ifcname));
+                user.vanetID = pilotID;
+                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked,pilotID);
+                res.redirect("/");
+            }catch(err){
+                res.redirect("/account");
+            }
+        }else{
+            res.sendStatus(400);
+        }
+    }else{
+        res.sendStatus(401);
+    }
 })
 
 //Settings

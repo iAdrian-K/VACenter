@@ -26,6 +26,7 @@
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "btoa": "^1.2.1",
+    "chalk": "^4.1.2",
     "check-disk-space": "^3.0.1",
     "clean-jsdoc-theme": "^3.2.8",
     "cookie-parser": "^1.4.5",

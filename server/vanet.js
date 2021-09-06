@@ -17,7 +17,6 @@ function reloadConfig() {
     return new Promise(async (resolve, error) => {
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
         resolve(true);
-        console.log(config)
     });
 
 }
@@ -75,7 +74,6 @@ function getVANetData(){
             const AircraftRequest = await URLReq("GET", "https://api.vanet.app/public/v1/aircraft", {"X-Api-Key": config.key}, null, null);
             const Aircraft = JSON.parse(AircraftRequest[2]).result;
             const AircraftArray = await repeater(Aircraft, function (item) {
-                console.log(item.liveryName)
                 if(AircraftMap.has(item.aircraftID)){
                     const mapEl = AircraftMap.get(item.aircraftID);
                     mapEl.livery.push({ id: item.liveryID, name: item.liveryName })
@@ -92,7 +90,6 @@ function getVANetData(){
             });
             resolve(AircraftMap);
         }else{
-            console.log("rgwhiuohgsuoh")
             await reloadConfig();
             const apiReq = await URLReq("GET", "https://api.va-center.com/VVCL/getAircraft", {"Content-Type": "application/x-www-form-urlencoded"}, null, {id: config.other.ident});
             const requestRes = apiReq[2];
@@ -111,10 +108,10 @@ function getVANetUser(profileName){
     return new Promise(async (resolve, reject) =>{
         if (config.key) {
             const UserReqRaw = await JSONReq("GET", `https://api.vanet.app/airline/v1/user/id/${profileName}`, { "X-Api-Key": config.key }, null, null);
-            const UserReq = JSON.parse(UserReqRaw[2]).result;            
-            if(JSON.parse(UserReqRaw[2]).code == 0){
+            const UserReq = UserReqRaw[2].result;            
+            if(UserReqRaw[2].status == 0){
                 resolve(UserReq);
-            }else if(JSON.parse(UserReqRaw[2]).code == 6){
+            }else if(UserReqRaw[2].status == 6){
                 reject("No user found")
             }else{
                 reject("Error")
@@ -137,7 +134,6 @@ function getVANetUser(profileName){
  * @returns 
  */
 function createVANetPirep(pilotID, depICAO, arrICAO, date, fuel, ft, aircraftLivID){
-    console.log(pilotID, depICAO, arrICAO, date, fuel, ft, aircraftLivID)
     return new Promise(async (resolve, reject) =>{
         if(pilotID && depICAO && arrICAO && date && fuel && ft && aircraftLivID){
             (JSONReq("POST", "https://api.vanet.app/airline/v1/flights", { "X-Api-Key": config.key}, null, {
@@ -149,7 +145,6 @@ function createVANetPirep(pilotID, depICAO, arrICAO, date, fuel, ft, aircraftLiv
                 flightTime: ft/60,
                 aircraftLiveryId: aircraftLivID
             })).then((state) =>{
-                console.log(state[2]);
                 resolve();
             })
         }else{
