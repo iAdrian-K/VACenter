@@ -106,7 +106,7 @@
 /**
  * A routes Object
  * @typedef {Object} route
- * @property {number} id
+ * @property {string} id
  * @property {string} num
  * @property {number} ft - Flight Time
  * @property {string} operator

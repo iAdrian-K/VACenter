@@ -1480,6 +1480,12 @@ app.delete("/admin/routes/remove", async function (req, res) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
+                const route = await GetRoute(req.body.id);
+                (await GetSlots()).forEach(slot =>{
+                    if(slot.route.toString() == route.id.toString()){
+                        DeleteSlot(slot.id.toString());
+                    }
+                })
                 await DeleteRoute(req.body.id);
                 res.redirect("/admin/routes")
             } else {
