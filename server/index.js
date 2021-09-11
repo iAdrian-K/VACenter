@@ -595,9 +595,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                 const route = await GetRoute(session.route);
                 if (req.file && req.body.fuel) {
                     fs.readFile(req.file.path, function (err, sourceData) {
-                        if (err) throw err;
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
-                            if (err) throw err;
                             fs.unlinkSync(`${req.file.path}`);
                             req.file.path = req.file.path + ".webp";
                             fs.writeFileSync(`${req.file.path}`, resultData);
@@ -1190,9 +1188,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                 if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
                     if(req.file){
                     fs.readFile(req.file.path, function (err, sourceData) {
-                        if (err) throw err;
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
-                            if (err) throw err;
                             fs.unlinkSync(`${req.file.path}`);
                             req.file.path = req.file.path + ".webp";
                             fs.writeFileSync(`${req.file.path}`, resultData);
