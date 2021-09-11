@@ -593,7 +593,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
             const session = await GetSession(sesID);
             if (session) {
                 const route = await GetRoute(session.route);
-                if (req.file && req.body.comments && req.body.fuel) {
+                if (req.file && req.body.fuel) {
                     fs.readFile(req.file.path, function (err, sourceData) {
                         if (err) throw err;
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
@@ -604,7 +604,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                 }
-                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments, "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
+                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
                 UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, session.depTime, session.arrTime, 0, "PF")
                 res.redirect("/home");
             } else {
@@ -1174,7 +1174,7 @@ app.post('/CPWD', async(req, res)=>{
 
 app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
     const cookies = getAppCookies(req)
-    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && req.body.comments && (config.other.pirepImg == true ? req.file.path : true)) {
+    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
         let user = await checkForUser(cookies);
         if (user) {
             let list = await GetAircrafts();
@@ -1203,7 +1203,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                         await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
                     }
                     
-                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
                     res.redirect("/");
                 } else {
                     res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
