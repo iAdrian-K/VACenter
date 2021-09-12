@@ -94,13 +94,13 @@ reloadUserRanks()
 //Versioning
 let branch = getVersionInfo().branch;
 let cvn = getVersionInfo().version;
-let cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}`)
+let cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
 /**
  * Used for checking the version info
  */
 function reloadVersion(){
     cvn = getVersionInfo().version;
-    cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}`)
+    cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
 }
 
 reloadVersion();
