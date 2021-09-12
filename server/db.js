@@ -505,7 +505,7 @@ function GetUsers() {
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO users(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) 
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID], function (err) {
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, "https://icons.getbootstrap.com/assets/icons/person-circle.svg", hours, created, llogin, cp, revoked, VANetID], function (err) {
             if (err) {
                 newError(err.message, "Error creating user (REF:DB21)")
                 resolve(false)
