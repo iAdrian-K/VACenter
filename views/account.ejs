@@ -27,7 +27,7 @@
                 <hr>
                 <% if(config.key && !(user.VANetID)){%>
                     <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST" action='/users/linkVANet'>
-                        <h1>Link IFC Account</h1>
+                        <h1><i class="text-danger bi bi-exclamation-triangle"></i> Link IFC Account</h1>
                         <p>This is required to interact with VANet.</p>
                         <div class="col-md-4">
                             <label for="validationCustom01" class="form-label">IFC Name</label>
