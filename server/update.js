@@ -136,7 +136,7 @@ function checkForNewVersion(){
             //Get current Version info
             let branch = getVersionInfo().branch;
             let cvn = getVersionInfo().version;
-            const currentVersionFull = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}`)
+            const currentVersionFull = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
             const currentVersionNum = currentVersionFull.slice(0, -1);
             const currentVersionBranchInd = currentVersionFull.charAt(currentVersionFull.length - 1);
             const currentVersionBranch = currentVersionBranchInd == "B" ? "beta" : (currentVersionBranchInd == "M" ? "master" : null);
