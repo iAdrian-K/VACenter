@@ -17,7 +17,7 @@
  * @property {string} created
  * @property {string} llogin
  * @property {boolean} cp - Change Password Flag
- * @property {boolean} revoked
+ * @property {number} revoked
  * @property {array} notifications
  * @property {array} pireps
  * @property {string} VANetID - the ID assigned by the VANet servers corresponding to the user's IFC profile.

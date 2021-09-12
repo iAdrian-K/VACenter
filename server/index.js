@@ -643,6 +643,8 @@ app.get('*', async (req, res)=>{
             }
             if(changePWD == true && req.path != "/changePWD"){
                 res.redirect('/changePWD');
+            }else if(user.revoked == 1){
+                res.clearCookie('authToken').redirect("/?r=ro")
             }else{
                 switch(req.path){
                     case "/":
@@ -1006,12 +1008,16 @@ app.post("/login", async (req,res) =>{
     if(req.body.user && req.body.pwd){
         const user = await GetUser(req.body.user);
         if (user){
-            if(bcrypt.compareSync(req.body.pwd, user.password) == true){
-                const token = makeid(50);
-                CreateToken(token, user.username);
-                res.cookie("authToken", token, { maxAge: new Date().getTime() + (10 * 365 * 24 * 60 * 60) }).redirect("/home")
+            if(user.revoked != 1){
+                if (bcrypt.compareSync(req.body.pwd, user.password) == true) {
+                    const token = makeid(50);
+                    CreateToken(token, user.username);
+                    res.cookie("authToken", token, { maxAge: new Date().getTime() + (10 * 365 * 24 * 60 * 60) }).redirect("/home")
+                } else {
+                    res.redirect('/?r=ii');
+                }
             }else{
-                res.redirect('/?r=ii');
+                res.redirect('/?r=ro');
             }
         }else{
             res.redirect('/?r=ii')
@@ -1452,7 +1458,7 @@ app.post("/admin/routes/update", async function (req, res) {
                         if (counter == req.body.aircraft.length) {
                             clearInterval(checker);
                             let vehiclePublicList = vehiclePublic.join(", ");
-                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, "0");
+                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.rankReq);
                             res.redirect("/admin/routes")
                         }
                     }, 250)
@@ -1506,7 +1512,9 @@ app.post("/admin/users/new", async function (req, res) {
                 if(checkForTarget){
                     let pilotID;
                     try{
-                        pilotID = (await getVANetUser(req.body.IFC));
+                        if(config.key){
+                            pilotID = (await getVANetUser(req.body.IFC));
+                        }
                     }catch(err) {
                         res.status(500).send(err);
                     }
@@ -1515,8 +1523,8 @@ app.post("/admin/users/new", async function (req, res) {
                         id: pilotID ? pilotID : null,
                     }
 
-                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false, vanetid.id)
-                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, false, vanetid.id)
+                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
+                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
                     
                     res.redirect("/admin/users")
                 }else{
@@ -1568,7 +1576,7 @@ app.post("/admin/users/revoke", async function (req, res) {
                 const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
                 if (checkForTarget) {
                     const target = await GetUser(req.body.uid)
-                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, true, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, 1, target.VANetID)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1592,7 +1600,7 @@ app.post("/admin/users/unrevoke", async function (req, res) {
                 const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
                 if (checkForTarget) {
                     const target = await GetUser(req.body.uid)
-                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, false, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, 0, target.VANetID)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);

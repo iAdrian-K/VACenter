@@ -39,7 +39,7 @@
                                 <input list="routes" id="route" name="route" class="mb-3 form-control" placeholder="Route">
                                 <datalist id="routes">
                                     <% routes.forEach(route=>{%>
-                                        <% if((parseInt(route.minRank) / 60) <= user.hours){%>
+                                        <% if((parseInt(route.minRank)) <= user.hours){%>
                                             <option value="<%= config.code + route.num %>"></option>
                                         <%}%>
                                     <%})%>
@@ -99,26 +99,28 @@
                 </thead>
                 <tbody>
                     <% slots.forEach(slot=>{%>
-                        <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%> pirepClickable" data-title="<%=slot.routeObj.num%>" title="<%= slot.routeObj.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openSlot('<%=slot.id%>','<%= slot.routeObj.num%>')">
-                            <td id="td-id-<%=slot.id %>" class="td-class-<%=slot.id %>" data-title="<%= slot.routeObj.num%>">
-                                <strong>
-                                    <%= (slot.routeObj.opObj ? (slot.routeObj.opObj.code ? slot.routeObj.opObj.code : config.code ) : config.code) %><%= slot.routeObj.num%>
-                                </strong>
-                            </td>
-                            <td data-text="<%= slot.routeObj.depICAO %>">
-                                <%= slot.routeObj.depICAO %>
-                            </td>
-                            <td data-text="<%= slot.routeObj.arrICAO %>">
-                                <%= slot.routeObj.arrICAO %>
-                            </td>
-                            <td data-text="<%= slot.routeObj.aircraftPublic %>">
-                                <%= slot.routeObj.aircraftPublic %>
-                            </td>
-                            <td data-text="<%= slot.depTime %>">
-                                <%= slot.depTime %>
-                            </td>
-                        </tr>
-                        <%})%>
+                        <% if((slot.routeObj.minRank) <= user.hours){%>
+                                <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%> pirepClickable" data-title="<%=slot.routeObj.num%>" title="<%= slot.routeObj.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openSlot('<%=slot.id%>','<%= slot.routeObj.num%>')">
+                                <td id="td-id-<%=slot.id %>" class="td-class-<%=slot.id %>" data-title="<%= slot.routeObj.num%>">
+                                    <strong>
+                                        <%= (slot.routeObj.opObj ? (slot.routeObj.opObj.code ? slot.routeObj.opObj.code : config.code ) : config.code) %><%= slot.routeObj.num%>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= slot.routeObj.depICAO %>">
+                                    <%= slot.routeObj.depICAO %>
+                                </td>
+                                <td data-text="<%= slot.routeObj.arrICAO %>">
+                                    <%= slot.routeObj.arrICAO %>
+                                </td>
+                                <td data-text="<%= slot.routeObj.aircraftPublic %>">
+                                    <%= slot.routeObj.aircraftPublic %>
+                                </td>
+                                <td data-text="<%= slot.depTime %>">
+                                    <%= slot.depTime %>
+                                </td>
+                            </tr>        
+                        <%}%>
+                    <%})%>
                 </tbody>
             </table>
         </div>

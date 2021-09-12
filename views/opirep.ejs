@@ -83,6 +83,19 @@
                                                                                         <strong><i class="bi bi-type"></i> Comments: </strong>
                                                                                         <%= pirep.comments%><br>
                                                         </p>
+                                                        <% if(config.other.pirepPic==true){%>
+                                                        
+                                                            <strong><i class="bi bi-image"></i> Image: </strong><br><br>
+                                                            <div class="w-100 text-center">
+                                                                <% if(pirep.pirepImg=="REMOVED" ){%>
+                                                                    <p class="fw-bold">Image removed in accordance with the image removal policy set in VACenter settings.</p>
+                                                                    <%}else{%>
+                                                                        <img src='<%= pirep.pirepImg%>.webp' style="width: 75%;" class="rounded mx-auto text-center">
+                                                                        <%}%>
+                                                        
+                                                            </div>
+                                                            <%}%>
+                                                        <br>
                                                         <% if (pirep.status=='a' ){%>
                                                             <span class="badge bg-success">Accepted</span>
                                                             <%}else if(pirep.status=="d" ){%>

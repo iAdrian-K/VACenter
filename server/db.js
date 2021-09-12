@@ -499,7 +499,7 @@ function GetUsers() {
  * @param {string} created - Date and time created
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
- * @param {boolean} revoked - User access revoked
+ * @param {number} revoked - User access revoked
  * @returns {Promise<Boolean>} Returns boolean of query
  */
 function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
@@ -528,7 +528,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
  * @param {string} created - Date and time created
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
- * @param {boolean} revoked - User access revoked
+ * @param {number} revoked - User access revoked
  * @returns {Promise<Boolean>} Returns boolean of query
  */
  function UpdateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
