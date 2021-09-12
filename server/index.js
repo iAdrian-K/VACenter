@@ -1504,7 +1504,12 @@ app.post("/admin/users/new", async function (req, res) {
             if (user.admin == true) {
                 const checkForTarget = ((await GetUser(req.body.username)) == undefined)
                 if(checkForTarget){
-                    const pilotID = (await getVANetUser(req.body.IFC));
+                    let pilotID;
+                    try{
+                        pilotID = (await getVANetUser(req.body.IFC));
+                    }catch(err) {
+                        res.status(500).send(err);
+                    }
                     let vanetid = {
                         status: pilotID ? true: false,
                         id: pilotID ? pilotID : null,
@@ -1814,10 +1819,10 @@ app.post("/admin/pireps/den", async function (req, res) {
                     if (config.other.pirepPic == true) {
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
-                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), "REMOVED");
                         }, config.other.pirepPicExpire);
                     }
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, null, targetPIREP.pirepImg);
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), targetPIREP.pirepImg);
                     res.redirect("/admin/pireps")
                 } else {
                     res.sendStatus(404);
