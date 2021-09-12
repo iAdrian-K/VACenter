@@ -2,6 +2,7 @@
 
 //Dependancies
 const fs = require('fs');
+var sanitizer = require('sanitizer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const chalk = require('chalk');
@@ -431,7 +432,7 @@ app.get('/newSlotUI', async (req, res) =>{
                 const sesID = await CreateSession(user.username, route.id.toString(), slotID, slot.depTime)
                 res.redirect(`/slotUI?ses=${sesID.toString()}`)
             }else{
-                res.status(404).send("Cant find slot with ID: " + slotID);
+                res.status(404).send("Cant find slot with ID: " + sanitizer.sanitize(slotID));
             }
         }
     }
@@ -1516,7 +1517,7 @@ app.post("/admin/users/new", async function (req, res) {
                             pilotID = (await getVANetUser(req.body.IFC));
                         }
                     }catch(err) {
-                        res.status(500).send(err);
+                        res.status(500).send(sanitizer.sanitize(err));
                     }
                     let vanetid = {
                         status: pilotID ? true: false,
