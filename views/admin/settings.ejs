@@ -5,157 +5,238 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Settings || <%= config.name %>
+        Admin || <%= config.name %>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/assets/styles/scroll.css">
-    <link rel="stylesheet" href="/assets/styles/main.css">
+    <%- include("./../components/head.ejs")%>
 </head>
 
-<body class="w-100 h-auto">
+<body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
-    <div class="w-100 h-auto p-5 text-center" id="content">
-        <i class="display-1 bi bi-gear"></i>
-        <h1 class="display-2 mt-1">Settings</h1>
-        <br>
-        <ul class="nav nav-tabs d-none d-md-flex text-center mb-4" id="myTab" role="tablist">
+        <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
+            <h2>Updates</h2>
             <hr>
-            <hr class="text-dark">
-            <li class="nav-item" role="presentation" style="margin-bottom: 1px;">
-                <button class="nav-link active pirepTab" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button"
-                    role="tab" aria-controls="update" aria-selected="true">Updater</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button"
-                    role="tab" aria-controls="custom" aria-selected="false">Customisation</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button"
-                    role="tab" aria-controls="logs" aria-selected="false">Logs</button>
-            </li>
-        </ul>
-        <ul class="nav nav-pills d-flex d-md-none text-center mb-4 border-bottom border-1 pb-1" id="myTab" role="tablist">
-            <hr>
-            <hr class="text-dark">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="update-tab" data-bs-toggle="tab" data-bs-target="#update" type="button"
-                    role="tab" aria-controls="update" aria-selected="true">Updater</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#custom" type="button" role="tab"
-                    aria-controls="custom" aria-selected="false">Customisation</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab"
-                    aria-controls="logs" aria-selected="false">Logs</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="update" role="tabpanel" aria-labelledby="update-tab">
-                <h2 class="display-3">Updater</h2>
-                <p><strong>Current Version: </strong>
-                    <%= cv %>
-                </p>
-                <br>
-                <button class="btn btn-primary mb-3" onclick="update()">
-                    Check for updates
-                </button>
-                <p id="updaterStatus"></p>
+            <span><strong>Current Version:</strong> <%= cv%></span>
+            <br><br>
+            <p id="statusTitle" class="fw-bold"></p>
+            <div class="form-control px-3 px-md-5 py-3 h-auto w-100" id="updateContainer">
+                <p class="fw-bold mt-2" id="statusStatus">Getting Updates, standby</p>
             </div>
-            <div class="tab-pane fade" id="custom" role="tabpanel" aria-labelledby="custom-tab">
-                <h2 class="display-3">Customisation</h2>
-                <p>To change some other settings, please visit the VANet site, and update them there, click reload config below, and the
-                    changes will be reflected.</p>
-                <form class="form-control w-100 px-5 py-3" method="POST" action="/admin/reqs/newData?t=s">
-                    <label>
-                        <strong>Background URL:</strong>
-                        <input type="url" name="bg" class="form-control mt-1" required placeholder="URL" value="<%= config.other.bg %>">
-                    </label>
-                    <br>
-                    <label class="mt-2">
-                        <strong>Rate Limiter Amounts:</strong>
-                        <input type="number" name="rates" class="form-control mt-1" required placeholder="Limits"
-                            value="<%= config.other.rates %>">
-                    </label>
-                    <br>
-                    <label class="mt-2">
-                        <strong>Navbar Color:</strong><br><br>
-                        <div class="p-2 rounded" id="colorPickerBG" style="background-color: rgb(252, 252, 252);">
-                        <input type="radio" class="btn-check" value="primary" name="navBarColor" id="primary-outlined" autocomplete="off" <% if(config.other.color[1] == "primary"){ %>checked<%}%>>
-                        <label class="btn btn-outline-primary" value="primary" for="primary-outlined">Blue</label>
+            <br>
+            <h2>Customisation</h2>
+            <hr>
 
-                        <input type="radio" class="btn-check" value="secondary" name="navBarColor" id="secondary-outlined" autocomplete="off" <% if(config.other.color[1] == "secondary"){ %>checked<%}%>>
-                        <label class="btn btn-outline-secondary" value="secondary" for="secondary-outlined">Grey</label>
-
-                        <input type="radio" class="btn-check" value="success" name="navBarColor" id="success-outlined" autocomplete="off" <% if(config.other.color[1] == "success"){ %>checked<%}%>>
-                        <label class="btn btn-outline-success" value="success" for="success-outlined">Green</label>
-                        
-                        <input type="radio" class="btn-check" value="danger" name="navBarColor" id="danger-outlined" autocomplete="off" <% if(config.other.color[1] == "danger"){ %>checked<%}%>>
-                        <label class="btn btn-outline-danger" value="danger" for="danger-outlined">Red</label>
-
-                        <input type="radio" class="btn-check" value="warning" name="navBarColor" id="warning-outlined" autocomplete="off" <% if(config.other.color[1] == "warning"){ %>checked<%}%>>
-                        <label class="btn btn-outline-warning" value="warning" for="warning-outlined">Yellow</label>
-
-                        <input type="radio" class="btn-check" value="info" name="navBarColor" id="info-outlined" autocomplete="off" <% if(config.other.color[1] == "info"){ %>checked<%}%>>
-                        <label class="btn btn-outline-info" value="info" for="info-outlined">Aqua</label>
-
-                        <input type="radio" class="btn-check" value="light" name="navBarColor" id="light-outlined" autocomplete="off" <% if(config.other.color[1] == "light"){ %>checked<%}%>>
-                        <label class="btn btn-outline-light" value="light" for="light-outlined">Light</label>
-
-                        <input type="radio" class="btn-check" value="dark" name="navBarColor" id="dark-outlined" autocomplete="off"  <% if(config.other.color[1] == "dark"){ %>checked<%}%>>
-                        <label class="btn btn-outline-dark" value="dark" for="dark-outlined">Dark</label>
-                            </div>
-                    </label>
-                    <br>
-                    <button class="btn btn-primary mt-2">Reload Config</button>
+            <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/accent" method="post">
+                    <h4>Accent Color</h4>
+                    <input type="radio" class="btn-check" name="accent" value="primary" id="primary" autocomplete="off">
+                    <label class="btn btn-primary my-2" for="primary">Blue</label>
+                    <input type="radio" class="btn-check" name="accent" value="secondary" id="secondary" autocomplete="off">
+                    <label class="btn btn-secondary my-2" for="secondary">Grey</label>
+                    <input type="radio" class="btn-check" name="accent" value="danger" id="danger" autocomplete="off">
+                    <label class="btn btn-danger my-2" for="danger">Red</label>
+                    <input type="radio" class="btn-check" name="accent" value="success" id="success" autocomplete="off">
+                    <label class="btn btn-success my-2" for="success">Green</label>
+                    <input type="radio" class="btn-check" name="accent" value="warning" id="warning" autocomplete="off">
+                    <label class="btn btn-warning my-2" for="warning">Yellow</label>
+                    <input type="radio" class="btn-check" name="accent" value="light" id="light" autocomplete="off">
+                    <label class="btn btn-light my-2" for="light">White</label>
+                    <input type="radio" class="btn-check" name="accent" value="dark" id="dark" autocomplete="off">
+                    <label class="btn btn-dark my-2" for="dark">Dark</label>
+                    <br><br>
+                    <button class="btn btn-primary" type="submit">Submit new Color</button>
                 </form>
             </div>
-            <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab"><strong>Coming Soon</strong></div>
+            <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/bg" method="post">
+                <h4>Background URL</h4>
+                <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg%>"><br>
+                <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+            <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/rate" method="post">
+                <h4>Rate Limiter Amounts</h4>
+                <input class="form-control" type="number" name="value" value="<%= config.other.rates%>"><br>
+                <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+            <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/pirepPic" method="post">
+                    <h4>PIREP Pictures</h4>
+                    <p>Allow Pilots to submit pictures of their Flights</p>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.pirepPic == true){%>checked<%}%>>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Allow Pictures</label>
+                    </div>
+                    <br>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
+                    </div>
+                    <br>
+                    <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
+                    <hr>
+                    <label>Pireps will be removed <input step="any" type="number" class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
+                    <br><br>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+
         </div>
-        
-        
-    </div>
-    <%- include("./../components/dark.ejs")%>
-    <script>
-        function update(){
-            const data = null;
+        <%- include('./../components/footer.ejs') %>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-Mr`cW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script>
+            function isValidHttpUrl(string) {
+                    let url;
 
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
+                    try {
+                        url = new URL(string);
+                    } catch (_) {
+                        return false;
+                    }
 
-            xhr.addEventListener("readystatechange", function () {
-                console.log(this)
-                if (this.readyState === this.DONE) {
-                    if(this.status == 202){
-                        document.getElementById("updaterStatus").innerHTML = "Status: <span class='text-success'> An update was detected, installing now.</span> Please standby"
-                        setTimeout(() => {
-                            document.getElementById("updaterStatus").innerHTML = "Reloading. <span class='text-success'> The update has been installed. </span>"
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 2500);
-                        }, 10000);
-                    }else if(this.status == 204){
-                            document.getElementById("updaterStatus").innerHTML = "Status: <span class='text-secondary'>No update available.</span>"
-                            setTimeout(() => {
-                                document.getElementById("updaterStatus").innerHTML = ""
-                            }, 2500);
+                    return url.protocol === "http:" || url.protocol === "https:";
+                }
+            if(isValidHttpUrl(document.getElementById("fill1").value) == false){
+            document.getElementById("fill1").value = window.location.protocol + "//" + window.location.host + document.getElementById("fill1").value
+            }
+            const currentVersionFull = "<%= cv %>"
+            console.log(currentVersionFull);
+            const currentVersionNum = currentVersionFull.slice(0, -1);
+            const currentVersionBranchInd = currentVersionFull.charAt(currentVersionFull.length - 1);
+            const currentVersionBranch = currentVersionBranchInd == "B" ? "beta": (currentVersionBranchInd == "M" ? "master": null);
+
+            function getMissingVersions(){
+                //Get Versions
+                const data = null;
+
+                const xhr = new XMLHttpRequest();
+                xhr.withCredentials = false;
+
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === this.DONE) {
+                        const body = JSON.parse(this.responseText);
+                        console.log(body.branches);
+                        console.log(currentVersionBranch)
+                        const branchData = body.branches[currentVersionBranch];
+                        console.log(branchData)
+                        const releases = branchData.releases;
+                        let min = 0;
+                        Object.entries(releases).forEach(([key, value]) => {
+                            console.log(key)
+                            if(compareVersion(currentVersionNum, key) == -1){
+                                min ++;
+                                const container = document.createElement("div");
+                                const title = document.createElement("h3");
+                                const desc = document.createElement("p");
+
+                                container.className = "form-control p-3 w-100 my-2 shadow";
+                                
+                                title.innerHTML = value.title ? value.title : "Unknown Title"
+                                desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found` 
+
+                                container.appendChild(title);
+                                container.appendChild(desc);
+
+                                document.getElementById("updateContainer").appendChild(container);
+                            }
+                            
+                        })
+                        if(min == 0){
+                            document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
+                        }else{
+                            document.getElementById("statusStatus").remove()
+                            document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-primary' onclick='sendUpdate()'>Update</button>"
+                        }
+                    }
+                });
+
+                xhr.open("GET", "https://admin.va-center.com/updateFile");
+
+                xhr.send(data);
+            }
+            function compareVersion(a, b) {
+                    let x = a.split('.').map(e => parseInt(e));
+                    let y = b.split('.').map(e => parseInt(e));
+                    let z = "";
+
+                    for (i = 0; i < x.length; i++) {
+                        if (x[i] === y[i]) {
+                            z += "e";
+                        } else
+                            if (x[i] > y[i]) {
+                                z += "m";
+                            } else {
+                                z += "l";
+                            }
+                    }
+                    if (!z.match(/[l|m]/g)) {
+                        return 0;
+                    } else if (z.split('e').join('')[0] == "m") {
+                        return 1;
+                    } else {
+                        return -1;
                     }
                 }
-            });
+                getMissingVersions()
+            function sendUpdate() {
+                        swal({
+                            title: "Are you sure you want to update?",
+                            text: "This can take around 30 seconds, the server will be restarted.  (To confirm type: Yes)",
+                            content: "input",
+                            icon: "warning",
+                            button: {
+                                text: "Update",
+                                closeModal: false
+                            },
+                            dangerMode: true,
+                        }).then((willUpdate) => {
+                                if (willUpdate == "Yes") {
+                                    const data = null;
 
-            xhr.open("POST", `/update`);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                    const xhr = new XMLHttpRequest();
+                                    xhr.withCredentials = true;
 
-            xhr.send(data);
-            document.getElementById("updaterStatus").innerHTML = "Checking, please don't reload. <span class='text-muted'> this should take around 10 seconds </span>"
-            
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
-        crossorigin="anonymous"></script>
+                                    xhr.addEventListener("readystatechange", function () {
+                                        if (this.readyState === this.DONE) {
+                                            if(this.status == 202){
+                                                swal({
+                                                    title: "Success!",
+                                                    text: "Updated! Please standby. This should take 30 seconds, the window will then reload.",
+                                                    icon: "success",
+                                                    showConfirmButton: false,
+                                                    showCancelButton: false
+                                                });
+                                                setTimeout(() => {
+                                                    window.location.reload();
+                                                }, 30000);
+                                            }else{
+                                                swal({
+                                                    title: "Update Failed!",
+                                                    text: this.responseText,
+                                                    icon: "error",
+                                                    buttons: true
+                                                })
+                                            }
+                                            
+                                        }
+                                    });
+
+                                    xhr.open("POST", "/admin/settings/update");
+                                    xhr.send(data);
+                                    
+                                } else {
+                                    swal("Aborted update");
+                                }
+                            });
+                    }
+                
+        </script>
 </body>
 
 </html>

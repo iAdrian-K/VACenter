@@ -1,0 +1,178 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        New PIREP || <%= config.name %>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+    <%- include("./components/head.ejs")%>
+</head>
+
+<body class="w-100 bg-light-light h-auto">
+    <%- include("./components/nav.ejs")%>
+        <div class="w-100 content bg-light-light px-3 px-md-5 pt-3 mb-4" id="content">
+            <h2>New PIREP</h2>
+            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                File manual pirep
+            </button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">New PIREP</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/newPIREP" enctype="multipart/form-data">
+                                <% if(config.key&&!(user.VANetID)){%>
+                                    <p class="text-danger mb-3">Your account can not communicate with VANet servers. This PIREP will not be sent to VANet. Visit the account page to fix this.</p>    
+                                <%}%>
+                                <h2>Create new PIREP</h2>
+                                <br>
+                                <label for="myBrowser">Type to search for a route:</label>
+                                <input list="routes" id="route" name="route" class="mb-3 form-control" placeholder="Route">
+                                <datalist id="routes">
+                                    <% routes.forEach(route=>{%>
+                                        <% if((parseInt(route.minRank)) <= user.hours){%>
+                                            <option value="<%= config.code + route.num %>"></option>
+                                        <%}%>
+                                    <%})%>
+                                </datalist>
+                                <label class="form-label">Aircraft</label>
+                                <select class="form-select mb-3" name="aircraft">
+                                    <% craft.forEach(vic=>{%>
+                                        <option value="<%= vic.publicName%>">
+                                            <%= vic.publicName%>
+                                        </option>
+                                        <%})%>
+                                </select>
+                                <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
+                                <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
+                                    aria-label="Flight Time" name="ft">
+                                <label class="form-label">Operator</label>
+                                <select class="form-select mb-3" name="op">
+                                    <% ops.forEach(op=>{%>
+                                        <option value="<%= op.operator %>">
+                                            <%= op.operator%>
+                                        </option>
+                                        <%})%>
+                                </select>
+                                <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
+                                <input type="number" class="form-control mb-3" placeholder="Fuel used (kg)" required="" aria-label="Flight Time"
+                                    name="fuel">
+                                <label class="form-label">Departure Date</label>
+                                <input type="date" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Departure Date"
+                                    name="depT">
+                                <label class="form-label">Comments</label><br>
+                                <textarea class="form-control-plaintext border border-secondary rounded mb-3 p-2" name="comments"></textarea>
+                                <% if(config.other.pirepPic == true){%>
+                                    <label class="form-label">PIREP Pictures</label><br>
+                                    <input class="form-control mb-3" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
+                                <%}%>
+                                <button class="btn btn-primary">Create</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+            <h3>Automatic Pireps:</h3>
+            <p>You should choose a route before you start the flight, and begin a session, you can safely close the tab during your flight and reopen once at the destination.</p>
+            <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
+                <thead>
+                    <tr class="tr-class-2">
+                        <th data-field="route">Route</th>
+                        <th data-field="Departure-Airport">Departure Airport</th>
+                        <th data-field="Arrival-Airport">Arrival Airport</th>
+                        <th data-field="aircraft">Aircraft</th>
+                        <th data-field="Departure-Time">Departure Time (Recommended)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% slots.forEach(slot=>{%>
+                        <% if((slot.routeObj.minRank) <= user.hours){%>
+                                <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%> pirepClickable" data-title="<%=slot.routeObj.num%>" title="<%= slot.routeObj.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openSlot('<%=slot.id%>','<%= slot.routeObj.num%>')">
+                                <td id="td-id-<%=slot.id %>" class="td-class-<%=slot.id %>" data-title="<%= slot.routeObj.num%>">
+                                    <strong>
+                                        <%= (slot.routeObj.opObj ? (slot.routeObj.opObj.code ? slot.routeObj.opObj.code : config.code ) : config.code) %><%= slot.routeObj.num%>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= slot.routeObj.depICAO %>">
+                                    <%= slot.routeObj.depICAO %>
+                                </td>
+                                <td data-text="<%= slot.routeObj.arrICAO %>">
+                                    <%= slot.routeObj.arrICAO %>
+                                </td>
+                                <td data-text="<%= slot.routeObj.aircraftPublic %>">
+                                    <%= slot.routeObj.aircraftPublic %>
+                                </td>
+                                <td data-text="<%= slot.depTime %>">
+                                    <%= slot.depTime %>
+                                </td>
+                            </tr>        
+                        <%}%>
+                    <%})%>
+                </tbody>
+            </table>
+        </div>
+        <%- include('components/footer.ejs') %>
+        </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
+            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+        <script>
+            $('#mainTable').on('click-row.bs.table', function (row, el, field){
+                console.log(el)
+                openSlot(el._id.split("-")[2], el._data.title)
+            })
+            function openSlot(id, routeNumber){
+                if("<%= allowNSession.toString()%>" == "true"){
+                    swal({
+                        title: `Do you want to fly route: <%= config.code%>${routeNumber}?`,
+                        text: "You will be taken to a seperate screen to track progress on your flight.",
+                        icon: "warning",
+                        buttons: {
+                            cancel: "Cancel!",
+                            go: {
+                                text: "Go",
+                                value: true,
+                                dangerMode: true,
+                                closeModal: false
+                            }
+                        },
+                        dangerMode: 'go'
+                    }).then(acceptFlight => {
+                        if (acceptFlight) {
+                            window.location.href = `/newSlotUI?slot=${id}`
+                        }
+                    })
+                }else{
+                    swal({
+                        title: "Oh no!",
+                        text:"We can't start a new session due to Session <%= activeFlight.id%> already running. Either cancel it, or go to the home screen to resume it.",
+                        icon: 'error'
+                    })
+                }
+                
+            }
+        </script>
+        
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+@media only screen and (max-width: 1000px){
+    .loginContainer{
+        width: 80vw;
+    }
+}
+@media only screen and (max-width: 600px){
+    .loginContainer{
+        width: 100vw !important;
+        height: 100vh;
+        top: 0px !important;
+    }
+}

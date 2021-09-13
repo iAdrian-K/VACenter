@@ -8,28 +8,75 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/styles/scroll.css">
-    <link rel="stylesheet" href="assets/styles/main.css">
+    <%- include('components/head')%>
+    <link rel="stylesheet" href="public/styles/login.css">
+    <style>
+        body {
+            width: 100vw;
+            background-image: url('<%= config.other.bg %>');
+            background-size: cover;
+            background-position: center;
+            
+            height: auto;
+        }
+    
+        .loginContainer {
+            background-color: rgba(255, 255, 255, .5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin: 0;
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            -ms-transform: translate(-50%, 0%);
+            transform: translate(-50%, 0%);
+        }
+        @media only screen and (max-width:992px){
+            .loginContainer {
+                background-color: rgba(255, 255, 255, 0.95);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                margin: 0;
+                position: relative;
+                top: 0%;
+                left: 0%;
+                -ms-transform: none;
+                transform: none;
+                width: 100% !important;
+                height: auto;
+                min-height: 100vh !important;
+            }
+        }
+    </style>
 </head>
-
-<body class="text-center text-light py-5 h-auto"
-    style="background:linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://webcdn.infiniteflight.com/blog/content/images/2019/08/Facebook.jpg'); background-position: center; background-size: cover;">
-        <h1 class="mt-5">Report a bug!</h1>
-        <h2>We are sorry to hear that you had an issue with VACenter.</h2>
-        <p>It would be greatly valued if you could please report the error below with as much detail as possible, and a method to contact you.</p>
-        <form action="https://va-center.com/report" method="POST" class="mt-5 p-5 halfBgFullSm m-auto bg-dark" id="reportForm">
-            <h2>Title</h2>
-            <input class="form-control" required type="text" name="Title"><br><br>
-            <h3>Body</h3>
-            <textarea class="w-100 p-3" required name="Body"></textarea>
-            <p>Please join the VACenter <a href="https://www.discord.gg/9WkvBdwb8Y" target="_blank" class="text-warning">Discord Server</a> to send images.</p><br>
-            <h2>Contact</h2>
-            <h3>Name</h3>
-            <input required class="w-100 form-control" type="text" name="Name"><br><br>
-            <h3>Email</h3>
-            <input class="w-100 form-control" type="text" email" name="Email"><br><br>
-            <button required class="btn btn-primary">Submit Report</button>
-        </form>
+<body class="pt-1">
+    <div class="loginContainer w-50 h-auto mx-auto rounded" style="z-index: 1000">
+        <div class="p-5 pb-3 text-center text-dark h-auto w-100 h-100">
+            <h2><strong class="fw-bolder">Report a bug</strong></h2>
+            <p>This is the form to report a bug, for feature suggestions, please see the VACenter official <a
+                    href="https://discord.gg/5UAA4thShN" target="_blank" class="link-blurple"><i
+                        class="bi bi-discord"></i>
+                    Discord</a>.</p>
+            <form action="https://error.va-center.com/api/reportBug" method="POST" class="p-3 text-start h-auto">
+                <h2>Title</h2>
+                <input class="form-control mb-3 w-100 rounded" type="text" name="title">
+                <h2>Body</h2>
+                <textarea class="form-text mb-3 p-1 w-100 rounded" name="body" style="border-color: #ced4da;"></textarea>
+                <h2>Contact Methods</h2>
+                <textarea class="form-text mb-3 p-1 w-100 rounded" name="contact" placeholder="No format required."
+                    style="border-color: #ced4da;"></textarea>
+                <div class="w-100 text-center">
+                    <button class="btn btn-primary mx-auto text-center" disabled>Submit</button>
+                    <p class="text-muted">Due to internal upgrades, this feature is not available.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="mx-auto w-auto rounded-top loginContainer text-center p-2 d-none d-lg-block" style="position: absolute; bottom:0; top: auto; left: 50%;">
+        <strong>
+            <%= config.name%>
+        </strong>'s crew center is powered by VACenter (V<%= version%>)
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
         crossorigin="anonymous"></script>

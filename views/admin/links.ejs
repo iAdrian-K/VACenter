@@ -1,0 +1,103 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Admin || <%= config.name %>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <%- include("./../components/head.ejs")%>
+</head>
+
+<body class="w-100 bg-light-light h-auto">
+    <%- include("./../components/nav.ejs")%>
+        <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
+            <h2>Custom Links</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% links.forEach(link=>{%>
+                            <tr>
+                                <th scope="row">
+                                    <%= link.title %>
+                                </th>
+                                <td>
+                                    <%= link.url %>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="removeLink('<%=link.id%>')"><i class="bi bi-x-circle"></i></button>
+                                </td>
+                            </tr>
+                            <%})%>
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Create New</button>
+            <div class="modal fade hideScroll" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add Link</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/admin/links/new">
+                                <h2>Create New Link</h2>
+                                <br>
+                                <input type="text" class="form-control mb-3" placeholder="Link Title" required=""
+                                    aria-label="Title" name="title">
+                                <input type="url" class="form-control mb-3" placeholder="Link URL" required=""
+                                    aria-label="URL" name="url">
+                                <button class="btn btn-primary">Create</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include('./../components/footer.ejs') %>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+                crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
+                integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+            <script>
+                function removeLink(id) {
+                    const data = `id=${id}`;
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.addEventListener("readystatechange", function () {
+                        console.log(this)
+                        if (this.readyState === this.DONE) {
+                            console.log(this.responseText);
+                        }
+                    });
+                    xhr.open("POST", `/admin/links/rem`);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(data);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                }
+            </script>
+</body>
+
+</html>

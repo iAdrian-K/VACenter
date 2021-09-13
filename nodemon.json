@@ -4,6 +4,9 @@
         "views/*",
         "data/*",
         "public/*",
-        "config.json"
+        "config.json",
+        "server/stats.json",
+        "database.db",
+        "database.db-journal"
     ]
 }

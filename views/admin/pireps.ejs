@@ -5,187 +5,106 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        PIREPS || <%= config.name %>
+        Admin || <%= config.name %>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="/assets/styles/scroll.css">
-    <link rel="stylesheet" href="/assets/styles/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+    <style>
+        .swal-modal{
+            z-index: 1000;
+        }
+    </style>
+    <%- include("./../components/head.ejs")%>
 </head>
 
-<body class="w-100 h-auto">
+<body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
-    <div class="w-100 h-auto py-5 px-2 px-lg-5 text-center" id="content">
-        <i class="display-1 bi bi-file-earmark-plus"></i>
-        <h1 class="display-2 mt-1">PIREPS</h1>
-        <br>
-        <ul class="nav nav-tabs d-none d-md-flex border-bottom border-light text-center mb-4" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab active" id="pirep-tab" data-bs-toggle="tab" data-bs-target="#pirep" type="button"
-                    role="tab" aria-controls="pirep" aria-selected="true">Filed PIREPS</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab" id="aircraft-tab" data-bs-toggle="tab" data-bs-target="#aircraft" type="button" role="tab"
-                    aria-controls="aircraft" aria-selected="false">Aircraft</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab" id="airlines-tab" data-bs-toggle="tab" data-bs-target="#airlines" type="button" role="tab"
-                    aria-controls="airlines" aria-selected="false">Codeshare</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab"
-                    aria-controls="routes" aria-selected="false">Routes</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link pirepTab" id="ranks-tab" data-bs-toggle="tab" data-bs-target="#ranks" type="button" role="tab"
-                    aria-controls="ranks" aria-selected="false">Ranks</button>
-            </li>
-        </ul>
-        <ul class="nav nav-pills d-flex d-md-none text-center mb-4 border-bottom border-1 pb-1" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pirep-tab" data-bs-toggle="tab" data-bs-target="#pirep" type="button"
-                    role="tab" aria-controls="pirep" aria-selected="true">Filed PIREPS</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="aircraft-tab" data-bs-toggle="tab" data-bs-target="#aircraft" type="button"
-                    role="tab" aria-controls="aircraft" aria-selected="false">Aircraft</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="airlines-tab" data-bs-toggle="tab" data-bs-target="#airlines" type="button"
-                    role="tab" aria-controls="airlines" aria-selected="false">Codeshare</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab"
-                    aria-controls="routes" aria-selected="false">Routes</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="ranks-tab" data-bs-toggle="tab" data-bs-target="#ranks" type="button"
-                    role="tab" aria-controls="ranks" aria-selected="false">Ranks</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="pirep" role="tabpanel" aria-labelledby="pirep-tab">
-                <h2>Current PIREPS</h2>
-                <br>
-                <div class="table-responsive" id="PIREPTable">
-                    <table class="table table-striped text-center">
-                        <thead>
-                            <tr>
-                                <th scope="col">Pilot</th>
-                                <th scope="col">Aircraft</th>
-                                <th scope="col">Airline</th>
-                                <th scope="col">Route</th>
-                                <th scope="col">Departure Date</th>
-                                <th scope="col">Fuel Used</th>
-                                <th scope="col">Flight Time</th>
-                                <th scope="col">Comments</th>
-                                <th scope="col">Actions </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% pireps.forEach(pirep=>{ %>
-                                <tr 
-                                    class="pirepRow <% if(pirep.status == 'a'){%>bg-success text-light<%}%> <%if(pirep.status == 'd'){%> bg-danger text-light<%}%>">
-                                    <td>
-                                        <%= pirep.pilot.name %>
-                                    </td>
-                                    <td>
-                                        <%= pirep.vehiclePublic %>
-                                    </td>
-                                    <td>
-                                        <%= pirep.airline %>
-                                    </td>
-                                    <td>
-                                        <%= pirep.route %>
-                                    </td>
-                                    <td>
-                                        <%- new Date(pirep.departureT).toLocaleDateString() %>
-                                    </td>
-                                    <td>
-                                        <%= pirep.fuel %>kg
-                                    </td>
-                                    <td>
-                                        <%= pirep.flightTime %>
-                                    </td>
-                                    <td>
-                                        <p style="max-width: 500px; width:auto; word-wrap: break-word">
-                                            <%= pirep.comments %>
-                                        </p>
-                                    </td>
-                                    <td>
-                                        <% if(pirep.status=="n" ){%>
-                                            <button class="btn btn-success my-1" onclick="aprPirep('<%= pirep.id %>')"><i
-                                                    class="bi bi-check-circle"></i></button>
-                                            <button class="btn btn-danger my-1" onclick="remPirep('<%= pirep.id %>')"><i
-                                                    class="bi bi-x-circle"></i></button>
-                                            </p>
-                                            <%}else{%>
-                                                <p>Already Actioned</p>
-                                                <%}%>
-                                    </td>
-                                </tr>
-                                <%})%>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="aircraft" role="tabpanel" aria-labelledby="aircraft-tab">
-                <h2>Current Aircraft</h2>
-                <br>
-                <div class="table-responsive">
-                    <table class="table table-striped text-center">
-                        <thead>
-                            <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Actions </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% craft.forEach(vehicle=>{%>
-                                <tr class="pirepRow">
-                                    <td scope="row">
-                                        <%= vehicle.publicName %>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-danger" onclick="remData('c', '<%= vehicle.livId %>')"><i
-                                                class="bi bi-x-circle"></i></button>
-                                    </td>
-                                </tr>
-                                <%})%>
-                
-                
-                        </tbody>
-                    </table>
-                </div>
-                <br>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Add Aircraft
-                </button>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
+            <h2>PIREPS</h2>
+            <p class="text-muted">Click a PIREP to see more.</p>
+            <table data-toggle="table" data-search="true" data-show-columns="true">
+                <thead>
+                    <tr class="tr-class-2">
+                        <th data-field="route">Route</th>
+                        <th data-field="pilot">Pilot</th>
+                        <th data-field="aircraft">Aircraft</th>
+                        <th data-field="status">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pireps.forEach(pirep =>{%>
+                        <tr id="tr-id-<%=pirep.id%>" class="tr-class-<%=pirep.id%>" data-title="<%=pirep.route%>" data-object='{"key": "value"}' style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
+                            <td id="td-id-<%=pirep.id %>" class="td-class-<%=pirep.id %>" data-title="<%=pirep.route%>">
+                                <strong><%= pirep.route%></strong>
+                            </td>
+                            <td data-text="<%= pirep.author%>"><%= config.code%><%= pirep.author%></td>
+                            <td data-text="<%= pirep.vehiclePublic%>"><%= pirep.vehiclePublic%></td>
+                            <td data-text="<% if(pirep.status == "a"){%>Approved<%}else if(pirep.status =="d"){%>Denied<%}else{%>Awaiting<%}%>">                                
+                                <% if(pirep.status=="a" ){%><span class="text-success">Approved</span>
+                                <%}else if(pirep.status=="d" ){%><span class="text-danger">Denied</span>
+                                    <%}else{%>Awaiting<%}%>
+                            </td>
+                        </tr>
+                    <%})%>
+                </tbody>
+            </table>
+            <br>
+            <% pireps.forEach(pirep=>{%>
+                <div class="modal fade" id="modal-<%=pirep.id%>" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add Aircraft</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">PIREP <%= pirep.route%></h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/reqs/newData?t=c">
-                                    <label class="form-label">Aircraft
-                                        <select class="form-select" id="newAirAirSel" name="airID" onchange="loadAircraftLivData()">
-                                            <% listAircraft.forEach(obj=>{%>
-                                                <option value='<%=obj.id%>'>
-                                                    <%= obj.name %>
-                                                </option>
-                                                <%})%>
-                                        </select>
-                                    </label><br>
-                                    <label class="form-label">Livery
-                                        <select class="form-select" id="newAirLivSel" name="livID">
-                                            <option value="">Waiting Selection</option>
-                                        </select>
-                                    </label><br>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                <div class="form-control mb-3">
+                                    <h2>PIREP <%= pirep.route%></h2>
+                                    <h5>Author: <%= config.code + Buffer.from(pirep.author, 'base64' ).toString() %></h5>
+                                    <hr>
+                                    <p>
+                                        <strong><i class="fa fa-plane"></i> Plane: </strong><%= pirep.vehiclePublic %><br>
+                                        <strong><i class="bi bi-shop"></i> Operator: </strong><%= pirep.airline %><br>
+                                        <strong><i class="fa fa-plane-departure"></i> Departure ICAO: </strong><%= pirep.depICAO %><br>
+                                        <strong><i class="fa fa-plane-arrival"></i> Arrival ICAO: </strong><%= pirep.arrICAO %><br>
+                                        <strong><i class="bi bi-chevron-up"></i> Route: </strong><%= pirep.route %><br>
+                                        <strong><i class="bi bi-calendar-date"></i> Departure Date: </strong><%= new Date(pirep.filed).toLocaleDateString() %><br>
+                                        <strong><i class="bi bi-clock"></i> Flight Time: </strong><%= (pirep.flightTime / 60).toFixed(2) %> (<%= pirep.flightTime %> mins)<br>
+                                        <strong><i class="bi bi-droplet-half"></i> Fuel: </strong><%= pirep.fuel %>kg<br>
+                                        <strong><i class="bi bi-text-left"></i> Comments: </strong><br>
+                                        <p class="form-control p-2">
+                                            <%= pirep.comments %><br>
+                                        </p>
+                                        <% if(config.other.pirepPic == true){%>
+                                            
+                                            <strong><i class="bi bi-image"></i> Image: </strong><br><br>
+                                            <div class="w-100 text-center">
+                                            <% if(pirep.pirepImg == "REMOVED"){%>  
+                                                <p class="fw-bold">Image Removed in accorance to the image removal policy set in settings.</p>
+                                            <%}else{%>
+                                                <img src='<%= pirep.pirepImg%>.webp' style="width: 75%;" class="rounded mx-auto text-center">
+                                            <%}%>
+                                            
+                                            </div>
+                                        <%}%>
+                                        
+                                    </p>
+                                </div>
+                                <% if(pirep.status == "n"){%>
+                                    <button type="button" class="btn btn-success" onclick="appPirep('<%= pirep.id%>')">Accept</button>
+                                    <button type="button" class="btn btn-danger" onclick="remPirep('<%= pirep.id%>')">Deny</button>
+                                <%}else if(pirep.status =="d"){%>
+                                    <button type="button" class="btn btn-danger" disabled>Already Actioned (Denied)</button>
+                                    <br><br>
+                                    <h5>Reject Reason:</h5>
+                                    <p><%= pirep.rejectReason%></p>
+                                <%}else if(pirep.status =="a"){%>
+                                    <button type="button" class="btn btn-success" disabled>Already Actioned (Accepted)</button>
+                                <%}else{%>            
+                                    <button type="button" class="btn btn-dark" disabled>Already Actioned (Unknown)</button>
+                                    <%}%>
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -194,232 +113,75 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="tab-pane fade" id="airlines" role="tabpanel" aria-labelledby="airlines-tab">
-                <h2>Current Codeshare</h2>
-                <br>
-                <table class="table table-striped text-center">
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Actions </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% ops.forEach(airline=>{%>
-                            <tr class="pirepRow">
-                                <td scope="row">
-                                    <%= airline.name %>
-                                </td>
-                                <td>
-                                    <button class="btn <%if(airline.id != 'MAIN'){%> btn-danger"
-                                        onclick="remData('a', '<%= airline.id %>')">
-                                        <%}else{%> btn-secondary" style="cursor: not-allowed"><%}%><i class="bi bi-x-circle"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <%})%>
-                
-                
-                    </tbody>
-                </table>
-                <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=a">
-                    <h2>New Codeshare</h2>
-                    <input type="text" class="form-control" name="airName" placeholder="Name: EG ('CODESHARE: Alitalia Virtual')">
-                    <br>
-                    <button class="btn btn-primary">Add</button>
-                </form>
-            </div>
-            <div class="tab-pane fade" id="routes" role="tabpanel" aria-labelledby="routes-tab">
-                <h2>Current Routes</h2>
-                <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=r">
-                    <h2>New Route</h2>
-                    <input type="text" class="form-control" name="routeName" placeholder="Name: EG ('<%= config.code %>0001')">
-                    <br>
-                    <button class="btn btn-primary">Add</button>
-                </form>
-                <br>
-                <table class="table table-striped text-center" id="RoutesTable">
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Actions </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% routes.forEach(route=>{%>
-                            <tr class="pirepRow">
-                                <td scope="row">
-                                    <%= route.name %>
-                                </td>
-                                <td>
-                                    <button class="btn btn-danger" onclick="remData('r', '<%= route.id %>')"><i
-                                            class="bi bi-x-circle"></i></button>
-                                </td>
-                            </tr>
-                            <%})%>
-                
-                
-                    </tbody>
-                </table>
-            </div>
-            <div class="tab-pane fade" id="ranks" role="tabpanel" aria-labelledby="ranks-tab">
-                <h2>Current Ranks</h2>
-                <br>
-                <form class="halfBgFullSm mx-auto h-auto" method="POST" action="/admin/reqs/newData?t=ra">
-                    <h2>New Rank</h2>
-                    <label class="form-label mb-3">
-                    <strong>Name:</strong>
-                    <input type="text" class="form-control" name="name" placeholder="Cadet">
-                    </label>
-                    <label class="form-label mb-3">
-                    <strong>Minimum Hours:</strong>
-                    <input type="number" class="form-control" name="min" placeholder="0">
-                    </label>
-                    <br>
-                    <button class="btn btn-primary">Add</button>
-                </form>
-                <br>
-                <table class="table table-striped text-center" id="RanksTable">
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Min Hours</th>
-                            <th scope="col">Actions </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% ranks.forEach(rank=>{%>
-                            <tr class="pirepRow">
-                                <td scope="row">
-                                    <%= rank.name %>
-                                </td>
-                                <td>
-                                    <%= rank.minH %>
-                                </td>
-                                <td>
-                                    <button class="btn btn-danger" onclick="remData('ra', '<%= rank.name %>')"><i
-                                            class="bi bi-x-circle"></i></button>
-                                </td>
-                            </tr>
-                            <%})%>
-            
-            
-                    </tbody>
-                </table>
-            </div>
+            <%})%>
         </div>
-        </div>
+        <%- include('./../components/footer.ejs') %>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         
-    </div>
-    <%- include("./../components/dark.ejs")%>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
-        crossorigin="anonymous"></script>
-    <script>
-        const times = Array.from(document.getElementsByClassName('loadInBTZ'));
-            times.forEach(timeEl => {
-                const time = new Date(timeEl.innerHTML)
-                timeEl.innerHTML = time.toString();
-            })
-        function remData(type, id){
-            const data = `id=${id}`;
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function () {
-                console.log(this)
-                if (this.readyState === this.DONE) {
-                    console.log(this.responseText);
-                }
-            });
-
-            xhr.open("DELETE", `/admin/reqs/remData?t=${type}`);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            xhr.send(data);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        }
-
-        function aprPirep(id){
-            const data = `id=${id}`;
-
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function () {
-                console.log(this)
-                if (this.readyState === this.DONE) {
-                    console.log(this.responseText);
-                }
-            });
-
-            xhr.open("POST", `/admin/reqs/newData?t=p`);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            xhr.send(data);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        }
-        function remPirep(id) {
-                const data = `id=${id}`;
-
-                const xhr = new XMLHttpRequest();
-                xhr.withCredentials = true;
-
-                xhr.addEventListener("readystatechange", function () {
-                    console.log(this)
-                    if (this.readyState === this.DONE) {
-                        console.log(this.responseText);
-                    }
-                });
-
-                xhr.open("DELETE", `/admin/reqs/remData?t=p`);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                xhr.send(data);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            }
-            function loadAircraftLivData(){
-                const airID = document.getElementById("newAirAirSel").value;
-                document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
-                const data = null;
-
-                const xhr = new XMLHttpRequest();
-
-                xhr.addEventListener("readystatechange", function () {
-                    if (this.readyState === this.DONE) {
+            <script>
+                function appPirep(id) {
+                    const data = `id=${id}`;
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = true;
+                    xhr.addEventListener("readystatechange", function () {
                         console.log(this)
-                        if(this.status == 200){
-                            const data = JSON.parse(this.responseText).result;
-                            document.getElementById("newAirLivSel").innerHTML = "";
-                            data.forEach(liv=>{
-                                const el = document.createElement("option")
-                                el.value = liv.liveryID;
-                                el.innerHTML = liv.liveryName;
-                                document.getElementById("newAirLivSel").appendChild(el)
-                            })
-                        } else {
-                            alert(this.status)
+                        if (this.readyState === this.DONE) {
+                            console.log(this.responseText);
                         }
-                    }
-                });
-
-                xhr.open("GET", `/getLivData?liv=${airID}`);
-
-                xhr.send(data);
-            }
-            loadAircraftLivData()
-    </script>
-    
+                    });
+                    xhr.open("POST", `/admin/pireps/apr`);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.send(data);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                }
+                function remPirep(id) {
+                    swal({
+                        title: "Rejection Reason",
+                        text: "Please provide a rejection reason to the pilot.",
+                        content: {
+                            element: "input",
+                            attributes: {
+                                placeholder: "Rejection Reason",
+                                type: "text",
+                            },
+                        },
+                        icon: "info",
+                        button: {
+                            text: "Reject",
+                            closeModal: false
+                        },
+                        dangerMode: true,
+                    }).then((reason) => {
+                        if (reason) {
+                            const data = `id=${id}&rejectReason=${window.btoa(reason)}`;
+                            const xhr = new XMLHttpRequest();
+                            xhr.withCredentials = true;
+                            xhr.addEventListener("readystatechange", function () {
+                                console.log(this)
+                                if (this.readyState === this.DONE) {
+                                    console.log(this.responseText);
+                                }
+                            });
+                            xhr.open("POST", `/admin/pireps/den`);
+                            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            xhr.send(data);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        }else{
+                            swal("Error", "No Reject Reason was provided.", "error");        
+                        }
+                    })
+                }
+            </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 </body>
 
 </html>
