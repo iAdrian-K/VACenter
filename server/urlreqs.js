@@ -1,6 +1,17 @@
 //@ts-check
 
 const request = require("request");
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+
+//Sentry
+Sentry.init({
+    dsn: "https://6d767a62451e42bea695a23f8f9bf6d7@o999289.ingest.sentry.io/5958189",
+
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+});
 
 /**@module Requests */
 
@@ -46,9 +57,9 @@ function JSONReq(method, url, headers, query, data){
             body: data,
             json: true
         };
-        request(options, function(error, response, body){
-            if(error) throw new Error(error);
-            resolve([error, response, body]);
+        request(options, function(err, response, body){
+            if(err) throw Sentry.captureException(err);
+            resolve([err, response, body]);
         })
     })
 }
@@ -71,9 +82,9 @@ function URLReq(method, url, headers, query, data) {
             qs: query,
             form: data,
         };
-        request(options, function (error, response, body) {
-            if (error) throw new Error(error);
-            resolve([error, response, body]);
+        request(options, function (err, response, body) {
+            if (err) throw Sentry.captureException(err);
+            resolve([err, response, body]);
         })
     })
 }

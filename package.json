@@ -22,6 +22,9 @@
   "author": "Sam Neale",
   "license": "ISC",
   "dependencies": {
+    "@mapbox/node-pre-gyp": "github:mapbox/node-pre-gyp",
+    "@sentry/node": "^6.12.0",
+    "@sentry/tracing": "^6.12.0",
     "atob": "^2.1.2",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",

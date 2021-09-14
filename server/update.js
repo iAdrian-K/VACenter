@@ -2,7 +2,17 @@
 
 const fs = require('fs');
 const request = require("request");
-const sqlite3 = require('sqlite3').verbose();
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+
+//Sentry
+Sentry.init({
+    dsn: "https://6d767a62451e42bea695a23f8f9bf6d7@o999289.ingest.sentry.io/5958189",
+
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+});
 
 const { JSONReq, URLReq, MethodValues } = require("./urlreqs")
 const {
@@ -33,29 +43,6 @@ function dynamicSort(property) {
         var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
     }
-}
-
-
-function newError(error, title) {
-    const requestSPECIAL = require('request');
-    // @ts-ignore
-    let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../config.json")))
-    let errorB;
-    if (error instanceof Error) {
-        errorB = error.toString()
-    } else if (typeof error == "object") {
-        errorB = JSON.stringify(error)
-    } else {
-        errorB = error;
-    }
-    const options2 = {
-        method: 'POST',
-        url: 'https://error.va-center.com/api/reportBug',
-        form: { title: title ? title : "AUTO - ERROR - " + config.name, body: errorB, contact: JSON.stringify(config) }
-    };
-
-    request(options2, function (error2, response2, body2) {
-    })
 }
 
 /**
@@ -278,11 +265,12 @@ function update(){
                     const options = {
                         method: 'POST',
                         url: 'https://admin.va-center.com/stats/instances/update',
+                        // @ts-ignore
                         form: { id: require("./../config.json").other.ident, version: `${order[order.length - 1].num}${addition}` }
                     };
-                    request(options, function (error, response, body) {
-                        if (error) {
-                            newError(error, `${require("./../config.json").code} - updateError`)
+                    request(options, function (err, response, body) {
+                        if (err) {
+                            Sentry.captureException(err);
                             clearInterval(updateFinChecker)
                         }
                         if (response.statusCode == 200) {
@@ -298,7 +286,7 @@ function update(){
                             })
                         } else {
                             clearInterval(updateFinChecker)
-                            newError([response.statusCode, response.body], `${require("./../config.json").code} - updateError`)
+                            Sentry.captureException(err);
                             console.error([response.statusCode, response.body])
                         }
                     })

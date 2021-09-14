@@ -16,6 +16,17 @@ const OS = require('os');
 require('dotenv').config()
 const tinify = require("tinify");
 tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+
+//Sentry
+Sentry.init({
+    dsn: "https://6d767a62451e42bea695a23f8f9bf6d7@o999289.ingest.sentry.io/5958189",
+
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+});
 
 //Storage
 let store = [];
@@ -596,7 +607,9 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                 const route = await GetRoute(session.route);
                 if (req.file && req.body.fuel) {
                     fs.readFile(req.file.path, function (err, sourceData) {
+                        Sentry.captureException(err);
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                            Sentry.captureException(err);
                             fs.unlinkSync(`${req.file.path}`);
                             req.file.path = req.file.path + ".webp";
                             fs.writeFileSync(`${req.file.path}`, resultData);
@@ -1195,7 +1208,9 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                 if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
                     if(req.file){
                     fs.readFile(req.file.path, function (err, sourceData) {
+                        Sentry.captureException(err);
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                            Sentry.captureException(err);
                             fs.unlinkSync(`${req.file.path}`);
                             req.file.path = req.file.path + ".webp";
                             fs.writeFileSync(`${req.file.path}`, resultData);
@@ -1517,6 +1532,7 @@ app.post("/admin/users/new", async function (req, res) {
                             pilotID = (await getVANetUser(req.body.IFC));
                         }
                     }catch(err) {
+                        Sentry.captureException(err);
                         res.status(500).send(sanitizer.sanitize(err));
                     }
                     let vanetid = {
@@ -1656,6 +1672,7 @@ app.post("/users/linkVANet", async function (req, res){
                 await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked,pilotID);
                 res.redirect("/");
             }catch(err){
+                Sentry.captureException(err);
                 res.redirect("/account");
             }
         }else{
