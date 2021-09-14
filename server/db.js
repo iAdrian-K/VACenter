@@ -8,10 +8,11 @@ const bcrypt = require('bcrypt');
 const chalk = require('chalk');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
+require('dotenv').config()
 
 //Sentry
 Sentry.init({
-    dsn: "https://6d767a62451e42bea695a23f8f9bf6d7@o999289.ingest.sentry.io/5958189",
+    dsn: "process.env.SENTRY",
 
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
