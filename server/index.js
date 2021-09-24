@@ -18,14 +18,12 @@ const tinify = require("tinify");
 tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
-
 //Sentry
 Sentry.init({
-    dsn: "process.env.SENTRY",
-
+    dsn: `${process.env.SENTRY}`,
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.5,
 });
 
 //Storage
