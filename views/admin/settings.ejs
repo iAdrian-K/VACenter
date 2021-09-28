@@ -66,9 +66,9 @@
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/pirepPic" method="post">
                     <h4>PIREP Pictures</h4>
-                    <p>Allow Pilots to submit pictures of their Flights</p>
+                    <p>Allow Pilots to submit pictures of their Flights. <% if(hosting){%><span class="text-muted">This feature is disabled since you are on VACenter Standard Plan.</span><%}%></p>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.pirepPic == true){%>checked<%}%>>
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.pirepPic == true){%>checked<%}%> <% if(hosting){%>disabled<%}%>>
                         <label class="form-check-label" for="flexSwitchCheckDefault">Allow Pictures</label>
                     </div>
                     <br>
@@ -80,7 +80,7 @@
                     <hr>
                     <label>Pireps will be removed <input step="any" type="number" class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
                     <br><br>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-primary">Update</button>
                 </form>
             </div>
 

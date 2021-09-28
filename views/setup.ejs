@@ -96,6 +96,9 @@
             </h1>
             <h2><strong class="fw-bolder">PIREP Images</strong></h2>
             <p>Do you want your Pilots to be able to submit pictures of their flights?</p>
+            <% if(hosting){%>
+                <p class="text-muted">This feature is disabled since you are running on VACenter Hosting.</p>
+            <%}%>
             <div class="form-check form-switch text-center">
                 <label class="form-check-label" for="flexSwitchCheckDefault">
                     <input class="form-check-input text-center" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(hosting){%>disabled<%}%>>

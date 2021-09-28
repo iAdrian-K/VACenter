@@ -1145,7 +1145,7 @@ app.post('/setupNVN', async (req, res) => {
                 rates: 100,
                 navColor: ["dark", "dark"],
                 ident: makeid(25),
-                pirepPic: data.pirepPictures,
+                pirepPic: hosting? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
@@ -1763,7 +1763,7 @@ app.post("/admin/settings/pirepPic", async function (req, res) {
         if (user.admin == true) {
             if(req.body.imgExpireDays){
                 const newConfig = getConfig();
-                newConfig.other.pirepPic = req.body.state == "on" ? true: false;
+                newConfig.other.pirepPic = hosting ? false : (req.body.state == "on" ? true: false);
                 newConfig.other.pirepPicExpire = ((((parseFloat(req.body.imgExpireDays) * 24) * 60) * 60) * 1000);
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
                 setTimeout(() => {
