@@ -6,29 +6,17 @@ const path = require('path');
 const request = require('request');
 const bcrypt = require('bcrypt');
 const chalk = require('chalk');
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+require('dotenv').config()
 
-function newError(error, title) {
-    const requestSPECIAL = require('request');
-    // @ts-ignore
-    let config = JSON.parse(fs.readFileSync(path.join(__dirname, "/../config.json")))
-    let errorB;
-    if(error instanceof Error){
-        errorB = error.toString()
-    }else if(typeof error == "object"){
-        errorB = JSON.stringify(error)
-    }else{
-        errorB = error;
-    }
-    const options2 = {
-        method: 'POST',
-        url: 'https://error.va-center.com/api/reportBug',
-        form: { title: title ? title : "AUTO - ERROR - " + config.name, body: errorB, contact: JSON.stringify(config) }
-    };
-
-    request(options2, function (error2, response2, body2) {
-        console.log(chalk.red("NEW REPORT"));
-    })
-}
+//Sentry
+/* Sentry.init({
+    dsn: "https://473725d276b441ea867cdde3d17b868b@o996992.ingest.sentry.io/5955471",
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 0.5,
+}); */
 
 /**
  * @typedef {import('./types.js').user} user
@@ -53,7 +41,7 @@ const sqlite3 = require('sqlite3').verbose();
 //Database
 let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
-        newError(err.message, "Error accessing database (REF:DB01)")
+        Sentry.captureException(err);
     }
     console.log(chalk.blue('Connected to the database.'));
 });
@@ -69,7 +57,7 @@ let db = new sqlite3.Database('./database.db', (err) => {
         db.serialize(() => {
             db.get(`SELECT * FROM aircrafts WHERE livID = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error getting aircraft data (REF:DB02)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -86,7 +74,7 @@ function GetAircrafts() {
         db.serialize(() => {
             db.all(`SELECT * FROM aircrafts`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all aircraft data (REF:DB03)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -108,7 +96,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
         db.run(`INSERT INTO aircrafts(livID, airID, livName, airName, publicName) 
                 VALUES(?, ?, ?, ?, ?)`, [livID, airID, livName, airName, publicName], function (err) {
             if (err) {
-                newError(err.message, "Error creating new aircraft (REF:DB04)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -127,7 +115,7 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
         db.serialize(() => {
             db.run(`DELETE FROM aircrafts WHERE livID = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting aircraft (REF:DB05)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -149,12 +137,13 @@ function CreateAircraft(livID, airID, livName, airName, publicName) {
         db.serialize(() => {
             db.get(`SELECT * FROM events WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing event data (REF:DB06)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     var eventsRow = row;
                     eventsRow.gates = [];
                     db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [id], (err, row) => {
+                        Sentry.captureException(err);
                         eventsRow.gates.push(row);
                     }, function() {
                         resolve(eventsRow);
@@ -174,7 +163,7 @@ function GetEvents() {
         db.serialize(() => {
             db.all(`SELECT * FROM events`, (err, events) => {
                 if (err) {
-                    newError(err.message, "Error accessing all event data (REF:DB07)")
+                    Sentry.captureException(err);
                 } else {
                     if (events.length == 0) {
                         resolve([])
@@ -184,6 +173,7 @@ function GetEvents() {
                             event.gates = [];
                             let gatesProcessed = 0;
                             db.each(`SELECT gate, taken FROM gates WHERE eventID = ?`, [event.id], (err, gate) => {
+                                Sentry.captureException(err);
                                 event.gates.push(gate)
                             }, function() {
                                 eventsProcessed ++;
@@ -216,16 +206,14 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         db.run(`INSERT INTO events(title, body, arrAir, depAir, depTime, air, airName, server) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [title, body, arrAir, depAir, depTime, air, airName, server], function (err) {
             if (err) {
-                newError(err.message, "Error creating event (REF:DB08)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 var createdEvent = this.lastID;
                 gates.forEach(gate => {
                     db.run(`INSERT INTO gates(eventID, gate, taken) 
                             VALUES(?, ?, 0)`, [createdEvent, gate], function (err) {
-                        if (err) {
-                            newError(err.message, "Error creating event's gate (REF:DB09)")
-                        }
+                        Sentry.captureException(err);
                     });
                 })
                 resolve(true);
@@ -244,7 +232,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         db.serialize(() => {
             db.run(`DELETE FROM events WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting event (REF:DB10)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -266,7 +254,7 @@ function CreateEvent(title, body, arrAir, depAir, depTime, air, airName, server,
         db.serialize(() => {
             db.get(`SELECT * FROM pireps WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing PIREP data (REF:DB11)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -284,7 +272,7 @@ function GetPireps() {
         db.serialize(() => {
             db.all(`SELECT * FROM pireps`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all PIREP data (REF:DB12)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -302,7 +290,7 @@ function GetPireps() {
         db.serialize(() => {
             db.all(`SELECT * FROM pireps WHERE author = ?`, [user], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all PIREP data for a user (REF:DB13)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -333,7 +321,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
         db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, pirepImg)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null, (img ? img : null)], function (err) {
             if (err) {
-                newError(err.message, "Error creating PIREP (REF:DB14)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -379,7 +367,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
                 pirepImg = ?
                 WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, (img?img:null), id], function (err) {
             if (err) {
-                newError(err.message, "Error updating PIREP (REF:DB15)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -400,7 +388,7 @@ function GetToken(token) {
         db.serialize(() => {
             db.get(`SELECT * FROM tokens WHERE token = ?`, [token], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing token data (REF:DB16)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -419,7 +407,7 @@ function CreateToken(token, user) {
         db.run(`INSERT INTO tokens (token, user) 
                 VALUES(?, ?)`, [token, user], function (err) {
             if (err) {
-                newError(err.message, "Error creating token (REF:DB17)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -438,7 +426,7 @@ function CreateToken(token, user) {
         db.serialize(() => {
             db.run(`DELETE FROM tokens WHERE user = ?`, [username], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting user's token (REF:DB18)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -460,7 +448,7 @@ function GetUser(username) {
         db.serialize(() => {
             db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing user data (REF:DB19)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -478,7 +466,7 @@ function GetUsers() {
         db.serialize(() => {
             db.all(`SELECT * FROM users`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all user data (REF:DB20)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -507,7 +495,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.run(`INSERT INTO users(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) 
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, "https://icons.getbootstrap.com/assets/icons/person-circle.svg", hours, created, llogin, cp, revoked, VANetID], function (err) {
             if (err) {
-                newError(err.message, "Error creating user (REF:DB21)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -547,7 +535,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
                 VANetID = ? 
                 WHERE username = ?`, [rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, username], function (err) {
             if (err) {
-                newError(err.message, "Error updating user (REF:DB22)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -566,7 +554,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.serialize(() => {
             db.all(`DELETE FROM users WHERE username = ?`, [username], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all user data (REF:DB23)")
+                    Sentry.captureException(err);
                     resolve(false);
                 } else {
                     resolve(true);
@@ -587,7 +575,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
         db.serialize(() => {
             db.get(`SELECT * FROM operators WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing operator data (REF:DB24)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -605,7 +593,7 @@ function GetOperators() {
         db.serialize(() => {
             db.all(`SELECT * FROM operators`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all operator data (REF:DB25)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -624,7 +612,7 @@ function CreateOperator(operator) {
         db.run(`INSERT INTO operators(operator) 
                 VALUES(?)`, [operator], function (err) {
             if (err) {
-                newError(err.message, "Error creating operator (REF:DB26)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -643,7 +631,7 @@ function CreateOperator(operator) {
         db.serialize(() => {
             db.run(`DELETE FROM operators WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting operator (REF:DB27)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -664,7 +652,7 @@ function CreateOperator(operator) {
         db.serialize(() => {
             db.get(`SELECT * FROM routes WHERE id = ?`, [id], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing route data (REF:DB28)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -683,7 +671,7 @@ function GetRouteByNum(num) {
         db.serialize(() => {
             db.get(`SELECT * FROM routes WHERE num = ?`, [num], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing route data (REF:DB29)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -701,7 +689,7 @@ function GetRoutes() {
         db.serialize(() => {
             db.all(`SELECT * FROM routes`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing all route data (REF:DB30)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -729,7 +717,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
         db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
                 VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
             if (err) {
-                newError(err.message, "Error creating route (REF:DB31)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -766,7 +754,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
                 minRank = ?
                 WHERE id = ?`, [num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank, id], function (err) {
             if (err) {
-                newError(err.message, "Error creating route (REF:DB32)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -785,7 +773,7 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
         db.serialize(() => {
             db.all(`DELETE FROM routes WHERE id = ?`, [id], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error deleting route (REF:DB33)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true);
@@ -806,7 +794,7 @@ function GetNotifications(user){
         db.serialize(() => {
             db.all(`SELECT * FROM notifications WHERE user = ?`, [user], (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing notification data (REF:DB34)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -831,7 +819,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
             db.run(`INSERT INTO notifications(user, title, desc, icon, timeStamp, link)
                     VALUES(?,?,?,?,?,?)`, [user, title, desc, icon, timeStamp, link], (err) => {
                 if (err) {
-                    newError(err.message, "Error creating notification (REF:DB35)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -839,7 +827,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
             });
             db.run(`DELETE FROM notifications WHERE id IN (SELECT id FROM notifications ORDER BY id DESC LIMIT -1 OFFSET 5) AND user = ?`, [user], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notifications while creating notification (REF:DB36)")
+                    Sentry.captureException(err);
                 }
             })
         });
@@ -856,8 +844,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB37)")
-                    resolve(false)
+                    Sentry.captureException(err);
                 } else {
                     resolve(true)
                 }
@@ -876,7 +863,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM notifications WHERE user = ?`, [username], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting notification (REF:DB38)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -896,7 +883,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.all(`SELECT * FROM stats`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing stats data (REF:DB39)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -915,7 +902,7 @@ function CreateNotification(user, title, desc, icon, timeStamp, link){
         db.serialize(() => {
             db.run(`DELETE FROM stats WHERE name = ?`, [name], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting stat (REF:DB40)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -939,7 +926,7 @@ function UpdateStat(name, newName, newValue){
                         value = ?
                         WHERE name = ?`, [newValue, name], (err) => {
                     if (err) {
-                        newError(err.message, "Error updating stat (REF:DB41)")
+                        Sentry.captureException(err);
                         resolve(false)
                     } else {
                         resolve(true)
@@ -951,7 +938,7 @@ function UpdateStat(name, newName, newValue){
                         value = ?
                         WHERE name = ?`, [newName, newValue, name], (err) => {
                     if (err) {
-                        newError(err.message, "Error updating stat (REF:DB42)")
+                        Sentry.captureException(err);
                         resolve(false)
                     } else {
                         resolve(true)
@@ -972,7 +959,7 @@ function UpdateStat(name, newName, newValue){
         db.serialize(() => {
             db.all(`SELECT * FROM ranks`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing rank data (REF:DB43)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -991,7 +978,7 @@ function UpdateStat(name, newName, newValue){
         db.serialize(() => {
             db.run(`DELETE FROM ranks WHERE rank = ?`, [rank], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting stat (REF:DB44)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1016,7 +1003,7 @@ function UpdateRank(name, newName, newMinH){
                     minH = ?
                     WHERE name = ?`, [newName, newMinH, name], (err) => {
                 if (err) {
-                    newError(err.message, "Error updating stat (REF:DB45)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1036,7 +1023,7 @@ function UpdateRank(name, newName, newMinH){
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO ranks(rank, minH) VALUES(?, ?)`, [rank, minH], function (err) {
             if (err) {
-                newError(err.message, "Error creating operator (REF:DB46)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -1055,7 +1042,7 @@ function GetSlots() {
         db.serialize(() => {
             db.all(`SELECT * FROM slots`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing slot data (REF:DB47)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -1073,7 +1060,7 @@ function GetSlot(ID) {
         db.serialize(() => {
             db.get(`SELECT * FROM slots WHERE id = ?`, [ID], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing slot data (REF:DB59)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -1082,7 +1069,7 @@ function GetSlot(ID) {
     });
 }
 
-function GetSlotsWithRoutes(){
+/* function GetSlotsWithRoutes(){
     return new Promise((resolve, error) => {
         GetSlots().then((slots) => {
             slots.forEach(async slot => {
@@ -1091,9 +1078,28 @@ function GetSlotsWithRoutes(){
             setTimeout(() => {
                 resolve(slots);
             }, 500)
-          
-
         });
+    })
+} */
+
+function GetSlotsWithRoutes(){
+    return new Promise((resolve, reject) => {
+        try {
+                GetSlots().then((slots) => {
+                    if(slots.length != 0){
+                        slots.forEach(async slot => {
+                            slot.routeObj = await GetRoute(slot.route);
+                        }, function () {
+                            resolve(slots);
+                        })
+                    }else{
+                        resolve(slots);
+                    }
+                });
+        } catch (err) {
+            Sentry.captureException(err);
+            reject(err);
+        }
     })
 }
 
@@ -1107,7 +1113,7 @@ function DeleteSlot(slot) {
         db.serialize(() => {
             db.run(`DELETE FROM slots WHERE id = ?`, [slot], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting slot (REF:DB48)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1134,7 +1140,7 @@ function UpdateSlot(id, route, newDepTime, newArrTime) {
                     arrTime = ?
                     WHERE id = ?`, [route, newDepTime, newArrTime, id], (err) => {
                 if (err) {
-                    newError(err.message, "Error updating slot (REF:DB49)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1157,7 +1163,7 @@ function CreateSlot(id, route, depTime, arrTime) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO slots(route, depTime, arrTime) VALUES(?, ?, ?)`, [route, depTime, arrTime], function (err) {
             if (err) {
-                newError(err.message, "Error creating slot (REF:DB50)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -1178,7 +1184,7 @@ function GetPPURL(username){
         db.serialize(() => {
             db.get(`SELECT profileURL FROM users WHERE username = ?`, [username], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing Profile Picture data (REF:DB51)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -1197,7 +1203,7 @@ function GetPPURL(username){
         return new Promise((resolve, error) => {
             db.exec(query, function (err) {
                 if (err) {
-                    newError(err.message, "Error running custom queries (REF:DB52)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1217,7 +1223,7 @@ function GetLinks() {
         db.serialize(() => {
             db.all(`SELECT * FROM links`, (err, rows) => {
                 if (err) {
-                    newError(err.message, "Error accessing link data (REF:DB53)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(rows);
                 }
@@ -1236,7 +1242,7 @@ function DeleteLink(id) {
         db.serialize(() => {
             db.run(`DELETE FROM links WHERE id = ?`, [id], (err) => {
                 if (err) {
-                    newError(err.message, "Error deleting link (REF:DB54)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1256,7 +1262,7 @@ function CreateLink(title, url) {
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO links(title, url) VALUES(?, ?)`, [title, url], function (err) {
             if (err) {
-                newError(err.message, "Error creating Link (REF:DB56)")
+                Sentry.captureException(err);
                 resolve(false)
             } else {
                 resolve(true)
@@ -1278,7 +1284,7 @@ function CreateSession(pilot, route, slotID, depTime){
     return new Promise((resolve, error) => {
         db.run(`INSERT INTO flightSessions(pilot, route, slotID, aircraft, depTime, arrTime, active, state) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [pilot, route, slotID, null, depTime, 0, 1, "NI"], function (err,row) {
             if (err) {
-                newError(err.message, "Error creating Session (REF:DB57)")
+                Sentry.captureException(err);
                 resolve(-1)
             } else {
                 resolve(this.lastID)
@@ -1296,7 +1302,7 @@ function GetSession(ID){
         db.serialize(() => {
             db.get(`SELECT * FROM flightSessions WHERE id = ?`, [ID], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing session data (REF:DB58)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(row);
                 }
@@ -1314,11 +1320,11 @@ function GetSessionByPilot(pilot) {
         db.serialize(() => {
             db.all(`SELECT * FROM flightSessions WHERE pilot = ?`, [pilot], (err, row) => {
                 if (err) {
-                    newError(err.message, "Error accessing session data (REF:DB60)")
+                    Sentry.captureException(err);
                 } else {
                     if(Array.isArray(row)){
                         resolve(row);
-                    }else{
+                    } else {
                         resolve([row]);
                     }
                     
@@ -1355,7 +1361,7 @@ function UpdateSession(id, pilot, route, slotID, aircraft, depTime, arrTime, act
                     state = ?
                     WHERE id = ?`, [pilot, route, slotID, aircraft, depTime, arrTime, active, state, id], (err) => {
                 if (err) {
-                    newError(err.message, "Error updating session (REF:DB62)")
+                    Sentry.captureException(err);
                     resolve(false)
                 } else {
                     resolve(true)
@@ -1375,7 +1381,7 @@ function DeleteSession(ID) {
         db.serialize(() => {
             db.run(`DELETE FROM flightSessions WHERE id = ?`, [ID], (err) => {
                 if (err) {
-                    newError(err.message, "Error accessing session data (REF:DB61)")
+                    Sentry.captureException(err);
                 } else {
                     resolve(true);
                 }

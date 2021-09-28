@@ -6,7 +6,6 @@ var sanitizer = require('sanitizer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const chalk = require('chalk');
-const express = require('express');
 var bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const rateLimit = require("express-rate-limit");
@@ -16,6 +15,11 @@ const OS = require('os');
 require('dotenv').config()
 const tinify = require("tinify");
 tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
+const express = require('express');
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+
+let hosting = process.env.HOSTFLAG ? true : false;
 
 //Storage
 let store = [];
@@ -297,12 +301,27 @@ setTimeout(async () => {
 
 //App
 const app = express();
+//Sentry
+Sentry.init({
+    dsn: "https://770628b2aa5447f8906e75e5c4904c48@o996992.ingest.sentry.io/5955471",
+    integrations: [
+        // enable HTTP calls tracing
+        new Sentry.Integrations.Http({ tracing: true }),
+        // enable Express.js middleware tracing
+        new Tracing.Integrations.Express({ app }),
+    ],
+    environment: "Dev - Beta",
+    debug: true,
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+});
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
 console.log(chalk.green("Starting VACenter"))
-app.listen(process.env.PORT, () =>{
-    console.log(chalk.green("Listening on port " + process.env.PORT));
-});
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(function(req,res,next){
@@ -596,7 +615,9 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                 const route = await GetRoute(session.route);
                 if (req.file && req.body.fuel) {
                     fs.readFile(req.file.path, function (err, sourceData) {
+                        Sentry.captureException(err);
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                            Sentry.captureException(err);
                             fs.unlinkSync(`${req.file.path}`);
                             req.file.path = req.file.path + ".webp";
                             fs.writeFileSync(`${req.file.path}`, resultData);
@@ -613,7 +634,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
     }
 })
 
-app.get('*', async (req, res)=>{
+app.get('*', async (req, res, next)=>{
     const cookies = getAppCookies(req)
     if(req.path.slice(0,8) == "/public/"){
         if(await FileExists(path.join(__dirname, "..", req.path))){
@@ -959,7 +980,8 @@ app.get('*', async (req, res)=>{
                                     operators: await GetOperators(),
                                     config: getConfig(),
                                     cv: cvnb,
-                                    store: store
+                                    store: store,
+                                    hosting: hosting
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -984,7 +1006,9 @@ app.get('*', async (req, res)=>{
                         if(config.other){
                             res.redirect("/")
                         }else{
-                            res.render("setup")
+                            res.render("setup", {
+                                hosting: hosting
+                            })
                         }
                         break;
                     case "/getLivData":
@@ -994,15 +1018,38 @@ app.get('*', async (req, res)=>{
                         res.clearCookie("authToken").redirect("/");
                         break;
                     default:
-                        res.render("404", {
-                            config: getConfig()
-                        });
+                        next();
                         break;
                 }
             }
         }
     }
 })
+
+app.get("/debug-sentry", function mainHandler(req, res) {
+    throw new Error("My first Sentry error!");
+});
+
+app.get("*", (req, res, next) => {
+    res.render("404", {
+        config: getConfig()
+    })
+})
+
+
+app.use(Sentry.Handlers.errorHandler());
+
+// Optional fallthrough error handler
+app.use(function onError(err, req, res, next) {
+    // The error id is attached to `res.sentry` to be returned
+    // and optionally displayed to the user for support.
+    res.statusCode = 500;
+    res.end(res.sentry + "\n");
+});
+
+app.listen(process.env.PORT, () => {
+    console.log(chalk.green("Listening on port " + process.env.PORT));
+});
 
 //login
 app.post("/login", async (req,res) =>{
@@ -1098,7 +1145,7 @@ app.post('/setupNVN', async (req, res) => {
                 rates: 100,
                 navColor: ["dark", "dark"],
                 ident: makeid(25),
-                pirepPic: data.pirepPictures,
+                pirepPic: hosting? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
             }
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
@@ -1195,7 +1242,9 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                 if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
                     if(req.file){
                     fs.readFile(req.file.path, function (err, sourceData) {
+                        Sentry.captureException(err);
                         tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                            Sentry.captureException(err);
                             fs.unlinkSync(`${req.file.path}`);
                             req.file.path = req.file.path + ".webp";
                             fs.writeFileSync(`${req.file.path}`, resultData);
@@ -1517,6 +1566,7 @@ app.post("/admin/users/new", async function (req, res) {
                             pilotID = (await getVANetUser(req.body.IFC));
                         }
                     }catch(err) {
+                        Sentry.captureException(err);
                         res.status(500).send(sanitizer.sanitize(err));
                     }
                     let vanetid = {
@@ -1656,6 +1706,7 @@ app.post("/users/linkVANet", async function (req, res){
                 await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked,pilotID);
                 res.redirect("/");
             }catch(err){
+                Sentry.captureException(err);
                 res.redirect("/account");
             }
         }else{
@@ -1712,7 +1763,7 @@ app.post("/admin/settings/pirepPic", async function (req, res) {
         if (user.admin == true) {
             if(req.body.imgExpireDays){
                 const newConfig = getConfig();
-                newConfig.other.pirepPic = req.body.state == "on" ? true: false;
+                newConfig.other.pirepPic = hosting ? false : (req.body.state == "on" ? true: false);
                 newConfig.other.pirepPicExpire = ((((parseFloat(req.body.imgExpireDays) * 24) * 60) * 60) * 1000);
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
                 setTimeout(() => {

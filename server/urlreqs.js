@@ -1,6 +1,17 @@
 //@ts-check
 
 const request = require("request");
+const Sentry = require("@sentry/node");
+const Tracing = require("@sentry/tracing");
+require('dotenv').config()
+
+//Sentry
+/* Sentry.init({
+    dsn: "https://473725d276b441ea867cdde3d17b868b@o996992.ingest.sentry.io/5955471",
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 0.5,
+}); */
 
 /**@module Requests */
 
@@ -46,9 +57,9 @@ function JSONReq(method, url, headers, query, data){
             body: data,
             json: true
         };
-        request(options, function(error, response, body){
-            if(error) throw new Error(error);
-            resolve([error, response, body]);
+        request(options, function(err, response, body){
+            if(err) throw Sentry.captureException(err);
+            resolve([err, response, body]);
         })
     })
 }
@@ -71,9 +82,9 @@ function URLReq(method, url, headers, query, data) {
             qs: query,
             form: data,
         };
-        request(options, function (error, response, body) {
-            if (error) throw new Error(error);
-            resolve([error, response, body]);
+        request(options, function (err, response, body) {
+            if (err) throw Sentry.captureException(err);
+            resolve([err, response, body]);
         })
     })
 }
