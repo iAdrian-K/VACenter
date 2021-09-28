@@ -98,7 +98,8 @@
             <p>Do you want your Pilots to be able to submit pictures of their flights?</p>
             <div class="form-check form-switch text-center">
                 <label class="form-check-label" for="flexSwitchCheckDefault">
-                    <input class="form-check-input text-center" type="checkbox" id="flexSwitchCheckDefault" name="state"> Allow Pictures
+                    <input class="form-check-input text-center" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(hosting){%>disabled<%}%>>
+                    Allow Pictures
                 </label>
             </div>
             <br>

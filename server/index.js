@@ -6,7 +6,6 @@ var sanitizer = require('sanitizer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const chalk = require('chalk');
-const express = require('express');
 var bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const rateLimit = require("express-rate-limit");
@@ -16,15 +15,11 @@ const OS = require('os');
 require('dotenv').config()
 const tinify = require("tinify");
 tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
+const express = require('express');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
-//Sentry
-Sentry.init({
-    dsn: `${process.env.SENTRY}`,
-    // We recommend adjusting this value in production, or using tracesSampler
-    // for finer control
-    tracesSampleRate: 0.5,
-});
+
+let hosting = process.env.HOSTFLAG ? true : false;
 
 //Storage
 let store = [];
@@ -306,12 +301,27 @@ setTimeout(async () => {
 
 //App
 const app = express();
+//Sentry
+Sentry.init({
+    dsn: "https://770628b2aa5447f8906e75e5c4904c48@o996992.ingest.sentry.io/5955471",
+    integrations: [
+        // enable HTTP calls tracing
+        new Sentry.Integrations.Http({ tracing: true }),
+        // enable Express.js middleware tracing
+        new Tracing.Integrations.Express({ app }),
+    ],
+    environment: "Dev - Alpha",
+    debug: true,
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+});
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
 console.log(chalk.green("Starting VACenter"))
-app.listen(process.env.PORT, () =>{
-    console.log(chalk.green("Listening on port " + process.env.PORT));
-});
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(function(req,res,next){
@@ -624,7 +634,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
     }
 })
 
-app.get('*', async (req, res)=>{
+app.get('*', async (req, res, next)=>{
     const cookies = getAppCookies(req)
     if(req.path.slice(0,8) == "/public/"){
         if(await FileExists(path.join(__dirname, "..", req.path))){
@@ -970,7 +980,8 @@ app.get('*', async (req, res)=>{
                                     operators: await GetOperators(),
                                     config: getConfig(),
                                     cv: cvnb,
-                                    store: store
+                                    store: store,
+                                    hosting: hosting
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -995,7 +1006,9 @@ app.get('*', async (req, res)=>{
                         if(config.other){
                             res.redirect("/")
                         }else{
-                            res.render("setup")
+                            res.render("setup", {
+                                hosting: hosting
+                            })
                         }
                         break;
                     case "/getLivData":
@@ -1005,15 +1018,38 @@ app.get('*', async (req, res)=>{
                         res.clearCookie("authToken").redirect("/");
                         break;
                     default:
-                        res.render("404", {
-                            config: getConfig()
-                        });
+                        next();
                         break;
                 }
             }
         }
     }
 })
+
+app.get("/debug-sentry", function mainHandler(req, res) {
+    throw new Error("My first Sentry error!");
+});
+
+app.get("*", (req, res, next) => {
+    res.render("404", {
+        config: getConfig()
+    })
+})
+
+
+app.use(Sentry.Handlers.errorHandler());
+
+// Optional fallthrough error handler
+app.use(function onError(err, req, res, next) {
+    // The error id is attached to `res.sentry` to be returned
+    // and optionally displayed to the user for support.
+    res.statusCode = 500;
+    res.end(res.sentry + "\n");
+});
+
+app.listen(process.env.PORT, () => {
+    console.log(chalk.green("Listening on port " + process.env.PORT));
+});
 
 //login
 app.post("/login", async (req,res) =>{
