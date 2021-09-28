@@ -1083,19 +1083,24 @@ function GetSlot(ID) {
 } */
 
 function GetSlotsWithRoutes(){
-    try {
-        return new Promise((resolve, error) => {
-            GetSlots().then((slots) => {
-                slots.forEach(async slot => {
-                    slot.routeObj = await GetRoute(slot.route);
-                }, function() {
-                    resolve(slots);
-                })
-            });
-        })
-    } catch (err) {
-        Sentry.captureException(err);
-    }
+    return new Promise((resolve, reject) => {
+        try {
+                GetSlots().then((slots) => {
+                    if(slots.length != 0){
+                        slots.forEach(async slot => {
+                            slot.routeObj = await GetRoute(slot.route);
+                        }, function () {
+                            resolve(slots);
+                        })
+                    }else{
+                        resolve(slots);
+                    }
+                });
+        } catch (err) {
+            Sentry.captureException(err);
+            reject(err);
+        }
+    })
 }
 
 /**
