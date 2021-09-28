@@ -11,13 +11,12 @@ const Tracing = require("@sentry/tracing");
 require('dotenv').config()
 
 //Sentry
-Sentry.init({
-    dsn: "process.env.SENTRY",
-
+/* Sentry.init({
+    dsn: "https://473725d276b441ea867cdde3d17b868b@o996992.ingest.sentry.io/5955471",
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
-    tracesSampleRate: 1.0,
-});
+    tracesSampleRate: 0.5,
+}); */
 
 /**
  * @typedef {import('./types.js').user} user
@@ -1084,19 +1083,24 @@ function GetSlot(ID) {
 } */
 
 function GetSlotsWithRoutes(){
-    try {
-        return new Promise((resolve, error) => {
-            GetSlots().then((slots) => {
-                slots.forEach(async slot => {
-                    slot.routeObj = await GetRoute(slot.route);
-                }, function() {
-                    resolve(slots);
-                })
-            });
-        })
-    } catch (err) {
-        Sentry.captureException(err);
-    }
+    return new Promise((resolve, reject) => {
+        try {
+                GetSlots().then((slots) => {
+                    if(slots.length != 0){
+                        slots.forEach(async slot => {
+                            slot.routeObj = await GetRoute(slot.route);
+                        }, function () {
+                            resolve(slots);
+                        })
+                    }else{
+                        resolve(slots);
+                    }
+                });
+        } catch (err) {
+            Sentry.captureException(err);
+            reject(err);
+        }
+    })
 }
 
 /**

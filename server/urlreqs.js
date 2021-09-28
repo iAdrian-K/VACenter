@@ -6,13 +6,12 @@ const Tracing = require("@sentry/tracing");
 require('dotenv').config()
 
 //Sentry
-Sentry.init({
-    dsn: "process.env.SENTRY",
-
+/* Sentry.init({
+    dsn: "https://473725d276b441ea867cdde3d17b868b@o996992.ingest.sentry.io/5955471",
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
-    tracesSampleRate: 1.0,
-});
+    tracesSampleRate: 0.5,
+}); */
 
 /**@module Requests */
 
