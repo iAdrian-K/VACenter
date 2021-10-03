@@ -1,6 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-<%= config.other.navColor[1]%> bg-<%= config.other.navColor[0]%>">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/home"><%= config.name%></a>
+        <a class="navbar-brand" href="/home">
+            <span class="fs-6">
+            <img src="<%= config.other.logo%>" alt=""
+                class="d-inline-block" style="vertical-align: middle; height: 1.25em; margin-bottom: .15em;"> 
+            <%= config.name%>
+            </span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

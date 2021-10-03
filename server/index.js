@@ -176,22 +176,14 @@ let config = {
         rates: 100
     }
 };
-let limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-});
 /**
  * Reloads Config
  * @name Reload Config
  */
+
 function reloadConfig(){
     return new Promise(async (resolve, error) => {
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
-        let limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 minutes
-            max: (config.other) ? (config.other.rates ? config.other.rates : 100) : 100 // limit each IP to 100 requests per windowMs
-        });
-        app.use(limiter);
         resolve(true);
     })
     
@@ -328,6 +320,11 @@ app.use(function(req,res,next){
     res.locals.version = cvnb;
     next();
 })
+let limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 //app.use(cookieParser());
 
 //Util Funcs
@@ -1733,15 +1730,15 @@ app.post("/admin/settings/update", async function (req, res) {
             res.sendStatus(401);
         }
 })
-app.post("/admin/settings/rate", async function (req, res) {
+app.post("/admin/settings/logo", async function (req, res) {
     const cookies = getAppCookies(req)
     if(req.body.value){
     let user = await checkForUser(cookies);
     if (user) {
         if (user.admin == true) {
             const newConfig = getConfig();
-            newConfig.other.rates = req.body.value;
-            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
+            newConfig.other.logo = req.body.value;
+            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(()=>{
                 reloadConfig();
                 res.redirect("/admin/settings")
