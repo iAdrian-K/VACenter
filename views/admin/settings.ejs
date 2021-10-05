@@ -52,13 +52,13 @@
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/bg" method="post">
                 <h4>Background URL</h4>
-                <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg%>"><br>
+                <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>"><br>
                 <button type="submit" class="btn btn-primary">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/logo" method="post">
-                <h4>Logo</h4>
+                <h4>Logo URL</h4>
                 <input class="form-control" type="url" name="value" value="<%= config.other.logo%>"><br>
                 <button type="submit" class="btn btn-primary">Update</button>
                 </form>
@@ -102,9 +102,6 @@
 
                     return url.protocol === "http:" || url.protocol === "https:";
                 }
-            if(isValidHttpUrl(document.getElementById("fill1").value) == false){
-            document.getElementById("fill1").value = window.location.protocol + "//" + window.location.host + document.getElementById("fill1").value
-            }
             const currentVersionFull = "<%= cv %>"
             console.log(currentVersionFull);
             const currentVersionNum = currentVersionFull.slice(0, -1);
