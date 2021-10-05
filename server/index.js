@@ -1085,7 +1085,7 @@ app.post('/setup', async (req,res)=>{
             newConfig.key = req.body.key;
             newConfig.other = {
                 bg: "/public/images/stockBG2.jpg",
-                logo: "",
+                logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark"],
                 ident: makeid(25),
@@ -1138,7 +1138,7 @@ app.post('/setupNVN', async (req, res) => {
             newConfig.key = req.body.key;
             newConfig.other = {
                 bg: "/public/images/stockBG2.jpg",
-                logo: "",
+                logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark"],
                 ident: makeid(25),
