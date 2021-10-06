@@ -18,6 +18,7 @@ tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
 const express = require('express');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
+const csv = require('csvtojson')
 
 let hosting = process.env.HOSTFLAG ? true : false;
 
@@ -630,6 +631,39 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
         }
     }
 })
+
+app.post('/import/:comp', upload.single('csv'), async (req, res) => {
+    const cookies = getAppCookies(req);
+    if(((!config.code) && req.path != "/setup")){
+        if((!config.code) && req.path != "/setup"){
+            res.redirect('/setup')
+        }else{
+            res.redirect("/?r=ue")
+        }
+    }else{
+        const changePWD = await checkForCPWD(cookies);
+        let user = await checkForUser(cookies);
+        if(user){
+            user = await getUserWithObjs(user, ["notifications", "pireps"]);
+        }
+        if(changePWD == true && req.path != "/changePWD"){
+            res.redirect('/changePWD');
+        }else if(user.revoked == 1){
+            res.clearCookie('authToken').redirect("/?r=ro")
+        }else{
+            switch(req.params.comp){
+                case "routes":
+                    csv().fromFile(req.file.path).then((jsonObj)=>{
+                        for (var i = 0; i < jsonObj.length; i++){
+                            CreateRoute(makeid(50), jsonObj[i].num,jsonObj[i].flightTime,jsonObj[i].operator,jsonObj[i].aircraft,jsonObj[i].aircraft,jsonObj[i].depICAO,jsonObj[i].arrICAO,jsonObj[i].aircraftPublic,jsonObj[i].minHrs)
+                        }
+                    })
+                    break;
+            }
+        }
+    }
+});
+
 
 app.get('*', async (req, res, next)=>{
     const cookies = getAppCookies(req)
