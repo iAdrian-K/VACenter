@@ -1276,13 +1276,11 @@ function CreateLink(title, url) {
  * Creates a session
  * @param {string} pilot - Username of pilot
  * @param {string} route - Num of route
- * @param {string} slotID - ID of slot
- * @param {string} depTime - Departure Time of slot
  * @returns {Promise<number>} Returns ID of session or -1 if error
  */
-function CreateSession(pilot, route, slotID, depTime){
+function CreateSession(pilot, route){
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO flightSessions(pilot, route, slotID, aircraft, depTime, arrTime, active, state) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [pilot, route, slotID, null, depTime, 0, 1, "NI"], function (err,row) {
+        db.run(`INSERT INTO flightSessions(pilot, route, aircraft, depTime, arrTime, active, state) VALUES(?, ?, ?, ?, ?, ?, ?)`, [pilot, route, null, null, 0, 1, "NI"], function (err,row) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(-1)
@@ -1339,7 +1337,6 @@ function GetSessionByPilot(pilot) {
  * @param {string} id 
  * @param {string} pilot
  * @param {string} route
- * @param {string} slotID
  * @param {string} aircraft
  * @param {string} depTime
  * @param {string} arrTime
@@ -1347,19 +1344,18 @@ function GetSessionByPilot(pilot) {
  * @param {string} state
  * @returns {Promise<Boolean>} Boolean of success or failure
  */
-function UpdateSession(id, pilot, route, slotID, aircraft, depTime, arrTime, active, state) {
+function UpdateSession(id, pilot, route, aircraft, depTime, arrTime, active, state) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
             db.run(`UPDATE flightSessions SET
                     pilot = ?,
                     route = ?,
-                    slotID = ?,
                     aircraft = ?,
                     depTime = ?,
                     arrTime = ?,
                     active = ?,
                     state = ?
-                    WHERE id = ?`, [pilot, route, slotID, aircraft, depTime, arrTime, active, state, id], (err) => {
+                    WHERE id = ?`, [pilot, route, aircraft, depTime, arrTime, active, state, id], (err) => {
                 if (err) {
                     Sentry.captureException(err);
                     resolve(false)

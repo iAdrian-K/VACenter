@@ -94,29 +94,25 @@
                         <th data-field="Departure-Airport">Departure Airport</th>
                         <th data-field="Arrival-Airport">Arrival Airport</th>
                         <th data-field="aircraft">Aircraft</th>
-                        <th data-field="Departure-Time">Departure Time (Recommended)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% slots.forEach(slot=>{%>
-                        <% if((slot.routeObj.minRank) <= user.hours){%>
-                                <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%> pirepClickable" data-title="<%=slot.routeObj.num%>" title="<%= slot.routeObj.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openSlot('<%=slot.id%>','<%= slot.routeObj.num%>')">
-                                <td id="td-id-<%=slot.id %>" class="td-class-<%=slot.id %>" data-title="<%= slot.routeObj.num%>">
+                    <% routes.forEach(route=>{%>
+                        <% if((route.minRank) <= user.hours){%>
+                                <tr id="tr-id-<%=route.num%>" class="tr-class-<%=route.num%> pirepClickable" data-title="<%=route.num%>" title="<%= route.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openRoute('<%=route.num%>','<%= route.num%>')">
+                                <td id="td-id-<%=route.num %>" class="td-class-<%=route.num %>" data-title="<%= route.num%>">
                                     <strong>
-                                        <%= (slot.routeObj.opObj ? (slot.routeObj.opObj.code ? slot.routeObj.opObj.code : config.code ) : config.code) %><%= slot.routeObj.num%>
+                                        <%= (route.opObj ? (route.opObj.code ? route.opObj.code : config.code ) : config.code) %><%= route.num%>
                                     </strong>
                                 </td>
-                                <td data-text="<%= slot.routeObj.depICAO %>">
-                                    <%= slot.routeObj.depICAO %>
+                                <td data-text="<%= route.depICAO %>">
+                                    <%= route.depICAO %>
                                 </td>
-                                <td data-text="<%= slot.routeObj.arrICAO %>">
-                                    <%= slot.routeObj.arrICAO %>
+                                <td data-text="<%= route.arrICAO %>">
+                                    <%= route.arrICAO %>
                                 </td>
-                                <td data-text="<%= slot.routeObj.aircraftPublic %>">
-                                    <%= slot.routeObj.aircraftPublic %>
-                                </td>
-                                <td data-text="<%= slot.depTime %>">
-                                    <%= slot.depTime %>
+                                <td data-text="<%= route.aircraftPublic %>">
+                                    <%= route.aircraftPublic %>
                                 </td>
                             </tr>        
                         <%}%>
@@ -139,9 +135,9 @@
         <script>
             $('#mainTable').on('click-row.bs.table', function (row, el, field){
                 console.log(el)
-                openSlot(el._id.split("-")[2], el._data.title)
+                openRoute(el._id.split("-")[2], el._data.title)
             })
-            function openSlot(id, routeNumber){
+            function openRoute(routeNumber){
                 if("<%= allowNSession.toString()%>" == "true"){
                     swal({
                         title: `Do you want to fly route: <%= config.code%>${routeNumber}?`,
@@ -159,7 +155,7 @@
                         dangerMode: 'go'
                     }).then(acceptFlight => {
                         if (acceptFlight) {
-                            window.location.href = `/newSlotUI?slot=${id}`
+                            window.location.href = `/newFlightUI?route=${routeNumber}`
                         }
                     })
                 }else{

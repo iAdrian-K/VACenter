@@ -76,8 +76,7 @@ const {
         GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
-        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-        GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlot, GetSlotsWithRoutes, run,
+        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser, run,
         GetLinks, CreateLink, DeleteLink,
     CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
     } = require("./db")
@@ -98,13 +97,13 @@ reloadUserRanks()
 //Versioning
 let branch = getVersionInfo().branch;
 let cvn = getVersionInfo().version;
-let cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
+let cvnb = branch == "beta" ? `${cvn}B` : (branch == "alpha" ? `${cvn}A` : `${cvn}M`)
 /**
  * Used for checking the version info
  */
 function reloadVersion(){
     cvn = getVersionInfo().version;
-    cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
+    cvnb = branch == "beta" ? `${cvn}B` : (branch == "alpha" ? `${cvn}A` : `${cvn}M`)
 }
 
 reloadVersion();
@@ -119,7 +118,6 @@ reloadVersion();
  * @typedef {import('./types.js').PIREP} PIREP
  * @typedef {import('./types.js').rank} rank
  * @typedef {import('./types.js').route} route
- * @typedef {import('./types.js').slot} slot
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
  * @typedef {import('./types.js').fsession} fsession
@@ -420,7 +418,7 @@ async function getUserWithObjs(userObj, flags){
 
 //Basic Routes
 
-app.get('/newSlotUI', async (req, res) =>{
+app.get('/newFlightUI', async (req, res) =>{
     const cookies = getAppCookies(req);
     //Check for setup
     if (((!config.code) && req.path != "/setup")) {
@@ -438,17 +436,15 @@ app.get('/newSlotUI', async (req, res) =>{
         if (changePWD == true && req.path != "/changePWD") {
             res.redirect('/changePWD');
         } else {
-            const slotID = req.query.slot.toString();
-            //Get Slot Obj
-            const slot = await GetSlot(slotID);
-            if(slot){
-                //Get Route Obj
-                const route = await GetRoute(slot.route)
+            const routeNum = req.query.route.toString();
+            //Get Route Obj
+            const route = await GetRouteByNum(routeNum);
+            if(route){
                 //Create Session
-                const sesID = await CreateSession(user.username, route.id.toString(), slotID, slot.depTime)
+                const sesID = await CreateSession(user.username, route.id.toString())
                 res.redirect(`/slotUI?ses=${sesID.toString()}`)
             }else{
-                res.status(404).send("Cant find slot with ID: " + sanitizer.sanitize(slotID));
+                res.status(404).send("Cant find route with ID: " + sanitizer.sanitize(routeNum));
             }
         }
     }
@@ -559,7 +555,7 @@ app.post('/updateSlot', async (req, res) => {
                         if(req.body.aircraft){
                             const aircraft = await GetAircraft(req.body.aircraft);
                             if(aircraft){
-                                await UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, aircraft.livID, session.depTime, session.arrTime, session.active == true? 1 : 0 , "AS");
+                                await UpdateSession(session.id.toString(), session.pilot, session.route, aircraft.livID, session.depTime, session.arrTime, session.active == true? 1 : 0 , "AS");
                                 res.redirect(`/slotUI?ses=${session.id}`)
                             }else{
                                 res.status(404).send("Can't find aircraft with that ID");
@@ -569,11 +565,11 @@ app.post('/updateSlot', async (req, res) => {
                         }
                         break;
                     case "SF":
-                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, (new Date()).toString(), session.arrTime, 1, "FS");
+                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, (new Date()).toString(), session.arrTime, 1, "FS");
                         res.sendStatus(200);
                         break;
                     case "EF":
-                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, session.depTime, (((new Date().getTime() - new Date(session.depTime).getTime())/1000)/60).toString(), 1, "FF");
+                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, (((new Date().getTime() - new Date(session.depTime).getTime())/1000)/60).toString(), 1, "FF");
                         res.sendStatus(200);
                         break;
                     default:
@@ -622,7 +618,7 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                     })
                 }
                 CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
-                UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, session.depTime, session.arrTime, 0, "PF")
+                UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF")
                 res.redirect("/home");
             } else {
                 res.status(404).send("Cant find session with ID: " + sesID);
