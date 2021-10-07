@@ -725,7 +725,6 @@ app.get('*', async (req, res, next)=>{
                                 routes: await GetRoutes(),
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
-                                slots: await GetSlotsWithRoutes(),
                                 config: getConfig(),
                                 allowNSession: !(activeFlightBool),
                                 activeFlight: activeFlight
@@ -1464,12 +1463,6 @@ app.post("/admin/routes/new", async function (req, res) {
                         clearInterval(checker);
                         let vehiclePublicList = vehiclePublic.join(", ");
                         await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.minH);
-                        Object.keys(req.body).forEach(async function (k, v) {
-                            if (k.slice(0, 5) == "slot_") {
-                                const value = req.body[k]
-                                CreateSlot(`routeID_slot_${k[6]}`, routeID, `${value}`, `NF_${v}`);
-                            }
-                        });
                         res.redirect("/admin/routes")
                     }
                 }, 250)
@@ -1530,11 +1523,6 @@ app.delete("/admin/routes/remove", async function (req, res) {
         if (user) {
             if (user.admin == true) {
                 const route = await GetRoute(req.body.id);
-                (await GetSlots()).forEach(slot =>{
-                    if(slot.route.toString() == route.id.toString()){
-                        DeleteSlot(slot.id.toString());
-                    }
-                })
                 await DeleteRoute(req.body.id);
                 res.redirect("/admin/routes")
             } else {
