@@ -981,6 +981,23 @@ app.get('*', async (req, res, next)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
+                    case "/admin/import":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/import", {
+                                    active: req.path,
+                                    title: "Admin - Import",
+                                    user: user,
+                                    activer: "/admin",
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
                     case "/admin/codeshare":
                         if (user) {
                             if (user.admin == true) {
