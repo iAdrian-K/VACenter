@@ -52,69 +52,6 @@
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     Add Route
                 </button>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add Route</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action="/admin/routes/new" id="nrform">
-                                    <h2>Create new route</h2>
-                                    <br>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1">
-                                            <%= config.code%>
-                                        </span>
-                                        <input type="text" class="form-control" placeholder="Route Number" aria-label="Username" required=""
-                                            aria-describedby="basic-addon1" name="num">
-                                    </div>
-                                    <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
-                                    <select class="form-select mb-3" name="aircraft" multiple required>
-                                        <% craft.forEach(vic=>{%>
-                                            <option value="<%= vic.livID%>"><%= vic.publicName%></option>    
-                                        <%})%>
-                                    </select>
-                                    <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
-                                    <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required="" aria-label="Flight Time"
-                                        name="ft">
-                                    <label class="form-label">Departure ICAO</label>
-                                    <input type="text" class="form-control mb-3" placeholder="YSSY" required="" aria-label="ICAO Departure"
-                                        name="depIcao">
-                                    <label class="form-label">Arrival ICAO</label>
-                                    <input type="text" class="form-control mb-3" placeholder="YMML" required="" aria-label="ICAO Arrival" name="arrIcao">
-                                    <label class="form-label">Operator</label>
-                                    <select class="form-select mb-3" name="op">
-                                        <% ops.forEach(op=>{%>
-                                            <option value="<%= op.id%>">
-                                                <%= op.operator%>
-                                            </option>
-                                            <%})%>
-                                    </select>
-                                    <label class="form-label">Departure Slots</label>
-                                    <br>
-                                    <div id="departureSlots">
-
-                                    </div>
-                                    <button class="btn btn-success mb-3 ms-1" type="button" onclick="addDepSlot()">Add Time</button>
-                                    <br>
-                                    <label class="form-label text-muted">Minimum Rank</label>
-                                    <select class="form-select" name="minH">
-                                        <% ranks.forEach(rank =>{%>
-                                            <option value="<%= rank.minH%>"><%= rank.rank%></option>    
-                                        <%})%>
-                                    </select>
-                                    <br>
-                                    <button class="btn btn-primary">Create</button>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <% routes.forEach(route=>{%>
                 <div class="modal fade" id="modal-<%= route.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -177,6 +114,67 @@
                     </div>
                 </div>
                 <%})%>
+            </div>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Route</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="/admin/routes/new" id="nrform">
+                            <h2>Create new route</h2>
+                            <br>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">
+                                    <%= config.code%>
+                                </span>
+                                <input type="text" class="form-control" placeholder="Route Number" aria-label="Username"
+                                    required="" aria-describedby="basic-addon1" name="num">
+                            </div>
+                            <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
+                            <select class="form-select mb-3" name="aircraft" multiple required>
+                                <% craft.forEach(vic=>{%>
+                                    <option value="<%= vic.livID%>">
+                                        <%= vic.publicName%>
+                                    </option>
+                                    <%})%>
+                            </select>
+                            <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
+                            <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
+                                aria-label="Flight Time" name="ft">
+                            <label class="form-label">Departure ICAO</label>
+                            <input type="text" class="form-control mb-3" placeholder="YSSY" required=""
+                                aria-label="ICAO Departure" name="depIcao">
+                            <label class="form-label">Arrival ICAO</label>
+                            <input type="text" class="form-control mb-3" placeholder="YMML" required=""
+                                aria-label="ICAO Arrival" name="arrIcao">
+                            <label class="form-label">Operator</label>
+                            <select class="form-select mb-3" name="op">
+                                <% ops.forEach(op=>{%>
+                                    <option value="<%= op.id%>">
+                                        <%= op.operator%>
+                                    </option>
+                                    <%})%>
+                            </select>
+                            <label class="form-label text-muted">Minimum Rank</label>
+                            <select class="form-select" name="minH">
+                                <% ranks.forEach(rank=>{%>
+                                    <option value="<%= rank.minH%>">
+                                        <%= rank.rank%>
+                                    </option>
+                                    <%})%>
+                            </select>
+                            <br>
+                            <button class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
         <%- include('./../components/footer.ejs') %>

@@ -50,7 +50,7 @@
         <% break;
         case "AS":%>
             <h1 class="display-6 fw-bold">Awaiting Start.</h1>
-            <p>Please load your flight at <%= session.depTime%>. (Current Time: <%= new Date().getUTCHours().toString() + ":" + new Date().getUTCMinutes().toString() %>z). However you can start your flight now if you wish to.</p>
+            <p>Please check the following information is correct (if not cancel this flight and try again), when you click "Start Flight" it will begin a timer, you can safely close this page during your flight. But come back to end it once you have parked at the gate.</p>
             <div class="form-control w-100 px-3 py-2">
                 <h4>Flight Details:</h4>
                 <p><strong class="fw-bold">Departure Airport:</strong> <%= route.depICAO%></p>
@@ -91,7 +91,22 @@
     <script src="https://unpkg.com/sweetalert@2.1.2/dist/sweetalert.min.js"></script>
     <script>
         function startFlight(){
-            swal("Are you sure?", "Are you sure you want to start flight?", 'info').then(state =>{
+            swal({
+                title: "Are you sure?",
+                text: "Are you sure you want to start the flight?",
+                icon: 'info',
+                showCancelButton: true,
+                showDenyButton: true,
+                dangerMode: true,
+                buttons: {
+                    cancel: "No",
+                    confirm: {
+                        text: "Yes",
+                        value: true
+                    }
+                },
+                closeOnConfirm: false
+            }).then(state =>{
                 if(state){
                     fetch("/updateSlot?state=SF&ses=<%=session.id%>", {
                         "method": "POST",
@@ -111,7 +126,22 @@
             })
         }
         function stopFlight() {
-                swal("Are you sure?", "Are you sure you want to end the flight?", 'info').then(state => {
+                swal({
+                title: "Are you sure?",
+                text: "Are you sure you want to end the flight?",
+                icon: 'info',
+                showCancelButton: true,
+                showDenyButton: true,
+                dangerMode: true,
+                buttons: {
+                    cancel: "No",
+                    confirm: {
+                        text: "Yes",
+                        value: true
+                    }
+                },
+                closeOnConfirm: false
+            }).then(state => {
                     if (state) {
                         fetch("/updateSlot?state=EF&ses=<%=session.id%>", {
                             "method": "POST",
