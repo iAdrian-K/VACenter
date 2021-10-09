@@ -1897,11 +1897,19 @@ app.post("/admin/settings/accent", async function (req, res) {
                 const newConfig = getConfig();
                 newConfig.other.navColor = [];
                 newConfig.other.navColor.push(req.body.accent);
-                if(req.body.accent == "light"){
+                if(req.body.accent == "light" || req.body.accent == "white"){
                     newConfig.other.navColor.push("light");
                 }else{
                     newConfig.other.navColor.push("dark");
                 }
+                if(req.body.state && req.body.accent != "danger"){
+                    newConfig.other.navColor.push(req.body.accent);
+                    newConfig.other.btnColor = true;
+                }else{
+                    newConfig.other.navColor.push("primary");
+                    newConfig.other.btnColor = false;
+                }
+                
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
                 res.redirect("/admin/settings")
             } else {

@@ -31,20 +31,28 @@
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/accent" method="post">
                     <h4>Accent Color</h4>
-                    <input type="radio" class="btn-check" name="accent" value="primary" id="primary" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="primary"){%>checked<%}%> name="accent" value="primary" id="primary" autocomplete="off">
                     <label class="btn btn-primary my-2" for="primary">Blue</label>
-                    <input type="radio" class="btn-check" name="accent" value="secondary" id="secondary" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="secondary"){%>checked<%}%> name="accent" value="secondary" id="secondary" autocomplete="off">
                     <label class="btn btn-secondary my-2" for="secondary">Grey</label>
-                    <input type="radio" class="btn-check" name="accent" value="danger" id="danger" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="danger"){%>checked<%}%> name="accent" value="danger" id="danger" autocomplete="off">
                     <label class="btn btn-danger my-2" for="danger">Red</label>
-                    <input type="radio" class="btn-check" name="accent" value="success" id="success" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="success"){%>checked<%}%> name="accent" value="success" id="success" autocomplete="off">
                     <label class="btn btn-success my-2" for="success">Green</label>
-                    <input type="radio" class="btn-check" name="accent" value="warning" id="warning" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="warning"){%>checked<%}%> name="accent" value="warning" id="warning" autocomplete="off">
                     <label class="btn btn-warning my-2" for="warning">Yellow</label>
-                    <input type="radio" class="btn-check" name="accent" value="light" id="light" autocomplete="off">
-                    <label class="btn btn-light my-2" for="light">White</label>
-                    <input type="radio" class="btn-check" name="accent" value="dark" id="dark" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="light"){%>checked<%}%> name="accent" value="light" id="light" autocomplete="off">
+                    <label class="btn btn-light my-2" for="light">Light</label>
+                    <!--<input type="radio" class="btn-check" <% if(config.other.navColor[0]=="white"){%>checked<%}%> name="accent" value="white" id="white" autocomplete="off">
+                    <label class="btn btn-white my-2 border border-black" for="white">White</label>-->
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="dark"){%>checked<%}%> name="accent" value="dark" id="dark" autocomplete="off">
                     <label class="btn btn-dark my-2" for="dark">Dark</label>
+                    <br>
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.btnColor == true){%>checked<%}%>>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Affect Buttons</label>
+                    </div>
+                    <span class="text-muted">Not avaliable with red</span>
                     <br><br>
                     <button class="btn btn-primary" type="submit">Submit new Color</button>
                 </form>
