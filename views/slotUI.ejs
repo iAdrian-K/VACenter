@@ -45,7 +45,7 @@
                         <%})%>
                     </select>
                 </label><br><br>
-                <button class="btn btn-primary">Submit</button>
+                <button class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
             </form>
         <% break;
         case "AS":%>
@@ -58,13 +58,13 @@
                 <p><strong class="fw-bold">Aircraft Used:</strong> <%= vehicleUsed.publicName %></p>
             </div>
             <br>
-            <button class="btn btn-primary" onclick="startFlight()">Start Flight</button>
+            <button class="btn btn-<%= config.other.navColor[2] %>" onclick="startFlight()">Start Flight</button>
         <%break;
         case "FS":%>
             <h1 class="display-6 fw-bold">In Flight</h1>
             <p class="text-muted">Live Map not available at this time.</p>
             <p>Once you have touched down at your destination, click the button below to end your flight. You can safely leave this window and come back.</p>
-            <button class="btn btn-primary" onclick="stopFlight()">Finish Flight</button>
+            <button class="btn btn-<%= config.other.navColor[2] %>" onclick="stopFlight()">Finish Flight</button>
         <%break;
         case "FF":%>
             <h1 class="display-6 fw-bold">Flight Finished</h1>
@@ -80,7 +80,7 @@
                     <label class="form-label">PIREP Pictures</label><br>
                     <input class="form-control mb-3" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
                     <%}%>
-                <button class="btn btn-primary">Submit</button>
+                <button class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
             </form>
         <% break;
     }%>
