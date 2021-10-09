@@ -83,34 +83,47 @@
             integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
             
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script>
+            function sort(id){
+                var sel = $(`#${id}`);
+                var selected = sel.val(); // cache selected value, before reordering
+                var opts_list = sel.find('option');
+                opts_list.sort(function(a, b) { return $(a).text() > $(b).text() ? 1 : -1; });
+                console.log(opts_list[0])
+                sel.html('').append(opts_list);
+                sel.val(selected); // set cached selected value
+                document.getElementById(id).selectedIndex = 0;
+            }
+            sort('newAirAirSel');
             function loadAircraftLivData() {
-                    const airID = document.getElementById("newAirAirSel").value;
-                    document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
-                    const data = null;
-                    const xhr = new XMLHttpRequest();
-                    xhr.addEventListener("readystatechange", function () {
-                        if (this.readyState === this.DONE) {
-                            console.log(this)
-                            if (this.status == 200) {
-                                const data = JSON.parse(this.responseText);
-                                console.log(data)
-                                document.getElementById("newAirLivSel").innerHTML = "";
-                                data.livery.forEach(liv => {
-                                    const el = document.createElement("option")
-                                    el.value = liv.id;
-                                    el.innerHTML = liv.name;
-                                    document.getElementById("newAirLivSel").appendChild(el)
-                                })
-                            } else {
-                                alert(this.status)
-                            }
+                const airID = document.getElementById("newAirAirSel").value;
+                document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
+                const data = null;
+                const xhr = new XMLHttpRequest();
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === this.DONE) {
+                        console.log(this)
+                        if (this.status == 200) {
+                            const data = JSON.parse(this.responseText);
+                            console.log(data)
+                            document.getElementById("newAirLivSel").innerHTML = "";
+                            data.livery.forEach(liv => {
+                                const el = document.createElement("option")
+                                el.value = liv.id;
+                                el.innerHTML = liv.name;
+                                document.getElementById("newAirLivSel").appendChild(el)
+                            })
+                            sort('newAirLivSel');
+                        } else {
+                            alert(this.status)
                         }
-                    });
-                    xhr.open("GET", `/getLivData?liv=${airID}`);
-                    xhr.send(data);
-                }
-                loadAircraftLivData()
+                    }
+                });
+                xhr.open("GET", `/getLivData?liv=${airID}`);
+                xhr.send(data);
+            }
+            loadAircraftLivData()
             function remCraft(id) {
                     const data = `id=${id}`;
                     const xhr = new XMLHttpRequest();
