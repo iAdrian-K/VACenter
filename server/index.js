@@ -71,9 +71,9 @@ const {
         GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
         GetEvent, GetEvents, CreateEvent, DeleteEvent,
         GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-        GetOperator, GetOperators, CreateOperator, DeleteOperator,
+        GetOperatorByName, GetOperator, GetOperators, CreateOperator, DeleteOperator,
         GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
-        GetRanks, UpdateRank, CreateRank, DeleteRank,
+        GetRank, GetRanks, UpdateRank, CreateRank, DeleteRank,
         GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
@@ -134,6 +134,10 @@ function makeid(length) {
             charactersLength));
     }
     return result;
+}
+
+function randomizator(a, b) {
+    return Math.floor(Math.random() * b) + a;
 }
 const getAppCookies = (req) => {
     if (req.headers.cookie) {
@@ -304,7 +308,6 @@ Sentry.init({
         new Tracing.Integrations.Express({ app }),
     ],
     environment: "Dev - Beta",
-    debug: true,
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
@@ -653,11 +656,65 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
         }else{
             switch(req.params.comp){
                 case "routes":
-                    csv().fromFile(req.file.path).then((jsonObj)=>{
-                        for (var i = 0; i < jsonObj.length; i++){
-                            CreateRoute(makeid(50), jsonObj[i].num,jsonObj[i].flightTime,jsonObj[i].operator,jsonObj[i].aircraft,jsonObj[i].aircraft,jsonObj[i].depICAO,jsonObj[i].arrICAO,jsonObj[i].aircraftPublic,jsonObj[i].minHrs)
-                        }
-                    })
+                    let errorAllReadySent = false;
+                    if(req.file){
+                        csv().fromFile(req.file.path).then((jsonObj) => {
+                            jsonObj.forEach(row => {
+                                setTimeout(async () =>{
+                                    if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
+                                        const aircraft = await GetAircraft(row.aircraftID);
+                                        if (aircraft) {
+                                            const rank = await GetRank(row.rank);
+                                            if (rank) {
+                                                if (Array.isArray(rank) == false) {
+                                                    const operator = await GetOperatorByName(row.operator);
+                                                    if (operator) {
+                                                            setTimeout(() => {
+                                                                if (errorAllReadySent == false) {
+                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, row.rank);
+                                                                }
+                                                            }, 1500);
+                                                    } else {
+                                                        if (errorAllReadySent == false) {
+                                                            errorAllReadySent = true;
+                                                            res.status(404).send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)}`)
+                                                        }
+                                                    }
+                                                } else {
+                                                    if (errorAllReadySent == false) {
+                                                        errorAllReadySent = true;
+                                                        res.status(400).send(`Found 2 Ranks with the name: ${sanitizer.sanitize(row.rank)}, please update your ranks.`)
+                                                    }
+                                                }
+                                            } else {
+                                                if (errorAllReadySent == false) {
+                                                    errorAllReadySent = true;
+                                                    res.status(404).send(`Can't find rank by the name: ${sanitizer.sanitize(row.rank)}`)
+                                                }
+                                            }
+                                        } else {
+                                            if (errorAllReadySent == false) {
+                                                errorAllReadySent = true;
+                                                res.status(404).send(`Can't find aircraft with the ID: ${sanitizer.sanitize(row.aircraftID)}. Check the aircraft is in your fleet.`);
+                                            }
+                                        }
+                                    } else {
+                                        if(errorAllReadySent == false){
+                                            errorAllReadySent = true;
+                                            res.status(400).send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
+                                        }
+                                    }
+                                }, randomizator(50, 750))
+                            })
+                            setTimeout(() => {
+                                if (errorAllReadySent == false) {
+                                    res.redirect('/admin/routes')
+                                }
+                            }, 2000);
+                        })
+                    }else{
+                        res.status(400).send("Missing file.")
+                    }
                     break;
             }
         }
@@ -989,7 +1046,8 @@ app.get('*', async (req, res, next)=>{
                                     title: "Admin - Import",
                                     user: user,
                                     activer: "/admin",
-                                    config: getConfig()
+                                    config: getConfig(),
+                                    listCraft: vanetCraft
                                 })
                             } else {
                                 res.sendStatus(403);
