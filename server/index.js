@@ -422,19 +422,20 @@ app.get('/api/user/:callsign', async (req, res) => {
     console.log(req.params)
     if(req.params.callsign){
         let callsign = req.params.callsign.toString();
-        if(callsign.toString().slice(0,4) == config.other.code){
+        if(callsign.toString().slice(0,4) == config.code){
             callsign = callsign.slice(4, callsign.length);
         }
         let user = await GetUser(callsign)
         if(user){
             user = await getUserWithObjs(await GetUser(callsign), ["pireps"])
-            delete user['password']
-            delete user['admin']
-            delete user['VANetID']
-            delete user['cp']
+            delete user['password'];
+            delete user['admin'];
+            delete user['VANetID'];
+            delete user['cp'];
             delete user['llogin'];
-            delete user['revoked']
-            res.send(JSON.stringify(user));
+            delete user['revoked'];
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).end(JSON.stringify(user, null, 2));
         }else{
             res.sendStatus(404);
         }
