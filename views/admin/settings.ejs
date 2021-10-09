@@ -83,7 +83,14 @@
                     <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-primary">Update</button>
                 </form>
             </div>
-
+            <br>
+            <h2>3rd Party</h2>
+            <hr>
+            <div class="form-control shadow p-3 my-3">
+                <h4>Identifier</h4>
+                <p>Used for external identification. (IF Experiment Bot, etc)</p>
+                <span style="word-wrap: break-word;"><strong>Ident: </strong><%= config.other.ident%></span>
+            </div>
         </div>
         <%- include('./../components/footer.ejs') %>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
