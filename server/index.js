@@ -1902,7 +1902,7 @@ app.post("/admin/settings/accent", async function (req, res) {
                 }else{
                     newConfig.other.navColor.push("dark");
                 }
-                if(req.body.state && req.body.accent != "danger"){
+                if(req.body.state && req.body.accent != "danger" && req.body.accent != "light"){
                     newConfig.other.navColor.push(req.body.accent);
                     newConfig.other.btnColor = true;
                 }else{
