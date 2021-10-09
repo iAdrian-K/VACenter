@@ -18,7 +18,7 @@
     <%- include("./components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3 mb-4" id="content">
             <h2>New PIREP</h2>
-            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 File manual pirep
             </button>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -75,7 +75,7 @@
                                     <label class="form-label">PIREP Pictures</label><br>
                                     <input class="form-control mb-3" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
                                 <%}%>
-                                <button class="btn btn-primary">Create</button>
+                                <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
                             </form>
                         </div>
                         <div class="modal-footer">
