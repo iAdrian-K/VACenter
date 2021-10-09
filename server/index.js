@@ -701,12 +701,11 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                         }
                                     }
                                 }, randomizator(50, 750))
-                            })
-                            setTimeout(() => {
+                            }, () => {
                                 if (errorAllReadySent == false) {
                                     res.redirect('/admin/routes')
                                 }
-                            }, 2000);
+                            })
                         })
                     }else{
                         res.status(400).send("Missing file.")
