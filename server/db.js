@@ -565,6 +565,26 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
 }
 
 // Operators
+
+/**
+ * Returns record of Operator Name
+ * @param {string} name - Name of operator 
+ * @returns {Promise<operator>} Record for that operator
+ */
+function GetOperatorByName(name) {
+    return new Promise((resolve, error) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM operators WHERE operator = ?`, [name], (err, row) => {
+                if (err) {
+                    Sentry.captureException(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    });
+}
+
 /**
  * Returns record of specific Operator ID
  * @param {string} id - Unique id of operator 
@@ -950,6 +970,27 @@ function UpdateStat(name, newName, newValue){
 }
 
 // Ranks
+
+/**
+ * Get rank by name
+ * @param {string} name 
+ * @returns {Promise<rank>} Ranks
+ */
+function GetRank(name){
+    return new Promise((resolve, error) =>{
+        db.serialize(() => {
+            db.get(`SELECT * FROM ranks WHERE rank = ?`, [name], (err, row) => {
+                if (err) {
+                    Sentry.captureException(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    })
+}
+
+
 /**
  * Get all ranks
  * @returns {Promise<Array.<rank>>} Array of ranks
@@ -1395,9 +1436,9 @@ module.exports = {
     GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
     GetEvent, GetEvents, CreateEvent, DeleteEvent,
     GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-    GetOperator, GetOperators, CreateOperator, DeleteOperator,
+    GetOperatorByName, GetOperator, GetOperators, CreateOperator, DeleteOperator,
     GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
-    GetRanks, UpdateRank, CreateRank, DeleteRank,
+    GetRank, GetRanks, UpdateRank, CreateRank, DeleteRank,
     GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
     GetStats, UpdateStat, DeleteStat,
     GetToken, CreateToken, DeleteTokens,
