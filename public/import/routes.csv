@@ -1,1 +1,2 @@
-﻿num,flightTime,operator,aircraft,depICAO,arrICAO,aircraftPublic,minHrs
+num,flightTime,operator,aircraftID,depICAO,arrICAO,rank
+1,30,Test Virtual,05f62b14-907a-4b43-88f6-dc53df3f93a2,YSSY,YMML,Cadet
