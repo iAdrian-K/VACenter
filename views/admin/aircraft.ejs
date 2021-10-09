@@ -90,7 +90,6 @@
                 var selected = sel.val(); // cache selected value, before reordering
                 var opts_list = sel.find('option');
                 opts_list.sort(function(a, b) { return $(a).text() > $(b).text() ? 1 : -1; });
-                console.log(opts_list[0])
                 sel.html('').append(opts_list);
                 sel.val(selected); // set cached selected value
                 document.getElementById(id).selectedIndex = 0;
@@ -103,10 +102,8 @@
                 const xhr = new XMLHttpRequest();
                 xhr.addEventListener("readystatechange", function () {
                     if (this.readyState === this.DONE) {
-                        console.log(this)
                         if (this.status == 200) {
                             const data = JSON.parse(this.responseText);
-                            console.log(data)
                             document.getElementById("newAirLivSel").innerHTML = "";
                             data.livery.forEach(liv => {
                                 const el = document.createElement("option")
