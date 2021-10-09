@@ -1,4 +1,4 @@
-name: Sentry Deploy
+name: Sentry Release Beta
 
 on:
   release:
