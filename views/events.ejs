@@ -18,35 +18,33 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3 mb-4" id="content">
             <h2>Events</h2>
             <p class="text-muted">Click on an event to see more.</p>
-            <div class="container">
-                <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Title</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Locations</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% events.forEach(event=>{%>
-                            <tr data-bs-toggle="modal" style="cursor: pointer;" data-bs-target="#modal-<%=event.id%>">
-                                <th scope="row">
-                                    <%= event.title %>
-                                </th>
-                                <td>
-                                    <%= new Date(event.depTime).toLocaleDateString() %>
-                                </td>
-                                <td>
-                                    <%= event.depAir %> <i class="bi bi-chevron-right"></i> <%= event.arrAir%>
-                                </td>
-                                
-                            </tr>
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Locations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% events.forEach(event=>{%>
+                        <tr data-bs-toggle="modal" style="cursor: pointer;" data-bs-target="#modal-<%=event.id%>">
+                            <th scope="row">
+                                <%= event.title %>
+                            </th>
+                            <td>
+                                <%= new Date(event.depTime).toLocaleDateString() %>
+                            </td>
+                            <td>
+                                <%= event.depAir %> <i class="bi bi-chevron-right"></i> <%= event.arrAir%>
+                            </td>
                             
-                            <%})%>
-                    </tbody>
-                </table>
-                </div>
+                        </tr>
+                        
+                        <%})%>
+                </tbody>
+            </table>
             </div>
         </div>
         <% events.forEach(event =>{%>
