@@ -431,6 +431,9 @@ app.get('/api/user/:callsign', async (req, res) => {
             delete user['password']
             delete user['admin']
             delete user['VANetID']
+            delete user['cp']
+            delete user['llogin'];
+            delete user['revoked']
             res.send(JSON.stringify(user));
         }else{
             res.sendStatus(404);
