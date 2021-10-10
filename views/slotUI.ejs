@@ -36,10 +36,10 @@
     <% switch(session.state){
         case "NI":%> 
             <h1 class="display-6 fw-bold">Please fill in Required Info for your flight.</h1>
-            <form class="form" action="/updateSlot?state=NI&ses=<%=session.id%>" method="POST">
+            <form class="form needs-validation" action="/updateSlot?state=NI&ses=<%=session.id%>" novalidate method="POST">
                 <input type="hidden" name="sesID" value="<%= session.id %>">
                 <label class="form-label">Aircraft:
-                    <select class="form-select" name="aircraft">
+                    <select class="form-select" required name="aircraft">
                         <% aircraft.forEach(vic =>{%>
                             <option value="<%= vic.livID%>"><%= vic.publicName%></option>
                         <%})%>
@@ -74,16 +74,27 @@
             <h1 class="display-6 fw-bold">Flight Finished</h1>
             <p class="text-muted">Live Map not available at this time.</p>
             <p>Congratulations! You flew for <%= parseFloat(session.arrTime).toFixed(2)%> minutes. Please enter the following information to create the PIREP:</p>
-            <form method="POST" action="/finSlot?ses=<%= session.id%>" enctype="multipart/form-data">
-                <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
-                <input type="number" class="form-control mb-3" placeholder="Fuel used (kg)" required="" aria-label="Flight Time"
-                    name="fuel">
-                <label class="form-label">Comments</label><br>
-                <textarea class="form-control-plaintext border border-secondary rounded mb-3 p-2" name="comments"></textarea>
+            <form method="POST" class="needs-validation" novalidate action="/finSlot?ses=<%= session.id%>" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
+                    <input type="number" class="form-control" placeholder="Fuel used (kg)" required aria-label="Flight Time" name="fuel">
+                    <div class="valid-feedback">Good work!</div>
+                    <div class="invalid-feedback">Needs a valid number!</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Comments</label><br>
+                    <textarea class="form-control-plaintext border border-secondary rounded p-2" name="comments"></textarea>
+                    <div class="valid-feedback">Good work!</div>
+                    <div class="invalid-feedback">Needs valid text!</div>
+                </div>
                 <% if(config.other.pirepPic == true){%>
-                    <label class="form-label">PIREP Pictures</label><br>
-                    <input class="form-control mb-3" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
-                    <%}%>
+                    <div class="mb-3">
+                        <label class="form-label">PIREP Pictures</label><br>
+                        <input class="form-control" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
+                        <div class="valid-feedback">Good work!</div>
+                        <div class="invalid-feedback">Needs valid image!</div>
+                    </div>
+                <%}%>
                 <button class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
             </form>
         <% break;
@@ -164,6 +175,27 @@
                     }
                 })
             }
+    </script>
+    <script>
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
     </script>
 </body>
 
