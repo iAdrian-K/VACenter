@@ -58,37 +58,90 @@
                                 aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/admin/events/new">
+                            <form method="POST" action="/admin/events/new" class="needs-validation" novalidate>
                                 <h2>Create New Event</h2>
                                 <br>
-                                <input type="text" class="form-control mb-3" placeholder="Event Title" required="" aria-label="Title" name="title">
-                                <textarea class="form-control mb-3" name="desc" placeholder="Event Description"></textarea>
-                                <input type="text" class="form-control mb-3" placeholder="Departure ICAO" required="" aria-label="Departure ICAO" name="depICAO">
-                                <input type="text" class="form-control mb-3" placeholder="Arrival ICAO" required="" aria-label="Arrival ICAO" name="arrICAO">
+                                <div class="mb-4">
+                                    <label class="form-label" for="title">Event Title:</label>
+                                    <input type="text" class="form-control my-1" id="title" placeholder="Event Title" required="" aria-label="Title" name="title" required>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Needs to be valid text.
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label" for="desc">Event Title:</label>
+                                    <textarea class="form-control" name="desc" id="desc" required placeholder="Event Description"></textarea>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Needs to be valid text.
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label" for="depICAO">Departure ICAO:</label>
+                                    <input type="text" class="form-control mb-3" placeholder="YSSY" required aria-label="Departure ICAO" id="depICAO" name="depICAO" minlength="4" maxlength="4">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Needs to be valid 4 character airport code.
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label" for="depICAO">Arrival ICAO:</label>
+                                    <input type="text" class="form-control mb-3" placeholder="YMML" required aria-label="Arrival ICAO" id="arrICAO"
+                                        name="arrICAO" minlength="4" maxlength="4">
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Needs to be valid 4 character airport code.
+                                    </div>
+                                </div>
                                 <label class="form-label">
                                     Departure Time<br>
-                                    <input type="datetime-local" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Time"
+                                    <input type="datetime-local" class="form-control mb-3" placeholder="Departure Date" required aria-label="Time"
                                         name="date">
                                 </label>
-                                <label class="form-label w-100">Aircraft
-                                <select class="form-select mb-3" name="aircraft">
-                                    <% aircraft.forEach(vic=>{%>
-                                        <option value="<%= vic.livID%>"><%= vic.publicName%></option>    
-                                    <%})%>
-                                </select>
-                                </label>
-                                <label class="form-label w-100">Server
-                                <select class="form-select mb-3" name="server">
-                                    <option value="Expert">Expert</option>
-                                    <option value="Training">Training</option>
-                                    <option value="Casual">Casual</option>
-                                </select>
-                                </label>
+                                <div class="mb-4">
+                                    <label class="form-label" for="desc">Aircraft:</label>
+                                    <select class="form-select" name="aircraft" required>
+                                        <% aircraft.forEach(vic=>{%>
+                                            <option value="<%= vic.livID%>">
+                                                <%= vic.publicName%>
+                                            </option>
+                                            <%})%>
+                                    </select>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Needs to be an Aircraft.
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label" for="desc">Server:</label>
+                                    <select class="form-select" required name="server">
+                                        <option value="Expert">Expert</option>
+                                        <option value="Training">Training</option>
+                                        <option value="Casual">Casual</option>
+                                    </select>
+                                    <div class="valid-feedback">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Needs to be an Aircraft.
+                                    </div>
+                                </div>
                                 <label class="form-label w-100">
                                     Gates
                                     <br><span class="text-muted"><strong>NOTE:</strong> Please format the gates with the name followed by a comma, with no space, like follows: <i>Gate1,Gate2,Gate3</i></span>
                                 </label>
-                                <textarea class="form-control mb-3" name="gates" placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
+                                <textarea class="form-control mb-3" name="gates" required placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
                                 <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
                             </form>
                         </div>
