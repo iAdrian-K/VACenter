@@ -18,6 +18,7 @@ tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
 const express = require('express');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
+const csv = require('csvtojson')
 
 let hosting = process.env.HOSTFLAG ? true : false;
 
@@ -70,9 +71,9 @@ const {
         GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
         GetEvent, GetEvents, CreateEvent, DeleteEvent,
         GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-        GetOperator, GetOperators, CreateOperator, DeleteOperator,
+        GetOperatorByName, GetOperator, GetOperators, CreateOperator, DeleteOperator,
         GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
-        GetRanks, UpdateRank, CreateRank, DeleteRank,
+        GetRank, GetRanks, UpdateRank, CreateRank, DeleteRank,
         GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
@@ -131,6 +132,10 @@ function makeid(length) {
             charactersLength));
     }
     return result;
+}
+
+function randomizator(a, b) {
+    return Math.floor(Math.random() * b) + a;
 }
 const getAppCookies = (req) => {
     if (req.headers.cookie) {
@@ -301,7 +306,6 @@ Sentry.init({
         new Tracing.Integrations.Express({ app }),
     ],
     environment: "Dev - Beta",
-    debug: true,
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
@@ -451,7 +455,92 @@ app.get('/api/user/:callsign', async (req, res) => {
     }
 })
 
-app.get('*', async (req, res, next) => {
+app.post('/import/:comp', upload.single('csv'), async (req, res) => {
+    const cookies = getAppCookies(req);
+    if(((!config.code) && req.path != "/setup")){
+        if((!config.code) && req.path != "/setup"){
+            res.redirect('/setup')
+        }else{
+            res.redirect("/?r=ue")
+        }
+    }else{
+        const changePWD = await checkForCPWD(cookies);
+        let user = await checkForUser(cookies);
+        if(user){
+            user = await getUserWithObjs(user, ["notifications", "pireps"]);
+        }
+        if(changePWD == true && req.path != "/changePWD"){
+            res.redirect('/changePWD');
+        }else if(user.revoked == 1){
+            res.clearCookie('authToken').redirect("/?r=ro")
+        }else{
+            switch(req.params.comp){
+                case "routes":
+                    let errorAllReadySent = false;
+                    if(req.file){
+                        csv().fromFile(req.file.path).then((jsonObj) => {
+                            jsonObj.forEach(row => {
+                                setTimeout(async () =>{
+                                    if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
+                                        const aircraft = await GetAircraft(row.aircraftID);
+                                        if (aircraft) {
+                                            const rank = await GetRank(row.rank);
+                                            if (rank) {
+                                                if (Array.isArray(rank) == false) {
+                                                    const operator = await GetOperatorByName(row.operator);
+                                                    if (operator) {
+                                                            setTimeout(() => {
+                                                                if (errorAllReadySent == false) {
+                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, row.rank);
+                                                                }
+                                                            }, 1500);
+                                                    } else {
+                                                        if (errorAllReadySent == false) {
+                                                            errorAllReadySent = true;
+                                                            res.status(404).send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)}`)
+                                                        }
+                                                    }
+                                                } else {
+                                                    if (errorAllReadySent == false) {
+                                                        errorAllReadySent = true;
+                                                        res.status(400).send(`Found 2 Ranks with the name: ${sanitizer.sanitize(row.rank)}, please update your ranks.`)
+                                                    }
+                                                }
+                                            } else {
+                                                if (errorAllReadySent == false) {
+                                                    errorAllReadySent = true;
+                                                    res.status(404).send(`Can't find rank by the name: ${sanitizer.sanitize(row.rank)}`)
+                                                }
+                                            }
+                                        } else {
+                                            if (errorAllReadySent == false) {
+                                                errorAllReadySent = true;
+                                                res.status(404).send(`Can't find aircraft with the ID: ${sanitizer.sanitize(row.aircraftID)}. Check the aircraft is in your fleet.`);
+                                            }
+                                        }
+                                    } else {
+                                        if(errorAllReadySent == false){
+                                            errorAllReadySent = true;
+                                            res.status(400).send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
+                                        }
+                                    }
+                                }, randomizator(50, 750))
+                            }, () => {
+                                if (errorAllReadySent == false) {
+                                    res.redirect('/admin/routes')
+                                }
+                            })
+                        })
+                    }else{
+                        res.status(400).send("Missing file.")
+                    }
+                    break;
+            }
+        }
+    }
+});
+
+app.get('*', async (req, res, next)=>{
     const cookies = getAppCookies(req)
     if (req.path.slice(0, 8) == "/public/") {
         if (await FileExists(path.join(__dirname, "..", req.path))) {
@@ -770,6 +859,24 @@ app.get('*', async (req, res, next) => {
                                 res.sendStatus(403);
                             }
 
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/admin/import":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/import", {
+                                    active: req.path,
+                                    title: "Admin - Import",
+                                    user: user,
+                                    activer: "/admin",
+                                    config: getConfig(),
+                                    listCraft: vanetCraft
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
