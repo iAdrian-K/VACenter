@@ -49,7 +49,7 @@
                     </tbody>
                 </table>
             
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     Add Route
                 </button>
                 <% routes.forEach(route=>{%>
@@ -168,7 +168,7 @@
                                     <%})%>
                             </select>
                             <br>
-                            <button class="btn btn-primary">Create</button>
+                            <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
                         </form>
                     </div>
                     <div class="modal-footer">

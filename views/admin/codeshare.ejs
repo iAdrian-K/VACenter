@@ -40,7 +40,7 @@
                 </tbody>
             </table>
             <br>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Add Operator
             </button>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -49,13 +49,12 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">Add Operator</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <form method="POST" action="/admin/codeshare/new">
                                 <label class="form-label">Operator Name:
                                     <input class="form-control mt-1" id="newAirAirSel" name="airName"><br>
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
                             </form>
                         </div>
                         <div class="modal-footer">

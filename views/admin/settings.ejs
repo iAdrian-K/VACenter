@@ -31,36 +31,44 @@
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/accent" method="post">
                     <h4>Accent Color</h4>
-                    <input type="radio" class="btn-check" name="accent" value="primary" id="primary" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="primary"){%>checked<%}%> name="accent" value="primary" id="primary" autocomplete="off">
                     <label class="btn btn-primary my-2" for="primary">Blue</label>
-                    <input type="radio" class="btn-check" name="accent" value="secondary" id="secondary" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="secondary"){%>checked<%}%> name="accent" value="secondary" id="secondary" autocomplete="off">
                     <label class="btn btn-secondary my-2" for="secondary">Grey</label>
-                    <input type="radio" class="btn-check" name="accent" value="danger" id="danger" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="danger"){%>checked<%}%> name="accent" value="danger" id="danger" autocomplete="off">
                     <label class="btn btn-danger my-2" for="danger">Red</label>
-                    <input type="radio" class="btn-check" name="accent" value="success" id="success" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="success"){%>checked<%}%> name="accent" value="success" id="success" autocomplete="off">
                     <label class="btn btn-success my-2" for="success">Green</label>
-                    <input type="radio" class="btn-check" name="accent" value="warning" id="warning" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="warning"){%>checked<%}%> name="accent" value="warning" id="warning" autocomplete="off">
                     <label class="btn btn-warning my-2" for="warning">Yellow</label>
-                    <input type="radio" class="btn-check" name="accent" value="light" id="light" autocomplete="off">
-                    <label class="btn btn-light my-2" for="light">White</label>
-                    <input type="radio" class="btn-check" name="accent" value="dark" id="dark" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="light"){%>checked<%}%> name="accent" value="light" id="light" autocomplete="off">
+                    <label class="btn btn-light my-2" for="light">Light</label>
+                    <!--<input type="radio" class="btn-check" <% if(config.other.navColor[0]=="white"){%>checked<%}%> name="accent" value="white" id="white" autocomplete="off">
+                    <label class="btn btn-white my-2 border border-black" for="white">White</label>-->
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="dark"){%>checked<%}%> name="accent" value="dark" id="dark" autocomplete="off">
                     <label class="btn btn-dark my-2" for="dark">Dark</label>
+                    <br>
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.btnColor == true){%>checked<%}%>>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Affect Buttons</label>
+                    </div>
+                    <span class="text-muted">Not avaliable with red or light</span>
                     <br><br>
-                    <button class="btn btn-primary" type="submit">Submit new Color</button>
+                    <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit new Color</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/bg" method="post">
                 <h4>Background URL</h4>
                 <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>"><br>
-                <button type="submit" class="btn btn-primary">Update</button>
+                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/logo" method="post">
                 <h4>Logo URL</h4>
                 <input class="form-control" type="url" name="value" value="<%= config.other.logo%>"><br>
-                <button type="submit" class="btn btn-primary">Update</button>
+                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
@@ -73,14 +81,14 @@
                     </div>
                     <br>
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
+                        <div class="progress-bar bg-<%= config.other.navColor[2] %>" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
                     </div>
                     <br>
                     <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
                     <hr>
                     <label>Pireps will be removed <input step="any" type="number" class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
                     <br><br>
-                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-primary">Update</button>
+                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
 
@@ -148,7 +156,7 @@
                             document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
                         }else{
                             document.getElementById("statusStatus").remove()
-                            document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-primary' onclick='sendUpdate()'>Update</button>"
+                            document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-<%= config.other.navColor[2] %>' onclick='sendUpdate()'>Update</button>"
                         }
                     }
                 });

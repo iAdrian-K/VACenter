@@ -18,84 +18,82 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3" id="content">
             <h2>Events</h2>
             <p class="text-muted">Click on an event to see more.</p>
-            <div class="container">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Title</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Locations</th>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Locations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% events.forEach(event=>{%>
+                        <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=event.id%>">
+                                    <th scope="row">
+                                        <%= event.title%>
+                                    </th>
+                                    <td>
+                                        <%= new Date(event.depTime).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <%= event.depAir %> <i class="bi bi-chevron-right"></i> <%= event.arrAir%>
+                                    </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <% events.forEach(event=>{%>
-                            <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=event.id%>">
-                                        <th scope="row">
-                                            <%= event.title%>
-                                        </th>
-                                        <td>
-                                            <%= new Date(event.depTime).toLocaleDateString() %>
-                                        </td>
-                                        <td>
-                                            <%= event.depAir %> <i class="bi bi-chevron-right"></i> <%= event.arrAir%>
-                                        </td>
-                            </tr>
 
 
-                            <%})%>
-                    </tbody>
-                </table>
+                        <%})%>
+                </tbody>
+            </table>
 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Add Event
-                </button>
-                <div class="modal fade hideScroll" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add Event</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action="/admin/events/new">
-                                    <h2>Create New Event</h2>
-                                    <br>
-                                    <input type="text" class="form-control mb-3" placeholder="Event Title" required="" aria-label="Title" name="title">
-                                    <textarea class="form-control mb-3" name="desc" placeholder="Event Description"></textarea>
-                                    <input type="text" class="form-control mb-3" placeholder="Departure ICAO" required="" aria-label="Departure ICAO" name="depICAO">
-                                    <input type="text" class="form-control mb-3" placeholder="Arrival ICAO" required="" aria-label="Arrival ICAO" name="arrICAO">
-                                    <label class="form-label">
-                                        Departure Time<br>
-                                        <input type="datetime-local" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Time"
-                                            name="date">
-                                    </label>
-                                    <label class="form-label w-100">Aircraft
-                                    <select class="form-select mb-3" name="aircraft">
-                                        <% aircraft.forEach(vic=>{%>
-                                            <option value="<%= vic.livID%>"><%= vic.publicName%></option>    
-                                        <%})%>
-                                    </select>
-                                    </label>
-                                    <label class="form-label w-100">Server
-                                    <select class="form-select mb-3" name="server">
-                                        <option value="Expert">Expert</option>
-                                        <option value="Training">Training</option>
-                                        <option value="Casual">Casual</option>
-                                    </select>
-                                    </label>
-                                    <label class="form-label w-100">
-                                        Gates
-                                        <br><span class="text-muted"><strong>NOTE:</strong> Please format the gates with the name followed by a comma, with no space, like follows: <i>Gate1,Gate2,Gate3</i></span>
-                                    </label>
-                                    <textarea class="form-control mb-3" name="gates" placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
-                                    <button class="btn btn-primary">Create</button>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Add Event
+            </button>
+            <div class="modal fade hideScroll" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add Event</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/admin/events/new">
+                                <h2>Create New Event</h2>
+                                <br>
+                                <input type="text" class="form-control mb-3" placeholder="Event Title" required="" aria-label="Title" name="title">
+                                <textarea class="form-control mb-3" name="desc" placeholder="Event Description"></textarea>
+                                <input type="text" class="form-control mb-3" placeholder="Departure ICAO" required="" aria-label="Departure ICAO" name="depICAO">
+                                <input type="text" class="form-control mb-3" placeholder="Arrival ICAO" required="" aria-label="Arrival ICAO" name="arrICAO">
+                                <label class="form-label">
+                                    Departure Time<br>
+                                    <input type="datetime-local" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Time"
+                                        name="date">
+                                </label>
+                                <label class="form-label w-100">Aircraft
+                                <select class="form-select mb-3" name="aircraft">
+                                    <% aircraft.forEach(vic=>{%>
+                                        <option value="<%= vic.livID%>"><%= vic.publicName%></option>    
+                                    <%})%>
+                                </select>
+                                </label>
+                                <label class="form-label w-100">Server
+                                <select class="form-select mb-3" name="server">
+                                    <option value="Expert">Expert</option>
+                                    <option value="Training">Training</option>
+                                    <option value="Casual">Casual</option>
+                                </select>
+                                </label>
+                                <label class="form-label w-100">
+                                    Gates
+                                    <br><span class="text-muted"><strong>NOTE:</strong> Please format the gates with the name followed by a comma, with no space, like follows: <i>Gate1,Gate2,Gate3</i></span>
+                                </label>
+                                <textarea class="form-control mb-3" name="gates" placeholder="Gate1,Gate2,Gate3">Gate1,Gate2,Gate3</textarea>
+                                <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
