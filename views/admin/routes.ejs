@@ -61,7 +61,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="POST" action="/admin/routes/update">
+                                <form method="POST" action="/admin/routes/update" class="needs-validation" novalidate>
                                     <h2>Modify <%=config.code + route.num%></h2>
                                     <br>
                                     <div class="input-group mb-3">
@@ -71,17 +71,28 @@
                                         <input type="text" class="form-control text-secondary" placeholder="Route Number" aria-label="Username" required=""
                                             aria-describedby="basic-addon1" name="num" value="<%= route.num%>" readonly>
                                     </div>
-                                    <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
-                                    <select class="form-select mb-3" name="aircraft" multiple required>
-                                        <% craft.forEach(vic=>{%>
-                                            <option value="<%= vic.livID%>" <% if(route.aircraft.split(",").includes(vic.livID)){%>selected<%}%>>
-                                                <%= vic.publicName%>
-                                            </option>
-                                            <%})%>
-                                    </select>
-                                    <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
-                                    <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required="" aria-label="Flight Time"
-                                        name="ft" value="<%= route.ft%>">
+                                    <div class="mb-3">
+                                        <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
+                                        <select class="form-select" name="aircraft" multiple required>
+                                            <% craft.forEach(vic=>{%>
+                                                <option value="<%= vic.livID%>" <% if(route.aircraft.split(",").includes(vic.livID)){%>selected<%}%>>
+                                                        <%= vic.publicName%>
+                                                </option>
+                                                <%})%>
+                                        </select>
+                                        <div class="valid-feedback">Looks good!</div>
+                                        <div class="invalid-feedback">Need to select at least one aircraft.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
+                                        <input type="number" class="form-control" placeholder="Flight Time (mins)" required="" aria-label="Flight Time" name="ft" value="<%= route.ft%>">
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Needs to be a valid number!
+                                        </div>
+                                    </div>
                                     <label class="form-label">Operator</label>
                                     <select class="form-select mb-3" name="op" value="<%= route.operator %>">
                                         <% ops.forEach(op=>{%>
@@ -98,10 +109,27 @@
                                             </option>
                                         <%})%>
                                     </select>
-                                    <label class="form-label">Departure ICAO</label>
-                                    <input type="text" class="form-control mb-3" placeholder="YSSY" required="" aria-label="ICAO Departure" name="depIcao" value="<%= route.depICAO%>">
-                                    <label class="form-label">Arrival ICAO</label>
-                                    <input type="text" class="form-control mb-3" placeholder="YMML" required="" aria-label="ICAO Arrival" name="arrIcao" value="<%= route.arrICAO%>">
+                                    <div class="mb-4">
+                                        <label class="form-label" for="depICAO">Departure ICAO:</label>
+                                        <input type="text" minlength="4" maxlength="4" class="form-control" placeholder="YSSY" required="" aria-label="ICAO Departure" name="depIcao" value="<%= route.depICAO%>">
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Needs to be valid 4 character airport code.
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label" for="arrICAO">Arrival ICAO:</label>
+                                        <input type="text" minlength="4" maxlength="4" class="form-control" placeholder="YMML" required=""
+                                            aria-label="ICAO Departure" name="arrIcao" value="<%= route.arrICAO%>">
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Needs to be valid 4 character airport code.
+                                        </div>
+                                    </div>
                                     <input type="hidden" value="<%= route.id%>" name="id">
                                     <button class="btn btn-primary">Update</button>
                                     <button class="btn btn-danger" type="button" onclick="remRoute('<%= route.id%>')">Remove</button>
@@ -124,7 +152,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form method="POST" action="/admin/routes/new" id="nrform">
+                        <form method="POST" action="/admin/routes/new" class="needs-validation" novalidate id="nrform">
                             <h2>Create new route</h2>
                             <br>
                             <div class="input-group mb-3">
@@ -133,26 +161,51 @@
                                 </span>
                                 <input type="text" class="form-control" placeholder="Route Number" aria-label="Username"
                                     required="" aria-describedby="basic-addon1" name="num">
+                                <div class="valid-feedback">Looks good!</div>
+                                <div class="invalid-feedback">Needs to be a valid route number.</div>
                             </div>
-                            <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
-                            <select class="form-select mb-3" name="aircraft" multiple required>
-                                <% craft.forEach(vic=>{%>
-                                    <option value="<%= vic.livID%>">
-                                        <%= vic.publicName%>
-                                    </option>
-                                    <%})%>
-                            </select>
-                            <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
-                            <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
-                                aria-label="Flight Time" name="ft">
-                            <label class="form-label">Departure ICAO</label>
-                            <input type="text" class="form-control mb-3" placeholder="YSSY" required=""
-                                aria-label="ICAO Departure" name="depIcao">
-                            <label class="form-label">Arrival ICAO</label>
-                            <input type="text" class="form-control mb-3" placeholder="YMML" required=""
-                                aria-label="ICAO Arrival" name="arrIcao">
+                            <div class="mb-3">
+                                <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
+                                <select class="form-select" name="aircraft" multiple required>
+                                    <% craft.forEach(vic=>{%>
+                                        <option value="<%= vic.livID%>">
+                                            <%= vic.publicName%>
+                                        </option>
+                                        <%})%>
+                                </select>
+                                <div class="valid-feedback">Looks good!</div>
+                                <div class="invalid-feedback">Need to select at least one aircraft.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
+                                <input type="number" class="form-control" placeholder="Flight Time (mins)" required="" aria-label="Flight Time" name="ft">
+                                <div class="valid-feedback">Looks good!</div>
+                                <div class="invalid-feedback">Need a valid flight time.</div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label" for="depICAO">Departure ICAO:</label>
+                                <input type="text" class="form-control" placeholder="YSSY" required aria-label="Departure ICAO" id="arrICAO"
+                                    name="depIcao" minlength="4" maxlength="4">
+                                <div class="valid-feedback">
+                                    Looks good!
+                                </div>
+                                <div class="invalid-feedback">
+                                    Needs to be valid 4 character airport code.
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label" for="depICAO">Arrival ICAO:</label>
+                                <input type="text" class="form-control" placeholder="YMML" required aria-label="Arrival ICAO" id="arrICAO"
+                                    name="arrIcao" minlength="4" maxlength="4">
+                                <div class="valid-feedback">
+                                    Looks good!
+                                </div>
+                                <div class="invalid-feedback">
+                                    Needs to be valid 4 character airport code.
+                                </div>
+                            </div>
                             <label class="form-label">Operator</label>
-                            <select class="form-select mb-3" name="op">
+                            <select class="form-select mb-3" required name="op">
                                 <% ops.forEach(op=>{%>
                                     <option value="<%= op.id%>">
                                         <%= op.operator%>
@@ -160,7 +213,7 @@
                                     <%})%>
                             </select>
                             <label class="form-label text-muted">Minimum Rank</label>
-                            <select class="form-select" name="minH">
+                            <select class="form-select" required name="minH">
                                 <% ranks.forEach(rank=>{%>
                                     <option value="<%= rank.minH%>">
                                         <%= rank.rank%>
