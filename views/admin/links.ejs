@@ -54,13 +54,21 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/admin/links/new">
+                            <form method="POST" class="needs-validation" novalidate action="/admin/links/new">
                                 <h2>Create New Link</h2>
                                 <br>
-                                <input type="text" class="form-control mb-3" placeholder="Link Title" required=""
-                                    aria-label="Title" name="title">
-                                <input type="url" class="form-control mb-3" placeholder="Link URL" required=""
-                                    aria-label="URL" name="url">
+                                <div class="mb-3">
+                                    <label for="title">Link Title:</label>
+                                    <input type="text" class="form-control" placeholder="Link Title" required aria-label="Title" id="title" name="title">
+                                    <div class="valid-feedback">Looks Good!</div>
+                                    <div class="invalid-feedback">Need valid text.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="url">Link URL:</label>
+                                    <input type="url" class="form-control" placeholder="Link URL" required id="url" aria-label="URL" name="url">
+                                    <div class="valid-feedback">Looks Good!</div>
+                                    <div class="invalid-feedback">Need a valid URL.</div>
+                                </div>
                                 <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
                             </form>
                         </div>
