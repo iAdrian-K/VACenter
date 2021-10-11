@@ -263,7 +263,9 @@ const updateStats = async () => {
     stats.pirepsLength = 0;
     (await GetPireps()).forEach(pirep =>{
         stats.pirepsLength++;
+        console.log(pirep.status)
         if(pirep.status == "a"){
+            console.log(pirep)
             stats.totalHours = stats.totalHours + (pirep.flightTime)/60
         }
     })
@@ -418,7 +420,7 @@ async function getUserWithObjs(userObj, flags){
 
 //Basic Routes
 
-app.get('/api/user/:callsign', async (req, res) => {
+app.get('/api/data/user/:callsign', async (req, res) => {
     if(req.query.auth){
         if(req.query.auth == config.other.ident.slice(0,8)){
             if (req.params.callsign) {
@@ -447,6 +449,46 @@ app.get('/api/user/:callsign', async (req, res) => {
             res.sendStatus(401);
         }
     }else{
+        res.sendStatus(401);
+    }
+})
+app.get('/api/data/pireps/:id', async (req, res) => {
+    if (req.query.auth) {
+        if (req.query.auth == config.other.ident.slice(0, 8)) {
+            if (req.params.id) {
+                let id = req.params.id;
+                let pirep = await GetPirep(id);
+                if (pirep) {
+                    // delete user['password'];
+                    // delete user['admin'];
+                    // delete user['VANetID'];
+                    // delete user['cp'];
+                    // delete user['llogin'];
+                    // delete user['revoked'];
+                    res.setHeader('Content-Type', 'application/json');
+                    res.status(200).end(JSON.stringify(pirep, null, 2));
+                } else {
+                    res.sendStatus(404);
+                }
+            } else {
+                res.sendStatus(400);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+})
+app.get('/api/data/stats', async (req, res) => {
+    if (req.query.auth) {
+        if (req.query.auth == config.other.ident.slice(0, 8)) {
+                res.setHeader('Content-Type', 'application/json');
+                res.status(200).end(JSON.stringify(stats, null, 2));
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
         res.sendStatus(401);
     }
 })
@@ -1693,6 +1735,7 @@ app.post("/admin/pireps/apr", async function (req, res){
                 const targetPIREP = await GetPirep(req.body.id)
                 if(targetPIREP){
                     targetPIREP.status = "a";
+                    updateStats();
                     if(config.other.pirepPic == true){
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
