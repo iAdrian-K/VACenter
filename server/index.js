@@ -1091,9 +1091,7 @@ app.get('*', async (req, res, next)=>{
                         }
                         break;
                     case "/report":
-                        res.render("report",{
-                            config: getConfig()
-                        })
+                        res.redirect("https://github.com/VACenter/VACenter/issues/new?assignees=&labels=bug&template=bug_report.md&title=")
                         break;
                     case '/changePWD':
                         if(user){
