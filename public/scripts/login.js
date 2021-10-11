@@ -38,18 +38,49 @@ const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.has('r')){
     switch (urlParams.get('r')) {
         case "ni":
-            swal("Oh no!", "You didn't enter a piece of information!", 'error')
+            swal("Oh no!", "You didn't enter a piece of information!", 'error').then(() =>{
+                window.location.href = "/"
+            })
             break;
         case "ro":
-            swal("Oh no!", "This account has been revoked by an administrator!", 'error')
+            swal("Oh no!", "This account has been revoked by an administrator!", 'error').then(() => {
+                window.location.href = "/"
+            })
             break;
         case "ii":
-            swal("Oh no!", "The information you entered was incorrect!", 'error')
+            swal("Oh no!", "The information you entered was incorrect!", 'error').then(() => {
+                window.location.href = "/"
+            })
             break;
         case "ue":
-            swal("Oh no!", "There was an unknown error!", 'error')
+            swal("Oh no!", "There was an unknown error!", 'error').then(() => {
+                window.location.href = "/"
+            })
             break;
         default:
             break;
+    }
+}
+function applyAction(enabled, link){
+    if(enabled){
+
+    }else{
+        swal({
+            title: "Application",
+            text: "This VA does not have this feature enabled, contact them to learn how to apply.",
+            icon: 'info'
+        })
+    }
+}
+
+function resetAction(enabled){
+    if(enabled){
+        
+    }else{
+        swal({
+            title: "Reset Password",
+            text: "This VA does not allow passwords to be reset here. Contact an Admin to have them reset it for you.",
+            icon: "error"
+        })
     }
 }

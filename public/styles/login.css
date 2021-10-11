@@ -1,12 +1,20 @@
-@media only screen and (max-width: 1000px){
-    .loginContainer{
-        width: 80vw;
-    }
+body{
+    height: 100vh;
+    width: 100vw;
 }
-@media only screen and (max-width: 600px){
-    .loginContainer{
-        width: 100vw !important;
-        height: 100vh;
-        top: 0px !important;
-    }
+.w-30{
+    width: 30% !important;
+}
+.w-40{
+    width: 40% !important;
+}
+.w-60{
+    width: 60% !important;
+}
+.w-70{
+    width: 70% !important;
+}
+#loginBGSide{
+    background-size: cover;
+    background-position: center;
 }
