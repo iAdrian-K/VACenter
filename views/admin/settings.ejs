@@ -58,21 +58,31 @@
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/bg" method="post">
+                <form action="/admin/settings/bg" novalidate class="needs-validation" method="post">
                 <h4>Background URL</h4>
-                <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>"><br>
+                <div>
+                    <input class="form-control" required type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>">
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Need a valid URL!</div>
+                </div>
+                <br>
                 <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/logo" method="post">
+                <form action="/admin/settings/logo" method="post" class="needs-validation" novalidate>
                 <h4>Logo URL</h4>
-                <input class="form-control" type="url" name="value" value="<%= config.other.logo%>"><br>
+                <div>
+                    <input class="form-control" required type="url" name="value" value="<%= config.other.logo%>">
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Need a valid URL!</div>
+                </div>
+                <br>
                 <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/pirepPic" method="post">
+                <form action="/admin/settings/pirepPic" novalidate class="needs-validation" method="post">
                     <h4>PIREP Pictures</h4>
                     <p>Allow Pilots to submit pictures of their Flights. <% if(hosting){%><span class="text-muted">This feature is disabled since you are on VACenter Standard Plan.</span><%}%></p>
                     <div class="form-check form-switch">
@@ -86,8 +96,16 @@
                     <br>
                     <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
                     <hr>
-                    <label>Pireps will be removed <input step="any" type="number" class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
-                    <br><br>
+                    <div>
+                        <label>Pireps will be removed <input min="0" step="any" type="number" required class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Needs to be a valid number of days!
+                        </div>
+                    </div>
+                    <br>
                     <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>

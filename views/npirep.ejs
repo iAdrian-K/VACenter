@@ -29,29 +29,37 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/newPIREP" enctype="multipart/form-data">
+                            <form method="POST" action="/newPIREP" novalidate class="needs-validation" enctype="multipart/form-data">
                                 <% if(config.key&&!(user.VANetID)){%>
                                     <p class="text-danger mb-3">Your account can not communicate with VANet servers. This PIREP will not be sent to VANet. Visit the account page to fix this.</p>    
                                 <%}%>
                                 <h2>Create new PIREP</h2>
                                 <br>
-                                <label for="myBrowser">Type to search for a route:</label>
-                                <input list="routes" id="route" name="route" class="mb-3 form-control" placeholder="Route">
-                                <datalist id="routes">
-                                    <% routes.forEach(route=>{%>
-                                        <% if((parseInt(route.minRank)) <= user.hours){%>
-                                            <option value="<%= config.code + route.num %>"></option>
-                                        <%}%>
-                                    <%})%>
-                                </datalist>
-                                <label class="form-label">Aircraft</label>
-                                <select class="form-select mb-3" name="aircraft">
-                                    <% craft.forEach(vic=>{%>
-                                        <option value="<%= vic.publicName%>">
-                                            <%= vic.publicName%>
-                                        </option>
+                                <div class="mb-3">
+                                    <label for="myBrowser">Type to search for a route:</label>
+                                    <input list="routes" id="route" name="route" required class=" form-control" placeholder="Route">
+                                    <datalist id="routes">
+                                        <% routes.forEach(route=>{%>
+                                            <% if((parseInt(route.minRank)) <= user.hours){%>
+                                                <option value="<%= config.code + route.num %>"></option>
+                                            <%}%>
                                         <%})%>
-                                </select>
+                                    </datalist>
+                                    <div class="valid-feedback">Looks good!</div>
+                                    <div class="invalid-feedback">Requires a valid Route.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Aircraft</label>
+                                    <select class="form-select" required name="aircraft">
+                                        <% craft.forEach(vic=>{%>
+                                            <option value="<%= vic.publicName%>">
+                                                <%= vic.publicName%>
+                                            </option>
+                                            <%})%>
+                                    </select>
+                                    <div class="valid-feedback">Looks good!</div>
+                                    <div class="invalid-feedback">Requires an aircraft.</div>
+                                </div>
                                 <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
                                 <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
                                     aria-label="Flight Time" name="ft">
