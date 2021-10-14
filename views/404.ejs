@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="/public/styles/public.css">
 </head>
 
-<body class="w-100">
+<body class="w-100" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('<%= config.other.bg %>');">
     <div class="box w-100">
-        <div class="row header px-5 py-3 fs-5 w-100 end-0">
+        <div class="row header bg-white px-5 py-3 fs-5 w-100 end-0">
             <div class="d-block text-center text-md-left" style="line-height: 1.75em;">
                 <span class="fw-bold float-md-start me-3">
                     <img src="<%= config.other.logo %>" class="rounded-circle" style="object-fit: cover; width: 1em; height: 1em; vertical-align:text-bottom"> <%= config.name%>
@@ -22,7 +22,7 @@
                 <button class="btn btn-primary float-none float-md-end" id="backBTN" onclick="history.back()">Go Back</button>
             </div>
         </div>
-        <div class="row text-white content w-100 end-0" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('<%= config.other.bg %>');">
+        <div class="row text-white content w-100 end-0">
             <div class="position-relative p-5">
                 <h2>Error 404</h2>
                 <h1 class="display-3 fw-bold h-auto">Something is missing</h1>
@@ -30,9 +30,10 @@
                 <button class="btn btn-primary" onclick="history.back()"><i class="bi bi-chevron-left"></i> Go Back</button>
             </div>
         </div>
-        <div class="row footer text-dark w-100 bg-light">
-            <div class="w-100 text-center p-2 pb-0">
-                <p>Powered by VACenter V<%= version%></p>
+        <div class="row footer w-100">
+            <div class="w-100 text-center p-2 pb-0 text-light">
+                <p>Powered by VACenter V<%= version%>
+                </p>
             </div>
         </div>
     </div>
