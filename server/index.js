@@ -426,7 +426,7 @@ async function getUserWithObjs(userObj, flags){
 
 app.get('/api/data/user/:callsign', async (req, res) => {
     if(req.query.auth){
-        if(req.query.auth == config.other.ident.slice(0,8)){
+        if(req.query.auth == config.other.ident){
             if (req.params.callsign) {
                 let callsign = req.params.callsign.toString();
                 if (callsign.toString().slice(0, 4) == config.code) {
@@ -458,7 +458,7 @@ app.get('/api/data/user/:callsign', async (req, res) => {
 })
 app.get('/api/data/pireps/:id', async (req, res) => {
     if (req.query.auth) {
-        if (req.query.auth == config.other.ident.slice(0, 8)) {
+        if (req.query.auth == config.other.ident) {
             if (req.params.id) {
                 let id = req.params.id;
                 let pirep = await GetPirep(id);
@@ -486,7 +486,7 @@ app.get('/api/data/pireps/:id', async (req, res) => {
 })
 app.get('/api/data/stats', async (req, res) => {
     if (req.query.auth) {
-        if (req.query.auth == config.other.ident.slice(0, 8)) {
+        if (req.query.auth == config.other.ident) {
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200).end(JSON.stringify(stats, null, 2));
         } else {
