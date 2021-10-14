@@ -40,7 +40,7 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary" type="submit">Submit</button>
+                            <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit</button>
                         </div>
                     </form>    
                 <%}%>
@@ -66,14 +66,14 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <button class="btn btn-primary" type="submit">Submit</button>
+                        <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit</button>
                     </div>
                 </form>
                 <br>
                 <h2>Security</h2>
                 <hr>
                 <form action="/OSOR" method="POST">
-                    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign out everywhere</button>
+                    <button class="btn btn-<%= config.other.navColor[2] %> w-100" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign out everywhere</button>
                 </form><br>
                 <form class="row g-3 mx-0 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST"
                     action="/CPWD" onsubmit="if((document.getElementById('validationPwd1').value == document.getElementById('validationPwd2').value)==false){alert('Passwords do not match.')}; return document.getElementById('validationPwd1').value == document.getElementById('validationPwd2').value;">

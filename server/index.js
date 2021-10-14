@@ -964,9 +964,7 @@ app.get('*', async (req, res, next)=>{
                         }
                         break;
                     case "/report":
-                        res.render("report", {
-                            config: getConfig()
-                        })
+                        res.redirect("https://github.com/VACenter/VACenter/issues/new?assignees=&labels=bug&template=bug_report.md&title=")
                         break;
                     case '/changePWD':
                         if (user) {
@@ -1107,7 +1105,7 @@ app.post('/setup', async (req,res)=>{
                 bg: "/public/images/stockBG2.jpg",
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
-                navColor: ["dark", "dark"],
+                navColor: ["dark", "dark", "primary"],
                 ident: makeid(25),
                 pirepPic: false,
                 pirepPicExpire: 86400000,
@@ -1160,7 +1158,7 @@ app.post('/setupNVN', async (req, res) => {
                 bg: "/public/images/stockBG2.jpg",
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
-                navColor: ["dark", "dark"],
+                navColor: ["dark", "dark", "primary"],
                 ident: makeid(25),
                 pirepPic: hosting? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
@@ -1810,11 +1808,19 @@ app.post("/admin/settings/accent", async function (req, res) {
                 const newConfig = getConfig();
                 newConfig.other.navColor = [];
                 newConfig.other.navColor.push(req.body.accent);
-                if(req.body.accent == "light"){
+                if(req.body.accent == "light" || req.body.accent == "white"){
                     newConfig.other.navColor.push("light");
                 }else{
                     newConfig.other.navColor.push("dark");
                 }
+                if(req.body.state && req.body.accent != "danger" && req.body.accent != "light"){
+                    newConfig.other.navColor.push(req.body.accent);
+                    newConfig.other.btnColor = true;
+                }else{
+                    newConfig.other.navColor.push("primary");
+                    newConfig.other.btnColor = false;
+                }
+                
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
                 res.redirect("/admin/settings")
             } else {

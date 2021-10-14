@@ -18,79 +18,99 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3" id="content">
             <h2>Users</h2>
             <p class="text-muted">Click on a user to see more.</p>
-            <div class="container">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Username</th>
-                            <th scope="col">Rank</th>
-                            <th scope="col">Name</th>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(target=>{%>
+                        <tr <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important; cursor: pointer;"<%}else{%>style="cursor: pointer;"<%}%> data-bs-toggle="modal" data-bs-target="#modal-<%=target.username%>" <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
+                            <th scope="row">
+                                <%= target.username %>
+                            </th>
+                            <td>
+                                <%= target.rank %>
+                            </td>
+                            <td>
+                                <%= target.display %>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <% users.forEach(target=>{%>
-                            <tr <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important; cursor: pointer;"<%}else{%>style="cursor: pointer;"<%}%> data-bs-toggle="modal" data-bs-target="#modal-<%=target.username%>" <% if(target.revoked){%>style="background-color:rgba(255, 0, 0, 0.2) !important;"<%}%>>
-                                <th scope="row">
-                                    <%= target.username %>
-                                </th>
-                                <td>
-                                    <%= target.rank %>
-                                </td>
-                                <td>
-                                    <%= target.display %>
-                                </td>
-                            </tr>
 
-                            
-                            <%})%>
-                    </tbody>
-                </table>
+                        
+                        <%})%>
+                </tbody>
+            </table>
 
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Add User
-                </button>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action="/admin/users/new">
-                                    <h2>Create new account</h2>
-                                    <br>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1"><%= config.code%></span>
-                                        <input type="text" class="form-control" placeholder="Username" aria-label="Username" required=""
-                                            aria-describedby="basic-addon1" name="username">
-                                    </div>
-                                    <input type="text" class="form-control mb-3" placeholder="Name" required="" aria-label="Name" name="Name">
-                                    <input type="text" class="form-control mb-3" placeholder="IFC Username" required="" aria-label="IFC" name="IFC">
-                                    <input type="number" class="form-control mb-3" min="0" placeholder="Starting Hours" required="" aria-label="hours" name="hours">
-                                    <p class="fw-bold"><span class="text-danger">CAUTION</span>: Please make sure the IFC Name is correct, you can not
-                                        change it later. It must be case correct.</p>
-                                    <input type="password" class="form-control" placeholder="Password" required="" aria-label="Password"
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Add User
+            </button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="/admin/users/new" novalidate class="needs-validation">
+                                <h2>Create new account</h2>
+                                <br>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1"><%= config.code%></span>
+                                    <input type="text" class="form-control" placeholder="Username" aria-label="Username" required="" aria-describedby="basic-addon1" name="username">
+                                    <div class="valid-feedback">Good work!</div>
+                                    <div class="invalid-feedback">Needs a valid username!</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Name:</label>
+                                    <input type="text" class="mt-1 form-control" placeholder="Name" required="" aria-label="Name" name="Name">
+                                    <div class="valid-feedback">Good work!</div>
+                                    <div class="invalid-feedback">Needs a valid name!</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label>IFC Username:</label>
+                                    <input type="text" class="mt-1 form-control" placeholder="IFC Username" required="" aria-label="IFC" name="IFC">
+                                    <div class="valid-feedback">Good work!</div>
+                                    <div class="invalid-feedback">Needs a valid username!</div>
+                                    <p class="mt-2"><span class="text-danger fw-bold">CAUTION</span>: Please make sure the IFC Name is correct, you can not
+                                        change it later. It must be case correct!</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Starting Hours:</label>
+                                    <input type="number" class="form-control mt-1" min="0" placeholder="Starting Hours" required="" aria-label="hours"
+                                        name="hours">
+                                    <div class="valid-feedback">Good work!</div>
+                                    <div class="invalid-feedback">Needs a valid number!</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Starting Password:</label>
+                                    <input type="password" class="form-control mt-1" placeholder="Password" required="" aria-label="Password"
                                         aria-describedby="basic-addon1" name="password">
-                                    <div class="form-check mt-3 text-start">
-                                        <input class="form-check-input" type="checkbox" value="yespls" checked="" disabled="" name="CPW" id="CPWCheck">
-                                        <label class="form-check-label" for="flexCheckDefault">
-                                            Require Password Change on login
-                                        </label>
-                                    </div>
-                                    <div class="form-check mt-3 text-start">
-                                        <input class="form-check-input" type="checkbox" value="true" name="admin" id="flexCheckDefault">
-                                        <label class="form-check-label" for="flexCheckDefault">
-                                            Admin
-                                        </label>
-                                        <p><strong>CAREFUL:</strong> This is a dangerous permission to grant.</p>
-                                    </div>
-                                    <button class="btn btn-primary">Create</button>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+                                    <div class="valid-feedback">Good work!</div>
+                                    <div class="invalid-feedback">Needs a valid password!</div>
+                                </div>
+                                <div class="form-check mt-1 text-start">
+                                    <input class="form-check-input" type="checkbox" value="yespls" checked="" disabled="" name="CPW" id="CPWCheck">
+                                    <label class="form-check-label" for="flexCheckDefault">
+                                        Require Password Change on login
+                                    </label>
+                                </div>
+                                <div class="form-check mt-3 text-start">
+                                    <input class="form-check-input" type="checkbox" value="true" name="admin" id="flexCheckDefault">
+                                    <label class="form-check-label" for="flexCheckDefault">
+                                        Admin
+                                    </label>
+                                    <p><strong>CAREFUL:</strong> This is a dangerous permission to grant.</p>
+                                </div>
+                                <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -112,16 +132,20 @@
                             <h4>User <%= config.code + target.username %>
                             </h4>
                             <hr>
-                            <form class="form-control p-3" method="POST" action="/admin/users/update">
+                            <form class="form-control p-3 needs-validation" novalidate method="POST" action="/admin/users/update">
                                 <h5>User Options</h5>
                                 <input type="hidden" value="<%= target.username%>" name="uid">
                                 <label>Username: 
                                 <input class="form-control" type="text"
                                     value="<%=target.username %>" disabled>
                                 </label><br><br>
-                                <label>Name:
-                                    <input class="form-control" type="text" value="<%= target.display%>" name="name">
-                                </label><br><br>
+                                <div class="w-50">
+                                    <label>Name:</label>
+                                    <input class="form-control" type="text" value="<%= target.display%>" name="name" required>
+                                    <div class="valid-feedback">Good job!</div>
+                                    <div class="invalid-feedback">Needs a valid name!</div>
+                                </div>
+                                <br>
                                 <button class="btn btn-primary">Change</button>
                             </form>
                             <form class="form-control p-3" method="POST" action="/admin/users/resetPWD">
