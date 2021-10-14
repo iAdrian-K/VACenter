@@ -456,7 +456,7 @@ app.get('/api/data/user/:callsign', async (req, res) => {
         res.sendStatus(401);
     }
 })
-app.get('/api/data/pireps/:id', async (req, res) => {
+app.get('/api/data/pirep/:id', async (req, res) => {
     if (req.query.auth) {
         if (req.query.auth == config.other.ident.slice(0, 5)) {
             if (req.params.id) {
@@ -1224,15 +1224,11 @@ app.post('/CPWD', async(req, res)=>{
     if(req.body.npwd){
         let user = await checkForUser(cookies);
         if (user) {
-            if(user.cp){
 //                if(bcrypt.comuser.password)
                 user.password = bcrypt.hashSync(req.body.npwd, 10);
                 await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked)
                 await DeleteTokens(user.username);
                 res.redirect("/");
-            }else{
-                res.sendStatus(403);
-            }
         }else{
             res.sendStatus(401);
         }
