@@ -150,39 +150,44 @@
 
                 xhr.addEventListener("readystatechange", function () {
                     if (this.readyState === this.DONE) {
-                        const body = JSON.parse(this.responseText);
-                        console.log(body.branches);
-                        console.log(currentVersionBranch)
-                        const branchData = body.branches[currentVersionBranch];
-                        console.log(branchData)
-                        const releases = branchData.releases;
-                        let min = 0;
-                        Object.entries(releases).forEach(([key, value]) => {
-                            console.log(key)
-                            if(compareVersion(currentVersionNum, key) == -1){
-                                min ++;
-                                const container = document.createElement("div");
-                                const title = document.createElement("h3");
-                                const desc = document.createElement("p");
+                        if(currentVersionBranch){
+                            const body = JSON.parse(this.responseText);
+                            console.log(body.branches);
+                            console.log(currentVersionBranch)
+                            const branchData = body.branches[currentVersionBranch];
+                            console.log(branchData)
+                            const releases = branchData.releases;
+                            let min = 0;
+                            Object.entries(releases).forEach(([key, value]) => {
+                                console.log(key)
+                                if (compareVersion(currentVersionNum, key) == -1) {
+                                    min++;
+                                    const container = document.createElement("div");
+                                    const title = document.createElement("h3");
+                                    const desc = document.createElement("p");
 
-                                container.className = "form-control p-3 w-100 my-2 shadow";
-                                
-                                title.innerHTML = value.title ? value.title : "Unknown Title"
-                                desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found` 
+                                    container.className = "form-control p-3 w-100 my-2 shadow";
 
-                                container.appendChild(title);
-                                container.appendChild(desc);
+                                    title.innerHTML = value.title ? value.title : "Unknown Title"
+                                    desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found`
 
-                                document.getElementById("updateContainer").appendChild(container);
+                                    container.appendChild(title);
+                                    container.appendChild(desc);
+
+                                    document.getElementById("updateContainer").appendChild(container);
+                                }
+
+                            })
+                            if (min == 0) {
+                                document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
+                            } else {
+                                document.getElementById("statusStatus").remove()
+                                document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-<%= config.other.navColor[2] %>' onclick='sendUpdate()'>Update</button>"
                             }
-                            
-                        })
-                        if(min == 0){
-                            document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
                         }else{
-                            document.getElementById("statusStatus").remove()
-                            document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-<%= config.other.navColor[2] %>' onclick='sendUpdate()'>Update</button>"
+                            console.error("Unknown branch")
                         }
+                        
                     }
                 });
 
