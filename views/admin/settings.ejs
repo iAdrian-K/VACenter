@@ -97,12 +97,12 @@
                     <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
                     <hr>
                     <div>
-                        <label>Pireps will be removed <input min="0" step="any" type="number" required class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
+                        <label>Pireps will be removed <input min="0" max="24" step="any" type="number" required class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied. <span class="text-muted" style="font-size: 10px;">Max 24 days</span></label>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
                         <div class="invalid-feedback">
-                            Needs to be a valid number of days!
+                            Needs to be a valid number of days! (Max 24)
                         </div>
                     </div>
                     <br>
