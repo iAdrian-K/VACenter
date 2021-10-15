@@ -534,6 +534,7 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                                             setTimeout(() => {
                                                                 if (errorAllReadySent == false) {
                                                                     CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, row.rank);
+                                                                    res.redirect("/admin/routes");
                                                                 }
                                                             }, 1500);
                                                     } else {
