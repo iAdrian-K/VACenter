@@ -47,7 +47,7 @@
                 <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start mx-auto" novalidate method="POST" action="/user/update">
                     <div class="col-md-4">
                         <label for="validationCustom01" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="validationCustom01" value="<%= user.display %>" name="name" required>
+                        <input type="text" class="form-control" id="validationCustom01" value="<%= user.display %>" name="display" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -57,7 +57,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="validationCustom02" class="form-label">Profile Picture URL</label>
-                        <input type="url" class="form-control" id="validationCustom02" value="<%= user.profileURL%>" name="ppurl" required>
+                        <input type="url" class="form-control" id="validationCustom02" value="<%= user.profileURL%>" name="url" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
