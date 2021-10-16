@@ -18,37 +18,35 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3 mb-4" id="content">
             <h2>Previous Flights</h2>
             <p class="text-muted">Click on a pirep to see more.</p>
-            <div class="container">
-                <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Route</th>
-                            <th scope="col">Airline</th>
-                            <th scope="col">Aircraft</th>
-                            <th scope="col">Status</th>
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Route</th>
+                        <th scope="col">Airline</th>
+                        <th scope="col">Aircraft</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% pireps.forEach(pirep =>{%>
+                        <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
+                            <th scope="row"><%= pirep.route %></th>
+                            <td><%= pirep.airline %></td>
+                            <td><%= pirep.vehiclePublic %></td>
+                            <td>
+                                <% if (pirep.status == 'a'){%>
+                                    <span class="badge bg-success">Accepted</span>
+                                <%}else if(pirep.status == "d"){%>
+                                    <span class="badge bg-danger">Rejected</span>
+                                <%}else{%>
+                                    <span class="badge bg-secondary">Awaiting</span>
+                                <%}%>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <% pireps.forEach(pirep =>{%>
-                            <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=pirep.id%>">
-                                <th scope="row"><%= pirep.route %></th>
-                                <td><%= pirep.airline %></td>
-                                <td><%= pirep.vehiclePublic %></td>
-                                <td>
-                                    <% if (pirep.status == 'a'){%>
-                                        <span class="badge bg-success">Accepted</span>
-                                    <%}else if(pirep.status == "d"){%>
-                                        <span class="badge bg-danger">Rejected</span>
-                                    <%}else{%>
-                                        <span class="badge bg-secondary">Awaiting</span>
-                                    <%}%>
-                                </td>
-                            </tr>
-                        <%})%>
-                    </tbody>
-                </table>
-                </div>
+                    <%})%>
+                </tbody>
+            </table>
             </div>
         </div>
         <% pireps.forEach(pirep =>{%>

@@ -3,6 +3,11 @@
 *{
   font-family: 'Nunito';
 }*/
+
+html, body{
+  min-height: 100vh;
+}
+
 .nav-active-btn{
   color: rgb(0, 31, 134) !important;
 background-color: rgb(208, 207, 253) !important;
