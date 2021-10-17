@@ -21,9 +21,7 @@
             <span><strong>Current Version:</strong> <%= cv%></span>
             <br><br>
             <p id="statusTitle" class="fw-bold"></p>
-            <div class="form-control px-3 px-md-5 py-3 h-auto w-100" id="updateContainer">
-                <p class="fw-bold mt-2" id="statusStatus">Getting Updates, standby</p>
-            </div>
+            <p class="fw-bold mt-2" id="statusStatus">Getting Updates, standby</p>
             <br>
             <h2>Customisation</h2>
             <hr>
@@ -110,6 +108,20 @@
                 </form>
             </div>
             <br>
+            <h2>Update</h2>
+            <hr>
+            <div class="form-control shadow p-3 my-3">
+                <h4>Recieve Beta Updates</h4>
+                <p>Get access to new experiemental features</p>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="beta" <% if(config.other.beta == true){%>checked<%}%>>
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Recieve Beta Updates</label>
+                </div><br>
+                <span>Current Version: <%= %></span><br>
+                <span>Current Branch: <%= %></span><br>
+                <span>Newest Version: <%= %></span><br>
+            </div>
+            <br>
             <h2>3rd Party</h2>
             <hr>
             <div class="form-control shadow p-3 my-3">
@@ -125,152 +137,16 @@
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
             function isValidHttpUrl(string) {
-                    let url;
+                let url;
 
-                    try {
-                        url = new URL(string);
-                    } catch (_) {
-                        return false;
-                    }
-
-                    return url.protocol === "http:" || url.protocol === "https:";
+                try {
+                    url = new URL(string);
+                } catch (_) {
+                    return false;
                 }
-            const currentVersionFull = "<%= cv %>"
-            console.log(currentVersionFull);
-            const currentVersionNum = currentVersionFull.slice(0, -1);
-            const currentVersionBranchInd = currentVersionFull.charAt(currentVersionFull.length - 1);
-            const currentVersionBranch = currentVersionBranchInd == "B" ? "beta": (currentVersionBranchInd == "M" ? "master": null);
 
-            function getMissingVersions(){
-                //Get Versions
-                const data = null;
-
-                const xhr = new XMLHttpRequest();
-                xhr.withCredentials = false;
-
-                xhr.addEventListener("readystatechange", function () {
-                    if (this.readyState === this.DONE) {
-                        if(currentVersionBranch){
-                            const body = JSON.parse(this.responseText);
-                            console.log(body.branches);
-                            console.log(currentVersionBranch)
-                            const branchData = body.branches[currentVersionBranch];
-                            console.log(branchData)
-                            const releases = branchData.releases;
-                            let min = 0;
-                            Object.entries(releases).forEach(([key, value]) => {
-                                console.log(key)
-                                if (compareVersion(currentVersionNum, key) == -1) {
-                                    min++;
-                                    const container = document.createElement("div");
-                                    const title = document.createElement("h3");
-                                    const desc = document.createElement("p");
-
-                                    container.className = "form-control p-3 w-100 my-2 shadow";
-
-                                    title.innerHTML = value.title ? value.title : "Unknown Title"
-                                    desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found`
-
-                                    container.appendChild(title);
-                                    container.appendChild(desc);
-
-                                    document.getElementById("updateContainer").appendChild(container);
-                                }
-
-                            })
-                            if (min == 0) {
-                                document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
-                            } else {
-                                document.getElementById("statusStatus").remove()
-                                document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-<%= config.other.navColor[2] %>' onclick='sendUpdate()'>Update</button>"
-                            }
-                        }else{
-                            console.error("Unknown branch")
-                        }
-                        
-                    }
-                });
-
-                xhr.open("GET", "https://admin.va-center.com/updateFile");
-
-                xhr.send(data);
+                return url.protocol === "http:" || url.protocol === "https:";
             }
-            function compareVersion(a, b) {
-                    let x = a.split('.').map(e => parseInt(e));
-                    let y = b.split('.').map(e => parseInt(e));
-                    let z = "";
-
-                    for (i = 0; i < x.length; i++) {
-                        if (x[i] === y[i]) {
-                            z += "e";
-                        } else
-                            if (x[i] > y[i]) {
-                                z += "m";
-                            } else {
-                                z += "l";
-                            }
-                    }
-                    if (!z.match(/[l|m]/g)) {
-                        return 0;
-                    } else if (z.split('e').join('')[0] == "m") {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
-                }
-                getMissingVersions()
-            function sendUpdate() {
-                        swal({
-                            title: "Are you sure you want to update?",
-                            text: "This can take around 30 seconds, the server will be restarted.  (To confirm type: Yes)",
-                            content: "input",
-                            icon: "warning",
-                            button: {
-                                text: "Update",
-                                closeModal: false
-                            },
-                            dangerMode: true,
-                        }).then((willUpdate) => {
-                                if (willUpdate == "Yes") {
-                                    const data = null;
-
-                                    const xhr = new XMLHttpRequest();
-                                    xhr.withCredentials = true;
-
-                                    xhr.addEventListener("readystatechange", function () {
-                                        if (this.readyState === this.DONE) {
-                                            if(this.status == 202){
-                                                swal({
-                                                    title: "Success!",
-                                                    text: "Updated! Please standby. This should take 30 seconds, the window will then reload.",
-                                                    icon: "success",
-                                                    showConfirmButton: false,
-                                                    showCancelButton: false
-                                                });
-                                                setTimeout(() => {
-                                                    window.location.reload();
-                                                }, 30000);
-                                            }else{
-                                                swal({
-                                                    title: "Update Failed!",
-                                                    text: this.responseText,
-                                                    icon: "error",
-                                                    buttons: true
-                                                })
-                                            }
-                                            
-                                        }
-                                    });
-
-                                    xhr.open("POST", "/admin/settings/update");
-                                    xhr.send(data);
-                                    
-                                } else {
-                                    swal("Aborted update");
-                                }
-                            });
-                    }
-                
         </script>
 </body>
 
