@@ -282,13 +282,16 @@ let vanetCraft = new Map();
 
 
 setInterval(async () => {
-    const VANetData = await getVANetData();
-    vanetCraft = VANetData[0];
+    if (config.other) {
+        if (config.other.ident) {
+            vanetCraft = (await getVANetData());
+        }
+    }
 }, 86400000);
 setTimeout(async () => {
     if (config.other) {
         if(config.other.ident){
-            vanetCraft = await getVANetData();
+            vanetCraft = (await getVANetData());
         }
     }
 }, 5000);
