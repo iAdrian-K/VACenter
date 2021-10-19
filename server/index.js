@@ -524,16 +524,20 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                             jsonObj.forEach(row => {
                                 setTimeout(async () =>{
                                     if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
+                                        console.log(await GetAircrafts())
                                         const aircraft = await GetAircraft(row.aircraftID);
                                         if (aircraft) {
+                                            console.log(row.rank);
                                             const rank = await GetRank(row.rank);
+                                            console.log(rank);
                                             if (rank) {
                                                 if (Array.isArray(rank) == false) {
                                                     const operator = await GetOperatorByName(row.operator);
                                                     if (operator) {
                                                             setTimeout(() => {
                                                                 if (errorAllReadySent == false) {
-                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, row.rank);
+                                                                    console.log(rank);
+                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, rank.minH.toString());
                                                                     res.redirect("/admin/routes");
                                                                 }
                                                             }, 1500);
