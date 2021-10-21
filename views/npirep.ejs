@@ -111,7 +111,7 @@
                 </thead>
                 <tbody>
                     <% routes.forEach(route=>{%>
-                        <% if((route.minRank) <= user.hours){%>
+                        <% if((route.minRank) <= user.hours || user.admin){%>
                                 <tr id="tr-id-<%=route.num%>" class="tr-class-<%=route.num%> pirepClickable" data-title="<%=route.num%>" title="<%= route.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openRoute('<%=route.num%>','<%= route.num%>')">
                                 <td id="td-id-<%=route.num %>" class="td-class-<%=route.num %>" data-title="<%= route.num%>">
                                     <strong>
