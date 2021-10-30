@@ -12,13 +12,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./components/head.ejs")%>
+    <style>
+        .fixed-table-body{
+            height: auto !important;
+        }
+    </style>
 </head>
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3 mb-4" id="content">
             <h2>New PIREP</h2>
-            <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 File manual pirep
             </button>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -29,29 +34,37 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/newPIREP" enctype="multipart/form-data">
+                            <form method="POST" action="/newPIREP" novalidate class="needs-validation" enctype="multipart/form-data">
                                 <% if(config.key&&!(user.VANetID)){%>
                                     <p class="text-danger mb-3">Your account can not communicate with VANet servers. This PIREP will not be sent to VANet. Visit the account page to fix this.</p>    
                                 <%}%>
                                 <h2>Create new PIREP</h2>
                                 <br>
-                                <label for="myBrowser">Type to search for a route:</label>
-                                <input list="routes" id="route" name="route" class="mb-3 form-control" placeholder="Route">
-                                <datalist id="routes">
-                                    <% routes.forEach(route=>{%>
-                                        <% if((parseInt(route.minRank)) <= user.hours){%>
-                                            <option value="<%= config.code + route.num %>"></option>
-                                        <%}%>
-                                    <%})%>
-                                </datalist>
-                                <label class="form-label">Aircraft</label>
-                                <select class="form-select mb-3" name="aircraft">
-                                    <% craft.forEach(vic=>{%>
-                                        <option value="<%= vic.publicName%>">
-                                            <%= vic.publicName%>
-                                        </option>
+                                <div class="mb-3">
+                                    <label for="myBrowser">Type to search for a route:</label>
+                                    <input list="routes" id="route" name="route" required class=" form-control" placeholder="Route">
+                                    <datalist id="routes">
+                                        <% routes.forEach(route=>{%>
+                                            <% if((parseInt(route.minRank)) <= user.hours){%>
+                                                <option value="<%= config.code + route.num %>"></option>
+                                            <%}%>
                                         <%})%>
-                                </select>
+                                    </datalist>
+                                    <div class="valid-feedback">Looks good!</div>
+                                    <div class="invalid-feedback">Requires a valid Route.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Aircraft</label>
+                                    <select class="form-select" required name="aircraft">
+                                        <% craft.forEach(vic=>{%>
+                                            <option value="<%= vic.publicName%>">
+                                                <%= vic.publicName%>
+                                            </option>
+                                            <%})%>
+                                    </select>
+                                    <div class="valid-feedback">Looks good!</div>
+                                    <div class="invalid-feedback">Requires an aircraft.</div>
+                                </div>
                                 <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
                                 <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
                                     aria-label="Flight Time" name="ft">
@@ -75,7 +88,7 @@
                                     <label class="form-label">PIREP Pictures</label><br>
                                     <input class="form-control mb-3" type="file" name="pirepImg" accept=".png,.jpg,.gif,.jpeg,.webp,.svg" required>
                                 <%}%>
-                                <button class="btn btn-primary">Create</button>
+                                <button class="btn btn-<%= config.other.navColor[2] %>">Create</button>
                             </form>
                         </div>
                         <div class="modal-footer">
@@ -94,29 +107,25 @@
                         <th data-field="Departure-Airport">Departure Airport</th>
                         <th data-field="Arrival-Airport">Arrival Airport</th>
                         <th data-field="aircraft">Aircraft</th>
-                        <th data-field="Departure-Time">Departure Time (Recommended)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% slots.forEach(slot=>{%>
-                        <% if((slot.routeObj.minRank) <= user.hours){%>
-                                <tr id="tr-id-<%=slot.id%>" class="tr-class-<%=slot.id%> pirepClickable" data-title="<%=slot.routeObj.num%>" title="<%= slot.routeObj.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openSlot('<%=slot.id%>','<%= slot.routeObj.num%>')">
-                                <td id="td-id-<%=slot.id %>" class="td-class-<%=slot.id %>" data-title="<%= slot.routeObj.num%>">
+                    <% routes.forEach(route=>{%>
+                        <% if((route.minRank) <= user.hours || user.admin){%>
+                                <tr id="tr-id-<%=route.num%>" class="tr-class-<%=route.num%> pirepClickable" data-title="<%=route.num%>" title="<%= route.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openRoute('<%=route.num%>','<%= route.num%>')">
+                                <td id="td-id-<%=route.num %>" class="td-class-<%=route.num %>" data-title="<%= route.num%>">
                                     <strong>
-                                        <%= (slot.routeObj.opObj ? (slot.routeObj.opObj.code ? slot.routeObj.opObj.code : config.code ) : config.code) %><%= slot.routeObj.num%>
+                                        <%= (route.opObj ? (route.opObj.code ? route.opObj.code : config.code ) : config.code) %><%= route.num%>
                                     </strong>
                                 </td>
-                                <td data-text="<%= slot.routeObj.depICAO %>">
-                                    <%= slot.routeObj.depICAO %>
+                                <td data-text="<%= route.depICAO %>">
+                                    <%= route.depICAO %>
                                 </td>
-                                <td data-text="<%= slot.routeObj.arrICAO %>">
-                                    <%= slot.routeObj.arrICAO %>
+                                <td data-text="<%= route.arrICAO %>">
+                                    <%= route.arrICAO %>
                                 </td>
-                                <td data-text="<%= slot.routeObj.aircraftPublic %>">
-                                    <%= slot.routeObj.aircraftPublic %>
-                                </td>
-                                <td data-text="<%= slot.depTime %>">
-                                    <%= slot.depTime %>
+                                <td data-text="<%= route.aircraftPublic %>">
+                                    <%= route.aircraftPublic %>
                                 </td>
                             </tr>        
                         <%}%>
@@ -139,9 +148,9 @@
         <script>
             $('#mainTable').on('click-row.bs.table', function (row, el, field){
                 console.log(el)
-                openSlot(el._id.split("-")[2], el._data.title)
+                openRoute(el._id.split("-")[2], el._data.title)
             })
-            function openSlot(id, routeNumber){
+            function openRoute(routeNumber){
                 if("<%= allowNSession.toString()%>" == "true"){
                     swal({
                         title: `Do you want to fly route: <%= config.code%>${routeNumber}?`,
@@ -159,7 +168,7 @@
                         dangerMode: 'go'
                     }).then(acceptFlight => {
                         if (acceptFlight) {
-                            window.location.href = `/newSlotUI?slot=${id}`
+                            window.location.href = `/newFlightUI?route=${routeNumber}`
                         }
                     })
                 }else{

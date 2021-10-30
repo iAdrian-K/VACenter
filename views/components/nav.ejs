@@ -1,6 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-<%= config.other.navColor[1]%> bg-<%= config.other.navColor[0]%>">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/home"><%= config.name%></a>
+        <a class="navbar-brand" href="/home">
+            <span class="fs-6">
+            <img src="<%= config.other.logo%>" alt=""
+                class="d-inline-block rounded-circle" style="vertical-align: middle; width: 1.25em; height: 1.25em; margin-bottom: .15em; object-fit: cover;"> 
+            <%= config.name%>
+            </span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -36,11 +42,12 @@
                             <li><a class="dropdown-item <% if(active == "/admin/aircraft"){%> active" aria-current="page<%}%>" href="/admin/aircraft"><i class="fa fa-plane"></i> Aircraft</a></li>
                             <li><a class="dropdown-item <% if(active == "/admin/codeshare"){%> active" aria-current="page<%}%>" href="/admin/codeshare"><i class="bi bi-shop"></i> Codeshare</a></li>
                             <li><a class="dropdown-item <% if(active == "/admin/events"){%> active" aria-current="page<%}%>" href="/admin/events"><i class="bi bi-calendar2"></i> Events</a></li>
+                            <li><a class="dropdown-item <% if(active == "/admin/import"){%> active" aria-current="page<%}%>" href="/admin/import"><i class="bi bi-upload"></i> Import</a></li>
+                            <li><a class="dropdown-item <% if(active == "/admin/links"){%> active" aria-current="page<%}%>" href="/admin/links"><i class="bi bi-link"></i> Links</a></li>
                             <li><a class="dropdown-item <% if(active == "/admin/pireps"){%> active" aria-current="page<%}%>" href="/admin/pireps"><i class="bi bi-archive"></i> PIREPS</a></li>
                             <li><a class="dropdown-item <% if(active == "/admin/ranks"){%> active" aria-current="page<%}%>" href="/admin/ranks"><i class="bi bi-person-lines-fill"></i> Ranks</a></li>
                             <li><a class="dropdown-item <% if(active == "/admin/routes"){%> active" aria-current="page<%}%>" href="/admin/routes"><i class="bi bi-arrow-down-up"></i> Routes</a></li>
                             <li><a class="dropdown-item <% if(active == "/admin/users"){%> active" aria-current="page<%}%>" href="/admin/users"><i class="bi bi-people"></i> Users</a></li>
-                            <li><a class="dropdown-item <% if(active == "/admin/links"){%> active" aria-current="page<%}%>" href="/admin/links"><i class="bi bi-link"></i> Links</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -53,7 +60,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle <% if(active == "/account"){%> active" aria-current="page<%}%>" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        <img src="<%= user.profileURL%>" class="align-text-top rounded" style="height: 1.1em;">
+                        <img src="<%= user.profileURL%>" class="align-text-top rounded-circle" style="height: 1.1em; width: 1.1em; object-fit: cover;">
                         <%= user.display%>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">

@@ -31,40 +31,58 @@
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/accent" method="post">
                     <h4>Accent Color</h4>
-                    <input type="radio" class="btn-check" name="accent" value="primary" id="primary" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="primary"){%>checked<%}%> name="accent" value="primary" id="primary" autocomplete="off">
                     <label class="btn btn-primary my-2" for="primary">Blue</label>
-                    <input type="radio" class="btn-check" name="accent" value="secondary" id="secondary" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="secondary"){%>checked<%}%> name="accent" value="secondary" id="secondary" autocomplete="off">
                     <label class="btn btn-secondary my-2" for="secondary">Grey</label>
-                    <input type="radio" class="btn-check" name="accent" value="danger" id="danger" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="danger"){%>checked<%}%> name="accent" value="danger" id="danger" autocomplete="off">
                     <label class="btn btn-danger my-2" for="danger">Red</label>
-                    <input type="radio" class="btn-check" name="accent" value="success" id="success" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="success"){%>checked<%}%> name="accent" value="success" id="success" autocomplete="off">
                     <label class="btn btn-success my-2" for="success">Green</label>
-                    <input type="radio" class="btn-check" name="accent" value="warning" id="warning" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="warning"){%>checked<%}%> name="accent" value="warning" id="warning" autocomplete="off">
                     <label class="btn btn-warning my-2" for="warning">Yellow</label>
-                    <input type="radio" class="btn-check" name="accent" value="light" id="light" autocomplete="off">
-                    <label class="btn btn-light my-2" for="light">White</label>
-                    <input type="radio" class="btn-check" name="accent" value="dark" id="dark" autocomplete="off">
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="light"){%>checked<%}%> name="accent" value="light" id="light" autocomplete="off">
+                    <label class="btn btn-light my-2" for="light">Light</label>
+                    <!--<input type="radio" class="btn-check" <% if(config.other.navColor[0]=="white"){%>checked<%}%> name="accent" value="white" id="white" autocomplete="off">
+                    <label class="btn btn-white my-2 border border-black" for="white">White</label>-->
+                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="dark"){%>checked<%}%> name="accent" value="dark" id="dark" autocomplete="off">
                     <label class="btn btn-dark my-2" for="dark">Dark</label>
+                    <br>
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.btnColor == true){%>checked<%}%>>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Affect Buttons</label>
+                    </div>
+                    <span class="text-muted">Not avaliable with red or light</span>
                     <br><br>
-                    <button class="btn btn-primary" type="submit">Submit new Color</button>
+                    <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit new Color</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/bg" method="post">
+                <form action="/admin/settings/bg" novalidate class="needs-validation" method="post">
                 <h4>Background URL</h4>
-                <input class="form-control" type="url" name="value" id="fill1" value="<%= config.other.bg%>"><br>
-                <button type="submit" class="btn btn-primary">Update</button>
+                <div>
+                    <input class="form-control" required type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>">
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Need a valid URL!</div>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/rate" method="post">
-                <h4>Rate Limiter Amounts</h4>
-                <input class="form-control" type="number" name="value" value="<%= config.other.rates%>"><br>
-                <button type="submit" class="btn btn-primary">Update</button>
+                <form action="/admin/settings/logo" method="post" class="needs-validation" novalidate>
+                <h4>Logo URL</h4>
+                <div>
+                    <input class="form-control" required type="url" name="value" value="<%= config.other.logo%>">
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Need a valid URL!</div>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/pirepPic" method="post">
+                <form action="/admin/settings/pirepPic" novalidate class="needs-validation" method="post">
                     <h4>PIREP Pictures</h4>
                     <p>Allow Pilots to submit pictures of their Flights. <% if(hosting){%><span class="text-muted">This feature is disabled since you are on VACenter Standard Plan.</span><%}%></p>
                     <div class="form-check form-switch">
@@ -73,17 +91,32 @@
                     </div>
                     <br>
                     <div class="progress">
-                        <div class="progress-bar" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
+                        <div class="progress-bar bg-<%= config.other.navColor[2] %>" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
                     </div>
                     <br>
                     <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
                     <hr>
-                    <label>Pireps will be removed <input step="any" type="number" class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied.</label>
-                    <br><br>
-                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-primary">Update</button>
+                    <div>
+                        <label>Pireps will be removed <input min="0" max="24" step="any" type="number" required class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied. <span class="text-muted" style="font-size: 10px;">Max 24 days</span></label>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Needs to be a valid number of days! (Max 24)
+                        </div>
+                    </div>
+                    <br>
+                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
-
+            <br>
+            <h2>3rd Party</h2>
+            <hr>
+            <div class="form-control shadow p-3 my-3">
+                <h4>Identifier</h4>
+                <p>Used for external identification. (IF Experiment Bot, etc)</p>
+                <span style="word-wrap: break-word;"><strong>Ident: </strong><%= config.other.ident.slice(0,5)%></span>
+            </div>
         </div>
         <%- include('./../components/footer.ejs') %>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -102,9 +135,6 @@
 
                     return url.protocol === "http:" || url.protocol === "https:";
                 }
-            if(isValidHttpUrl(document.getElementById("fill1").value) == false){
-            document.getElementById("fill1").value = window.location.protocol + "//" + window.location.host + document.getElementById("fill1").value
-            }
             const currentVersionFull = "<%= cv %>"
             console.log(currentVersionFull);
             const currentVersionNum = currentVersionFull.slice(0, -1);
@@ -120,39 +150,44 @@
 
                 xhr.addEventListener("readystatechange", function () {
                     if (this.readyState === this.DONE) {
-                        const body = JSON.parse(this.responseText);
-                        console.log(body.branches);
-                        console.log(currentVersionBranch)
-                        const branchData = body.branches[currentVersionBranch];
-                        console.log(branchData)
-                        const releases = branchData.releases;
-                        let min = 0;
-                        Object.entries(releases).forEach(([key, value]) => {
-                            console.log(key)
-                            if(compareVersion(currentVersionNum, key) == -1){
-                                min ++;
-                                const container = document.createElement("div");
-                                const title = document.createElement("h3");
-                                const desc = document.createElement("p");
+                        if(currentVersionBranch){
+                            const body = JSON.parse(this.responseText);
+                            console.log(body.branches);
+                            console.log(currentVersionBranch)
+                            const branchData = body.branches[currentVersionBranch];
+                            console.log(branchData)
+                            const releases = branchData.releases;
+                            let min = 0;
+                            Object.entries(releases).forEach(([key, value]) => {
+                                console.log(key)
+                                if (compareVersion(currentVersionNum, key) == -1) {
+                                    min++;
+                                    const container = document.createElement("div");
+                                    const title = document.createElement("h3");
+                                    const desc = document.createElement("p");
 
-                                container.className = "form-control p-3 w-100 my-2 shadow";
-                                
-                                title.innerHTML = value.title ? value.title : "Unknown Title"
-                                desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found` 
+                                    container.className = "form-control p-3 w-100 my-2 shadow";
 
-                                container.appendChild(title);
-                                container.appendChild(desc);
+                                    title.innerHTML = value.title ? value.title : "Unknown Title"
+                                    desc.innerHTML = value.desc ? `<strong>V${key}${currentVersionBranchInd}</strong><br>` + value.desc : `<strong>V${key}${currentVersionBranchInd}</strong><br>No Description Found`
 
-                                document.getElementById("updateContainer").appendChild(container);
+                                    container.appendChild(title);
+                                    container.appendChild(desc);
+
+                                    document.getElementById("updateContainer").appendChild(container);
+                                }
+
+                            })
+                            if (min == 0) {
+                                document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
+                            } else {
+                                document.getElementById("statusStatus").remove()
+                                document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-<%= config.other.navColor[2] %>' onclick='sendUpdate()'>Update</button>"
                             }
-                            
-                        })
-                        if(min == 0){
-                            document.getElementById("statusStatus").innerHTML = "No Updates Avaliable"
                         }else{
-                            document.getElementById("statusStatus").remove()
-                            document.getElementById("statusTitle").innerHTML = "New Update Available:<hr><button class='btn btn-outline-primary' onclick='sendUpdate()'>Update</button>"
+                            console.error("Unknown branch")
                         }
+                        
                     }
                 });
 

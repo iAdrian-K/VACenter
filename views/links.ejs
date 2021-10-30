@@ -18,29 +18,27 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3 mb-4" id="content">
             <h2>Links</h2>
             <p class="text-muted">Click on a link to visit.</p>
-            <div class="container">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col">Title</th>
-                                <th scope="col">URL</th>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">URL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% links.forEach(link=>{%>
+                            <tr onclick='confirmLink("<%=link.url%>")'>
+                                <th scope="row">
+                                    <%= link.title %>
+                                </th>
+                                <td>
+                                    <%= link.url %>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% links.forEach(link=>{%>
-                                <tr onclick='confirmLink("<%=link.url%>")'>
-                                    <th scope="row">
-                                        <%= link.title %>
-                                    </th>
-                                    <td>
-                                        <%= link.url %>
-                                    </td>
-                                </tr>
-                            <%})%>
-                        </tbody>
-                    </table>
-                </div>
+                        <%})%>
+                    </tbody>
+                </table>
             </div>
         </div>
                 <%- include('components/footer.ejs') %>

@@ -44,7 +44,7 @@
                 </tbody>
             </table>
             <br>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Add Rank
             </button>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -56,12 +56,20 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form method="POST" action="/admin/ranks/new">
-                                <label class="form-label">Rank Name:
-                                    <input class="form-control mt-1" id="newAirAirSel" name="name"><br>
-                                <label class="form-label">Rank Minimum Hours:
-                                    <input class="form-control mt-1" id="newAirAirSel" type="number" name="min"><br>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                            <form method="POST" action="/admin/ranks/new" novalidate class="needs-validation">
+                                <div class="mb-3 mt-1">
+                                    <label class="form-label">Rank Name:
+                                    <input class="form-control mt-1" id="newAirAirSel" name="name" required>
+                                    <div class="valid-feedback">Looks Good!</div>
+                                    <div class="invalid-feedback">Needs to be valid text!</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Rank Minimum Hours:
+                                        <input class="form-control" id="newAirAirSel" required type="number" step="any" name="min">
+                                        <div class="valid-feedback">Looks Good!</div>
+                                        <div class="invalid-feedback">Needs to be a valid number!</div>
+                                </div>
+                                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
                             </form>
                         </div>
                         <div class="modal-footer">

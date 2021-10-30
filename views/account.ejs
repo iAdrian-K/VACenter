@@ -19,14 +19,14 @@
             
             <div class="container">
                 <h1>
-                    <img src="<%= user.profileURL%>" style="height:0.8em"; class="rounded align-text-bottom mb-2">
+                    <img src="<%= user.profileURL%>" style="height: 0.8em; width: 0.8em; object-fit: cover;" class="rounded-circle align-text-bottom mb-2">
                     <%= user.display%>
                 </h1>
                 <h4><%= config.code + user.username%></h4>
                 <h2>Account Information</h2>
                 <hr>
                 <% if(config.key && !(user.VANetID)){%>
-                    <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST" action='/users/linkVANet'>
+                    <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center mx-auto text-md-start" novalidate method="POST" action='/users/linkVANet'>
                         <h1><i class="text-danger bi bi-exclamation-triangle"></i> Link IFC Account</h1>
                         <p>This is required to interact with VANet.</p>
                         <div class="col-md-4">
@@ -40,14 +40,14 @@
                             </div>
                         </div>
                         <div class="col-12">
-                            <button class="btn btn-primary" type="submit">Submit</button>
+                            <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit</button>
                         </div>
                     </form>    
                 <%}%>
-                <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST" action="/updateUser">
+                <form class="row g-3 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start mx-auto" novalidate method="POST" action="/user/update">
                     <div class="col-md-4">
                         <label for="validationCustom01" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="validationCustom01" value="<%= user.display %>" name="name" required>
+                        <input type="text" class="form-control" id="validationCustom01" value="<%= user.display %>" name="display" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -57,7 +57,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="validationCustom02" class="form-label">Profile Picture URL</label>
-                        <input type="url" class="form-control" id="validationCustom02" value="<%= user.profileURL%>" name="ppurl" required>
+                        <input type="url" class="form-control" id="validationCustom02" value="<%= user.profileURL%>" name="url" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -66,20 +66,20 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <button class="btn btn-primary" type="submit">Submit</button>
+                        <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit</button>
                     </div>
                 </form>
                 <br>
                 <h2>Security</h2>
                 <hr>
                 <form action="/OSOR" method="POST">
-                    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign out everywhere</button>
+                    <button class="btn btn-<%= config.other.navColor[2] %> w-100" type="submit"><i class="bi bi-box-arrow-in-right"></i> Sign out everywhere</button>
                 </form><br>
                 <form class="row g-3 mx-0 shadow p-3 border rounded mt-2 w-100 needs-validation text-center text-md-start" novalidate method="POST"
                     action="/CPWD" onsubmit="if((document.getElementById('validationPwd1').value == document.getElementById('validationPwd2').value)==false){alert('Passwords do not match.')}; return document.getElementById('validationPwd1').value == document.getElementById('validationPwd2').value;">
                     <div class="col-md-4">
                         <label for="validationPwd1" class="form-label">New Password</label>
-                        <input type="password" class="form-control" id="validationPwd1" name="pwd" required>
+                        <input type="password" class="form-control" id="validationPwd1" name="npwd" required>
                         <div class="valid-feedback">
                             Looks good!
                         </div>

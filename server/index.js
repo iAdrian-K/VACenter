@@ -18,6 +18,7 @@ tinify.key = "KfplF6KmZjMWXfFx8vqrXM8r4Wbtyqtp";
 const express = require('express');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
+const csv = require('csvtojson')
 
 let hosting = process.env.HOSTFLAG ? true : false;
 
@@ -70,14 +71,13 @@ const {
         GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
         GetEvent, GetEvents, CreateEvent, DeleteEvent,
         GetNotifications, CreateNotification, DeleteNotification, DeleteUsersNotifications,
-        GetOperator, GetOperators, CreateOperator, DeleteOperator,
+        GetOperatorByName, GetOperator, GetOperators, CreateOperator, DeleteOperator,
         GetPirep, GetUsersPireps, GetPireps, CreatePirep, UpdatePirep,
-        GetRanks, UpdateRank, CreateRank, DeleteRank,
+        GetRank, GetRanks, UpdateRank, CreateRank, DeleteRank,
         GetRoute, GetRoutes, GetRouteByNum, CreateRoute, UpdateRoute, DeleteRoute,
         GetStats, UpdateStat, DeleteStat,
         GetToken, CreateToken, DeleteTokens,
-        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
-        GetSlots, UpdateSlot, CreateSlot, DeleteSlot, GetSlot, GetSlotsWithRoutes, run,
+        GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser, run,
         GetLinks, CreateLink, DeleteLink,
     CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
     } = require("./db")
@@ -98,13 +98,13 @@ reloadUserRanks()
 //Versioning
 let branch = getVersionInfo().branch;
 let cvn = getVersionInfo().version;
-let cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
+let cvnb = branch == "beta" ? `${cvn}B` : (branch == "alpha" ? `${cvn}A` : `${cvn}M`)
 /**
  * Used for checking the version info
  */
 function reloadVersion(){
     cvn = getVersionInfo().version;
-    cvnb = branch == "beta" ? `${cvn}B` : (branch == "demo" ? `${cvn}B` : `${cvn}M`)
+    cvnb = branch == "beta" ? `${cvn}B` : (branch == "alpha" ? `${cvn}A` : `${cvn}M`)
 }
 
 reloadVersion();
@@ -119,7 +119,6 @@ reloadVersion();
  * @typedef {import('./types.js').PIREP} PIREP
  * @typedef {import('./types.js').rank} rank
  * @typedef {import('./types.js').route} route
- * @typedef {import('./types.js').slot} slot
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
  * @typedef {import('./types.js').fsession} fsession
@@ -133,6 +132,10 @@ function makeid(length) {
             charactersLength));
     }
     return result;
+}
+
+function randomizator(a, b) {
+    return Math.floor(Math.random() * b) + a;
 }
 const getAppCookies = (req) => {
     if (req.headers.cookie) {
@@ -176,22 +179,14 @@ let config = {
         rates: 100
     }
 };
-let limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-});
 /**
  * Reloads Config
  * @name Reload Config
  */
+
 function reloadConfig(){
     return new Promise(async (resolve, error) => {
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
-        let limiter = rateLimit({
-            windowMs: 15 * 60 * 1000, // 15 minutes
-            max: (config.other) ? (config.other.rates ? config.other.rates : 100) : 100 // limit each IP to 100 requests per windowMs
-        });
-        app.use(limiter);
         resolve(true);
     })
     
@@ -273,7 +268,9 @@ const updateStats = async () => {
     stats.pirepsLength = 0;
     (await GetPireps()).forEach(pirep =>{
         stats.pirepsLength++;
+        console.log(pirep.status)
         if(pirep.status == "a"){
+            console.log(pirep)
             stats.totalHours = stats.totalHours + (pirep.flightTime)/60
         }
     })
@@ -285,13 +282,16 @@ let vanetCraft = new Map();
 
 
 setInterval(async () => {
-    const VANetData = await getVANetData();
-    vanetCraft = VANetData[0];
+    if (config.other) {
+        if (config.other.ident) {
+            vanetCraft = (await getVANetData());
+        }
+    }
 }, 86400000);
 setTimeout(async () => {
     if (config.other) {
         if(config.other.ident){
-            vanetCraft = await getVANetData();
+            vanetCraft = (await getVANetData());
         }
     }
 }, 5000);
@@ -311,7 +311,6 @@ Sentry.init({
         new Tracing.Integrations.Express({ app }),
     ],
     environment: "Production",
-    debug: true,
     // Set tracesSampleRate to 1.0 to capture 100%
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
@@ -328,6 +327,11 @@ app.use(function(req,res,next){
     res.locals.version = cvnb;
     next();
 })
+let limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 125 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 //app.use(cookieParser());
 
 //Util Funcs
@@ -423,264 +427,224 @@ async function getUserWithObjs(userObj, flags){
 
 //Basic Routes
 
-app.get('/newSlotUI', async (req, res) =>{
-    const cookies = getAppCookies(req);
-    //Check for setup
-    if (((!config.code) && req.path != "/setup")) {
-        if ((!config.code) && req.path != "/setup") {
-            res.redirect('/setup')
-        } else {
-            res.redirect("/?r=ue")
-        }
-    } else {
-        const changePWD = await checkForCPWD(cookies);
-        let user = await checkForUser(cookies);
-        if (user) {
-            user = await getUserWithObjs(user, ["notifications", "pireps"]);
-        }
-        if (changePWD == true && req.path != "/changePWD") {
-            res.redirect('/changePWD');
-        } else {
-            const slotID = req.query.slot.toString();
-            //Get Slot Obj
-            const slot = await GetSlot(slotID);
-            if(slot){
-                //Get Route Obj
-                const route = await GetRoute(slot.route)
-                //Create Session
-                const sesID = await CreateSession(user.username, route.id.toString(), slotID, slot.depTime)
-                res.redirect(`/slotUI?ses=${sesID.toString()}`)
-            }else{
-                res.status(404).send("Cant find slot with ID: " + sanitizer.sanitize(slotID));
-            }
-        }
-    }
-})
-
-app.get('/slotUI', async (req, res) => {
-    const cookies = getAppCookies(req);
-    //Check for setup
-    if (((!config.code) && req.path != "/setup")) {
-        if ((!config.code) && req.path != "/setup") {
-            res.redirect('/setup')
-        } else {
-            res.redirect("/?r=ue")
-        }
-    } else {
-        const changePWD = await checkForCPWD(cookies);
-        let user = await checkForUser(cookies);
-        if (user) {
-            user = await getUserWithObjs(user, ["notifications", "pireps"]);
-        }
-        if (changePWD == true && req.path != "/changePWD") {
-            res.redirect('/changePWD');
-        } else {
-            const sesID = parseInt(req.query.ses.toString());
-            //Get Session Obj
-            const session = await GetSession(sesID);
-            if (session) {
-                if(session.pilot == user.username){
-                    res.render('slotUI', {
-                        user: user,
-                        config: getConfig(),
-                        session: session,
-                        aircraft: await GetAircrafts(),
-                        route: await GetRoute(session.route),
-                        vehicleUsed: await GetAircraft(session.aircraft)
-                    })
-                }else{
-                    res.status(403).send("You aren't the designated pilot for this session.");
+app.get('/api/data/user/:callsign', async (req, res) => {
+    if(req.query.auth){
+        if(req.query.auth == config.other.ident.slice(0,5)){
+            if (req.params.callsign) {
+                let callsign = req.params.callsign.toString();
+                if (callsign.toString().slice(0, 4) == config.code) {
+                    callsign = callsign.slice(4, callsign.length);
                 }
-                
-            } else {
-                res.status(404).send("Cant find session with ID: " + sesID);
-            }
-        }
-    }
-})
-
-app.get('/cancelSlot', async (req, res) => {
-    const cookies = getAppCookies(req);
-    //Check for setup
-    if (((!config.code) && req.path != "/setup")) {
-        if ((!config.code) && req.path != "/setup") {
-            res.redirect('/setup')
-        } else {
-            res.redirect("/?r=ue")
-        }
-    } else {
-        const changePWD = await checkForCPWD(cookies);
-        let user = await checkForUser(cookies);
-        if (user) {
-            user = await getUserWithObjs(user, ["notifications", "pireps"]);
-        }
-        if (changePWD == true && req.path != "/changePWD") {
-            res.redirect('/changePWD');
-        } else {
-            const sesID = parseInt(req.query.ses.toString());
-            //Get Session Obj
-            const session = await GetSession(sesID);
-            if (session) {
-                if (session.pilot == user.username) {
-                    await DeleteSession(sesID.toString());
-                    res.redirect('/home');
+                let user = await GetUser(callsign)
+                if (user) {
+                    user = await getUserWithObjs(await GetUser(callsign), ["pireps"])
+                    delete user['password'];
+                    delete user['admin'];
+                    delete user['VANetID'];
+                    delete user['cp'];
+                    delete user['llogin'];
+                    delete user['revoked'];
+                    res.setHeader('Content-Type', 'application/json');
+                    res.status(200).end(JSON.stringify(user, null, 2));
                 } else {
-                    res.status(403).send("You aren't the designated pilot for this session.");
+                    res.sendStatus(404);
                 }
-
             } else {
-                res.status(404).send("Cant find session with ID: " + sesID);
+                res.sendStatus(400);
             }
+        }else{
+            res.sendStatus(401);
         }
+    }else{
+        res.sendStatus(401);
+    }
+})
+app.get('/api/data/pirep/:id', async (req, res) => {
+    if (req.query.auth) {
+        if (req.query.auth == config.other.ident.slice(0, 5)) {
+            if (req.params.id) {
+                let id = req.params.id;
+                let pirep = await GetPirep(id);
+                if (pirep) {
+                    // delete user['password'];
+                    // delete user['admin'];
+                    // delete user['VANetID'];
+                    // delete user['cp'];
+                    // delete user['llogin'];
+                    // delete user['revoked'];
+                    res.setHeader('Content-Type', 'application/json');
+                    res.status(200).end(JSON.stringify(pirep, null, 2));
+                } else {
+                    res.sendStatus(404);
+                }
+            } else {
+                res.sendStatus(400);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+})
+app.get('/api/data/stats', async (req, res) => {
+    if (req.query.auth) {
+        if (req.query.auth == config.other.ident.slice(0, 5)) {
+                res.setHeader('Content-Type', 'application/json');
+                res.status(200).end(JSON.stringify(stats, null, 2));
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
     }
 })
 
-app.post('/updateSlot', async (req, res) => {
+app.post('/import/:comp', upload.single('csv'), async (req, res) => {
     const cookies = getAppCookies(req);
-    //Check for setup
-    if (((!config.code) && req.path != "/setup")) {
-        if ((!config.code) && req.path != "/setup") {
+    if(((!config.code) && req.path != "/setup")){
+        if((!config.code) && req.path != "/setup"){
             res.redirect('/setup')
-        } else {
+        }else{
             res.redirect("/?r=ue")
         }
-    } else {
+    }else{
         const changePWD = await checkForCPWD(cookies);
         let user = await checkForUser(cookies);
-        if (user) {
+        if(user){
             user = await getUserWithObjs(user, ["notifications", "pireps"]);
         }
-        if (changePWD == true && req.path != "/changePWD") {
+        if(changePWD == true && req.path != "/changePWD"){
             res.redirect('/changePWD');
-        } else {
-            const sesID = parseInt(req.query.ses.toString());
-            //Get Session Obj
-            const session = await GetSession(sesID);
-            if (session) {
-                switch(req.query.state){
-                    case "NI":
-                        if(req.body.aircraft){
-                            const aircraft = await GetAircraft(req.body.aircraft);
-                            if(aircraft){
-                                await UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, aircraft.livID, session.depTime, session.arrTime, session.active == true? 1 : 0 , "AS");
-                                res.redirect(`/slotUI?ses=${session.id}`)
-                            }else{
-                                res.status(404).send("Can't find aircraft with that ID");
-                            }
-                        }else{
-                            res.status(400).send("No aircraft provided.")
-                        }
-                        break;
-                    case "SF":
-                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, (new Date()).toString(), session.arrTime, 1, "FS");
-                        res.sendStatus(200);
-                        break;
-                    case "EF":
-                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, session.depTime, (((new Date().getTime() - new Date(session.depTime).getTime())/1000)/60).toString(), 1, "FF");
-                        res.sendStatus(200);
-                        break;
-                    default:
-                        res.status(400).send("No state provided");
-                    break;
-                }
-            } else {
-                res.status(404).send("Cant find session with ID: " + sesID);
-            }
-        }
-    }
-})
-
-app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
-    const cookies = getAppCookies(req);
-    //Check for setup
-    if (((!config.code) && req.path != "/setup")) {
-        if ((!config.code) && req.path != "/setup") {
-            res.redirect('/setup')
-        } else {
-            res.redirect("/?r=ue")
-        }
-    } else {
-        const changePWD = await checkForCPWD(cookies);
-        let user = await checkForUser(cookies);
-        if (user) {
-            user = await getUserWithObjs(user, ["notifications", "pireps"]);
-        }
-        if (changePWD == true && req.path != "/changePWD") {
-            res.redirect('/changePWD');
-        } else {
-            const sesID = parseInt(req.query.ses.toString());
-            //Get Session Obj
-            const session = await GetSession(sesID);
-            if (session) {
-                const route = await GetRoute(session.route);
-                if (req.file && req.body.fuel) {
-                    fs.readFile(req.file.path, function (err, sourceData) {
-                        Sentry.captureException(err);
-                        tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
-                            Sentry.captureException(err);
-                            fs.unlinkSync(`${req.file.path}`);
-                            req.file.path = req.file.path + ".webp";
-                            fs.writeFileSync(`${req.file.path}`, resultData);
+        }else if(user.revoked == 1){
+            res.clearCookie('authToken').redirect("/?r=ro")
+        }else{
+            switch(req.params.comp){
+                case "routes":
+                    let errorAllReadySent = false;
+                    if(req.file){
+                        csv().fromFile(req.file.path).then((jsonObj) => {
+                            jsonObj.forEach(row => {
+                                setTimeout(async () =>{
+                                    if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
+                                        console.log(await GetAircrafts())
+                                        const aircraft = await GetAircraft(row.aircraftID);
+                                        if (aircraft) {
+                                            console.log(row.rank);
+                                            const rank = await GetRank(row.rank);
+                                            console.log(rank);
+                                            if (rank) {
+                                                if (Array.isArray(rank) == false) {
+                                                    const operator = await GetOperatorByName(row.operator);
+                                                    if (operator) {
+                                                            setTimeout(() => {
+                                                                if (errorAllReadySent == false) {
+                                                                    console.log(rank);
+                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, rank.minH.toString());
+                                                                    res.redirect("/admin/routes");
+                                                                }
+                                                            }, 1500);
+                                                    } else {
+                                                        if (errorAllReadySent == false) {
+                                                            errorAllReadySent = true;
+                                                            res.status(404).send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)}`)
+                                                        }
+                                                    }
+                                                } else {
+                                                    if (errorAllReadySent == false) {
+                                                        errorAllReadySent = true;
+                                                        res.status(400).send(`Found 2 Ranks with the name: ${sanitizer.sanitize(row.rank)}, please update your ranks.`)
+                                                    }
+                                                }
+                                            } else {
+                                                if (errorAllReadySent == false) {
+                                                    errorAllReadySent = true;
+                                                    res.status(404).send(`Can't find rank by the name: ${sanitizer.sanitize(row.rank)}`)
+                                                }
+                                            }
+                                        } else {
+                                            if (errorAllReadySent == false) {
+                                                errorAllReadySent = true;
+                                                res.status(404).send(`Can't find aircraft with the ID: ${sanitizer.sanitize(row.aircraftID)}. Check the aircraft is in your fleet.`);
+                                            }
+                                        }
+                                    } else {
+                                        if(errorAllReadySent == false){
+                                            errorAllReadySent = true;
+                                            res.status(400).send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
+                                        }
+                                    }
+                                }, randomizator(50, 750))
+                            }, () => {
+                                if (errorAllReadySent == false) {
+                                    res.redirect('/admin/routes')
+                                }
+                            })
                         })
-                    })
-                }
-                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
-                UpdateSession(session.id.toString(), session.pilot, session.route, session.slotID, session.aircraft, session.depTime, session.arrTime, 0, "PF")
-                res.redirect("/home");
-            } else {
-                res.status(404).send("Cant find session with ID: " + sesID);
+                    }else{
+                        res.status(400).send("Missing file.")
+                    }
+                    break;
             }
         }
     }
-})
+});
 
 app.get('*', async (req, res, next)=>{
     const cookies = getAppCookies(req)
-    if(req.path.slice(0,8) == "/public/"){
-        if(await FileExists(path.join(__dirname, "..", req.path))){
+    if (req.path.slice(0, 8) == "/public/") {
+        if (await FileExists(path.join(__dirname, "..", req.path))) {
             res.sendFile(path.join(__dirname, "..", req.path));
-        }else{
+        } else {
             res.sendStatus(404);
         }
-    }else if(req.path.slice(0,6) == "/data/"){
-        if(await FileExists(path.join(__dirname, "..", req.path))){
+    } else if (req.path.slice(0, 6) == "/data/") {
+        if (await FileExists(path.join(__dirname, "..", req.path))) {
             res.sendFile(path.join(__dirname, "..", req.path));
-        }else{
+        } else {
             res.sendStatus(404);
         }
-    }else{
+    } else {
 
         //Check for setup
-        if(((!config.code) && req.path != "/setup")){
-            if((!config.code) && req.path != "/setup"){
+        if (((!config.code) && req.path != "/setup")) {
+            if ((!config.code) && req.path != "/setup") {
                 res.redirect('/setup')
-            }else{
+            } else {
                 res.redirect("/?r=ue")
             }
-        }else{
+        } else {
             const changePWD = await checkForCPWD(cookies);
             let user = await checkForUser(cookies);
-            if(user){
+            if (user) {
                 user = await getUserWithObjs(user, ["notifications", "pireps"]);
             }
-            if(changePWD == true && req.path != "/changePWD"){
+            if (changePWD == true && req.path != "/changePWD") {
                 res.redirect('/changePWD');
-            }else if(user.revoked == 1){
+            } else if (user.revoked == 1) {
                 res.clearCookie('authToken').redirect("/?r=ro")
-            }else{
-                switch(req.path){
+            } else {
+                let sesID;
+                let session;
+                if (req.path.toUpperCase().includes("SLOT")) {
+                    sesID = parseInt(req.query.ses.toString());
+                    //Get Session Obj
+                    session = await GetSession(sesID);
+                }
+                switch (req.path) {
+                    case "/login":
                     case "/":
-                        if(user){
+                        if (user) {
                             res.redirect("/home");
-                        }else{
-                        res.render("login", {
-                            config: getConfig(),
-                            version: cvnb
-                        })
+                        } else {
+                            res.render("login", {
+                                config: getConfig(),
+                                version: cvnb
+                            })
                         }
                         break;
                     case "/home":
-                        if(user){
+                        if (user) {
                             let vics = [];
                             let currentSession = null;
                             (await GetSessionByPilot(user.username)).every(session => {
@@ -702,10 +666,10 @@ app.get('*', async (req, res, next)=>{
                                 mode: mode,
                                 currentSession: currentSession,
                             })
-                        }else{
+                        } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
-                        
+
                         break;
                     case "/newPirep":
                         if (user) {
@@ -714,7 +678,7 @@ app.get('*', async (req, res, next)=>{
                             };
                             let activeFlightBool = false;
                             (await GetSessionByPilot(user.username)).every(session => {
-                                if(session.active){
+                                if (session.active) {
                                     activeFlightBool = true;
                                     activeFlight = session;
                                     return false;
@@ -728,7 +692,6 @@ app.get('*', async (req, res, next)=>{
                                 routes: await GetRoutes(),
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
-                                slots: await GetSlotsWithRoutes(),
                                 config: getConfig(),
                                 allowNSession: !(activeFlightBool),
                                 activeFlight: activeFlight
@@ -826,9 +789,9 @@ app.get('*', async (req, res, next)=>{
                         }
                         break;
                     case "/admin/events":
-                        
+
                         if (user) {
-                            
+
                             if (user.admin == true) {
                                 res.render("admin/events", {
                                     active: req.path,
@@ -876,7 +839,7 @@ app.get('*', async (req, res, next)=>{
                                     user: user,
                                     activer: "/admin",
                                     aircraft: await GetAircrafts(),
-                                    ranks: await GetRanks() ,
+                                    ranks: await GetRanks(),
                                     config: getConfig()
                                 })
                             } else {
@@ -950,6 +913,24 @@ app.get('*', async (req, res, next)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
+                    case "/admin/import":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/import", {
+                                    active: req.path,
+                                    title: "Admin - Import",
+                                    user: user,
+                                    activer: "/admin",
+                                    config: getConfig(),
+                                    listCraft: vanetCraft
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
                     case "/admin/codeshare":
                         if (user) {
                             if (user.admin == true) {
@@ -991,21 +972,19 @@ app.get('*', async (req, res, next)=>{
                         }
                         break;
                     case "/report":
-                        res.render("report",{
-                            config: getConfig()
-                        })
+                        res.redirect("https://github.com/VACenter/VACenter/issues/new?assignees=&labels=bug&template=bug_report.md&title=")
                         break;
                     case '/changePWD':
-                        if(user){
-                            res.render("changePWD",{
+                        if (user) {
+                            res.render("changePWD", {
                                 config: getConfig()
                             })
                         }
                         break;
                     case "/setup":
-                        if(config.other){
+                        if (config.other) {
                             res.redirect("/")
-                        }else{
+                        } else {
                             res.render("setup", {
                                 hosting: hosting
                             })
@@ -1016,6 +995,50 @@ app.get('*', async (req, res, next)=>{
                         break;
                     case "/logout":
                         res.clearCookie("authToken").redirect("/");
+                        break;
+                    case "/cancelSlot":
+                        if (session) {
+                            if (session.pilot == user.username) {
+                                await DeleteSession(sesID.toString());
+                                res.redirect('/home');
+                            } else {
+                                res.status(403).send("You aren't the designated pilot for this session.");
+                            }
+
+                        } else {
+                            res.status(404).send("Cant find session with ID: " + sesID);
+                        }
+                        break;
+                    case "/slotUI":
+                        if (session) {
+                            if (session.pilot == user.username) {
+                                res.render('slotUI', {
+                                    user: user,
+                                    config: getConfig(),
+                                    session: session,
+                                    aircraft: await GetAircrafts(),
+                                    route: await GetRoute(session.route),
+                                    vehicleUsed: await GetAircraft(session.aircraft)
+                                })
+                            } else {
+                                res.status(403).send("You aren't the designated pilot for this session.");
+                            }
+
+                        } else {
+                            res.status(404).send("Cant find session with ID: " + sesID);
+                        }
+                        break;
+                    case "/newFlightUI":
+                        const routeNum = req.query.route.toString();
+                        //Get Route Obj
+                        const route = await GetRouteByNum(routeNum);
+                        if (route) {
+                            //Create Session
+                            const sesID = await CreateSession(user.username, route.id.toString())
+                            res.redirect(`/slotUI?ses=${sesID.toString()}`)
+                        } else {
+                            res.status(404).send("Cant find route with ID: " + sanitizer.sanitize(routeNum));
+                        }
                         break;
                     default:
                         next();
@@ -1088,9 +1111,9 @@ app.post('/setup', async (req,res)=>{
             newConfig.key = req.body.key;
             newConfig.other = {
                 bg: "/public/images/stockBG2.jpg",
-                logo: "",
+                logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
-                navColor: ["dark", "dark"],
+                navColor: ["dark", "dark", "primary"],
                 ident: makeid(25),
                 pirepPic: false,
                 pirepPicExpire: 86400000,
@@ -1141,9 +1164,9 @@ app.post('/setupNVN', async (req, res) => {
             newConfig.key = req.body.key;
             newConfig.other = {
                 bg: "/public/images/stockBG2.jpg",
-                logo: "",
+                logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
-                navColor: ["dark", "dark"],
+                navColor: ["dark", "dark", "primary"],
                 ident: makeid(25),
                 pirepPic: hosting? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
@@ -1207,15 +1230,11 @@ app.post('/CPWD', async(req, res)=>{
     if(req.body.npwd){
         let user = await checkForUser(cookies);
         if (user) {
-            if(user.cp){
 //                if(bcrypt.comuser.password)
                 user.password = bcrypt.hashSync(req.body.npwd, 10);
                 await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked)
                 await DeleteTokens(user.username);
                 res.redirect("/");
-            }else{
-                res.sendStatus(403);
-            }
         }else{
             res.sendStatus(401);
         }
@@ -1467,12 +1486,6 @@ app.post("/admin/routes/new", async function (req, res) {
                         clearInterval(checker);
                         let vehiclePublicList = vehiclePublic.join(", ");
                         await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.minH);
-                        Object.keys(req.body).forEach(async function (k, v) {
-                            if (k.slice(0, 5) == "slot_") {
-                                const value = req.body[k]
-                                CreateSlot(`routeID_slot_${k[6]}`, routeID, `${value}`, `NF_${v}`);
-                            }
-                        });
                         res.redirect("/admin/routes")
                     }
                 }, 250)
@@ -1533,11 +1546,6 @@ app.delete("/admin/routes/remove", async function (req, res) {
         if (user) {
             if (user.admin == true) {
                 const route = await GetRoute(req.body.id);
-                (await GetSlots()).forEach(slot =>{
-                    if(slot.route.toString() == route.id.toString()){
-                        DeleteSlot(slot.id.toString());
-                    }
-                })
                 await DeleteRoute(req.body.id);
                 res.redirect("/admin/routes")
             } else {
@@ -1733,15 +1741,15 @@ app.post("/admin/settings/update", async function (req, res) {
             res.sendStatus(401);
         }
 })
-app.post("/admin/settings/rate", async function (req, res) {
+app.post("/admin/settings/logo", async function (req, res) {
     const cookies = getAppCookies(req)
     if(req.body.value){
     let user = await checkForUser(cookies);
     if (user) {
         if (user.admin == true) {
             const newConfig = getConfig();
-            newConfig.other.rates = req.body.value;
-            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
+            newConfig.other.logo = req.body.value;
+            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(()=>{
                 reloadConfig();
                 res.redirect("/admin/settings")
@@ -1808,11 +1816,19 @@ app.post("/admin/settings/accent", async function (req, res) {
                 const newConfig = getConfig();
                 newConfig.other.navColor = [];
                 newConfig.other.navColor.push(req.body.accent);
-                if(req.body.accent == "light"){
+                if(req.body.accent == "light" || req.body.accent == "white"){
                     newConfig.other.navColor.push("light");
                 }else{
                     newConfig.other.navColor.push("dark");
                 }
+                if(req.body.state && req.body.accent != "danger" && req.body.accent != "light"){
+                    newConfig.other.navColor.push(req.body.accent);
+                    newConfig.other.btnColor = true;
+                }else{
+                    newConfig.other.navColor.push("primary");
+                    newConfig.other.btnColor = false;
+                }
+                
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
                 res.redirect("/admin/settings")
             } else {
@@ -1836,6 +1852,7 @@ app.post("/admin/pireps/apr", async function (req, res){
                 const targetPIREP = await GetPirep(req.body.id)
                 if(targetPIREP){
                     targetPIREP.status = "a";
+                    updateStats();
                     if(config.other.pirepPic == true){
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
@@ -1933,5 +1950,104 @@ app.post("/admin/links/rem", async function (req, res) {
         }
     } else {
         res.sendStatus(400);
+    }
+})
+
+app.post('/updateSlot', async (req, res) => {
+    const cookies = getAppCookies(req);
+    //Check for setup
+    if (((!config.code) && req.path != "/setup")) {
+        if ((!config.code) && req.path != "/setup") {
+            res.redirect('/setup')
+        } else {
+            res.redirect("/?r=ue")
+        }
+    } else {
+        const changePWD = await checkForCPWD(cookies);
+        let user = await checkForUser(cookies);
+        if (user) {
+            user = await getUserWithObjs(user, ["notifications", "pireps"]);
+        }
+        if (changePWD == true && req.path != "/changePWD") {
+            res.redirect('/changePWD');
+        } else {
+            const sesID = parseInt(req.query.ses.toString());
+            //Get Session Obj
+            const session = await GetSession(sesID);
+            if (session) {
+                switch (req.query.state) {
+                    case "NI":
+                        if (req.body.aircraft) {
+                            const aircraft = await GetAircraft(req.body.aircraft);
+                            if (aircraft) {
+                                await UpdateSession(session.id.toString(), session.pilot, session.route, aircraft.livID, session.depTime, session.arrTime, session.active == true ? 1 : 0, "AS");
+                                res.redirect(`/slotUI?ses=${session.id}`)
+                            } else {
+                                res.status(404).send("Can't find aircraft with that ID");
+                            }
+                        } else {
+                            res.status(400).send("No aircraft provided.")
+                        }
+                        break;
+                    case "SF":
+                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, (new Date()).toString(), session.arrTime, 1, "FS");
+                        res.sendStatus(200);
+                        break;
+                    case "EF":
+                        await UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, (((new Date().getTime() - new Date(session.depTime).getTime()) / 1000) / 60).toString(), 1, "FF");
+                        res.sendStatus(200);
+                        break;
+                    default:
+                        res.status(400).send("No state provided");
+                        break;
+                }
+            } else {
+                res.status(404).send("Cant find session with ID: " + sesID);
+            }
+        }
+    }
+})
+
+app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
+    const cookies = getAppCookies(req);
+    //Check for setup
+    if (((!config.code) && req.path != "/setup")) {
+        if ((!config.code) && req.path != "/setup") {
+            res.redirect('/setup')
+        } else {
+            res.redirect("/?r=ue")
+        }
+    } else {
+        const changePWD = await checkForCPWD(cookies);
+        let user = await checkForUser(cookies);
+        if (user) {
+            user = await getUserWithObjs(user, ["notifications", "pireps"]);
+        }
+        if (changePWD == true && req.path != "/changePWD") {
+            res.redirect('/changePWD');
+        } else {
+            const sesID = parseInt(req.query.ses.toString());
+            //Get Session Obj
+            const session = await GetSession(sesID);
+            if (session) {
+                const route = await GetRoute(session.route);
+                if (req.file && req.body.fuel) {
+                    fs.readFile(req.file.path, function (err, sourceData) {
+                        Sentry.captureException(err);
+                        tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                            Sentry.captureException(err);
+                            fs.unlinkSync(`${req.file.path}`);
+                            req.file.path = req.file.path + ".webp";
+                            fs.writeFileSync(`${req.file.path}`, resultData);
+                        })
+                    })
+                }
+                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
+                UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF")
+                res.redirect("/home");
+            } else {
+                res.status(404).send("Cant find session with ID: " + sesID);
+            }
+        }
     }
 })
