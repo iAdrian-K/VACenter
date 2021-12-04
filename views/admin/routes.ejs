@@ -16,7 +16,11 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
-            <h2>Routes</h2>
+            <h2 class="d-inline-block">Routes</h2>
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> float-end" data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+                Add Route
+            </button>
             <p class="text-muted">Click on a route to see more.</p>
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -48,10 +52,6 @@
                             <%})%>
                     </tbody>
                 </table>
-            
-                <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Add Route
-                </button>
                 <% routes.forEach(route=>{%>
                 <div class="modal fade" id="modal-<%= route.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">

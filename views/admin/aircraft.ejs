@@ -16,7 +16,11 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
-            <h2>Aircraft</h2>
+            <h2 class="d-inline-block">Aircraft</h2>
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> float-end" data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+                Add Aircraft
+            </button>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -39,9 +43,6 @@
                 </tbody>
             </table>
             <br>
-            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Add Aircraft
-            </button>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
