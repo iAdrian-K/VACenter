@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./../components/head.ejs")%>
 </head>
 
@@ -18,29 +19,32 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 pt-3" id="content">
             <h2>Events</h2>
             <p class="text-muted">Click on an event to see more.</p>
-            <table class="table table-hover">
+            <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
                 <thead>
-                    <tr>
-                        <th scope="col">Title</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Locations</th>
+                    <tr class="tr-class-2">
+                        <th data-field="title">Title</th>
+                        <th data-field="data">Date</th>
+                        <th data-field="locations">Locations</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% events.forEach(event=>{%>
-                        <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-<%=event.id%>">
-                                    <th scope="row">
-                                        <%= event.title%>
-                                    </th>
-                                    <td>
-                                        <%= new Date(event.depTime).toLocaleDateString() %>
-                                    </td>
-                                    <td>
-                                        <%= event.depAir %> <i class="bi bi-chevron-right"></i> <%= event.arrAir%>
-                                    </td>
+                        <tr id="tr-id-<%=event.id%>" class="tr-class-<%=event.id%> pirepClickable" data-title="<%=event.id%>"
+                            title="<%= event.id%>" data-object='{"key": "value"}' style="cursor: pointer;" data-bs-toggle="modal"
+                            data-bs-target="#modal-<%=event.id%>">
+                            <td id="td-id-<%=event.id %>" class="td-class-<%=event.id %>" data-title="<%= event.id %>">
+                                <strong>
+                                    <%= event.title%>
+                                </strong>
+                            </td>
+                            <td data-text="<%= new Date(event.depTime).toLocaleDateString() %>">
+                                <%= new Date(event.depTime).toLocaleDateString() %>
+                            </td>
+                            <td data-text="<%= event.depAir %> <i class='bi bi-chevron-right'></i> <%= event.arrAir%>">
+                                <%= event.depAir %> <i class="bi bi-chevron-right"></i>
+                                    <%= event.arrAir%>
+                            </td>
                         </tr>
-
-
                         <%})%>
                 </tbody>
             </table>
@@ -224,9 +228,9 @@
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
                     integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
                     crossorigin="anonymous"></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
-                    integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
-                    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+                <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 </body>
 
 </html>
