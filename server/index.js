@@ -351,15 +351,17 @@ function getConfig(){
 
 //Test for Applications
 let appConfig = getConfig();
-if(appConfig.other.applications){
+if(appConfig.other){
+    if(appConfig.other.applications){
 
-}else{
-    appConfig.other.applications = {
-        state: false,
-        link: ""
+    } else {
+        appConfig.other.applications = {
+            state: false,
+            link: ""
+        }
+        fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(appConfig, null, 2));
+        reloadConfig();
     }
-    fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(appConfig, null, 2));
-    reloadConfig();
 }
 
 /**
