@@ -125,9 +125,7 @@
                         <div class="invalid-feedback">Need a valid link</div>
                     </div>
                     <br>
-                    <button class="btn btn-primary">
-                        Submit Changes
-                    </button>
+                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <br>
