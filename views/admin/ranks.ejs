@@ -17,6 +17,11 @@
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
+            <h2 class="d-inline-block">Ranks</h2>
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> float-end" data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+                Add Rank
+            </button>
             <h2>Ranks</h2>
             <div class="table-responsive">
                 <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
@@ -48,9 +53,7 @@
                 </table>
             </div>
             <br>
-            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Add Rank
-            </button>
+            
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
