@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./../components/head.ejs")%>
 </head>
 
@@ -23,33 +24,36 @@
             </button>
             <p class="text-muted">Click on a route to see more.</p>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
                     <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Aircraft</th>
-                            <th scope="col">Flight Time</th>
-                            <th scope="col">Operator</th>
+                        <tr class="tr-class-2">
+                            <th data-field="name">Name</th>
+                            <th data-field="aircraft">Aircraft</th>
+                            <th data-field="flightime">Flight Time</th>
+                            <th data-field="airline">Airline</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% routes.forEach(route=>{%>
-                            <tr style="cursor: pointer;"
-                                data-bs-toggle="modal" data-bs-target="#modal-<%=route.id%>">
-                                    <th scope="row">
+                            <tr id="tr-id-<%=route.id%>" class="tr-class-<%=route.id%> pirepClickable" data-title="<%=route.id%>"
+                                title="<%= route.id%>" data-object='{"key": "value"}' style="cursor: pointer;" data-bs-toggle="modal"
+                                data-bs-target="#modal-<%=route.id%>">
+                                <td id="td-id-<%=route.id %>" class="td-class-<%=route.id %>" data-title="<%= route.id %>">
+                                    <strong>
                                         <%= config.code + route.num %>
-                                    </th>
-                                    <td>
-                                        <%= route.aircraftPublic %>
-                                    </td>
-                                    <td>
-                                        <%= route.ft %>
-                                    </td>
-                                    <td>
-                                        <%= route.operatorPublic %>
-                                    </td>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= route.aircraftPublic %>">
+                                    <%= route.aircraftPublic %>
+                                </td>
+                                <td data-text="<%= route.ft %>">
+                                    <%= route.ft %>
+                                </td>
+                                <td data-text="<%= route.operatorPublic %>">
+                                    <%= route.operatorPublic %>
+                                </td>
                             </tr>
-                            <%})%>
+                        <%})%>
                     </tbody>
                 </table>
                 <% routes.forEach(route=>{%>
@@ -282,6 +286,9 @@
                         });
                     })
                 </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 </body>
 
 </html>
