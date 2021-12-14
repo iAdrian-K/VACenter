@@ -176,14 +176,17 @@ function mode(array) {
 //Config
 let config = {
     other: {
-        rates: 100
+        rates: 100,
+        applications:{
+            state: false,
+            link: ""
+        }
     }
 };
 /**
  * Reloads Config
  * @name Reload Config
  */
-
 function reloadConfig(){
     return new Promise(async (resolve, error) => {
         config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
@@ -191,6 +194,9 @@ function reloadConfig(){
     })
     
 }
+
+
+
 reloadConfig()
 setInterval(reloadConfig, 15000);
 
@@ -342,6 +348,20 @@ app.use(limiter);
 function getConfig(){
     return require("./../config.json");
 }
+
+//Test for Applications
+let appConfig = getConfig();
+if(appConfig.other.applications){
+
+}else{
+    appConfig.other.applications = {
+        state: false,
+        link: ""
+    }
+    fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(appConfig, null, 2));
+    reloadConfig();
+}
+
 /**
  * CheckCPWD - Used for checking if a user needs to change their password.
  * @param {Object} cookies 
@@ -1115,6 +1135,10 @@ app.post('/setup', async (req,res)=>{
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark", "primary"],
+                applications: {
+                    state: false,
+                    link: ""
+                },
                 ident: makeid(25),
                 pirepPic: false,
                 pirepPicExpire: 86400000,
@@ -1168,6 +1192,10 @@ app.post('/setupNVN', async (req, res) => {
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark", "primary"],
+                applications: {
+                    state: false,
+                    link: ""
+                },
                 ident: makeid(25),
                 pirepPic: hosting? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
@@ -1947,6 +1975,33 @@ app.post("/admin/links/rem", async function (req, res) {
         }
     } else {
         res.sendStatus(400);
+    }
+})
+
+app.post("/admin/applications/config", async (req, res) =>{
+    const cookies = getAppCookies(req);
+    let user = await checkForUser(cookies);
+    if (user) {
+        if (user.admin == true) {
+            const newConfig = getConfig();
+            if(req.body.state){
+                if(req.body.link){
+                    newConfig.other.applications.state = true;
+                    newConfig.other.applications.link = req.body.link;
+                }else{
+                    res.status(400);
+                    res.send("Missing Link");
+                }
+            }else{
+                newConfig.other.applications.state = false;
+            }
+            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+            res.redirect("/admin/settings#apps");
+        } else {
+            res.sendStatus(403);
+        }
+    } else {
+        res.sendStatus(401);
     }
 })
 
