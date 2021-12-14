@@ -883,7 +883,8 @@ app.get('*', async (req, res, next)=>{
                                     users: await GetUsers(),
                                     ops: await GetOperators(),
                                     routes: await GetRoutes(),
-                                    config: getConfig()
+                                    config: getConfig(),
+                                    pireps: await GetPireps()
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -1679,17 +1680,13 @@ app.post("/admin/users/resetPWD", async function (req, res){
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                if (req.body.targetUID) {
-                    let target = await GetUser(req.body.targetUID);
+                if (req.body.uid && req.body.newpwd) {
+                    let target = await GetUser(decodeURIComponent(req.body.uid));
                     if (target) {
-                        if (!target.cp) {
-                            target.password = bcrypt.hashSync("VACENTERBACKUP1", 10);
-                            await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked)
-                            await DeleteTokens(target.username);
-                            res.redirect("/admin/users");
-                        } else {
-                            res.sendStatus(409);
-                        }
+                        target.password = bcrypt.hashSync(decodeURIComponent(req.body.newpwd), 10);
+                        await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked)
+                        await DeleteTokens(target.username);
+                        res.sendStatus(200);
                     } else {
                         res.sendStatus(404);
                     }
