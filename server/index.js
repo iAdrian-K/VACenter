@@ -183,14 +183,21 @@ let config = {
         }
     }
 };
+
+function getConfig() {
+    // @ts-ignore
+    return JSON.parse(fs.readFileSync(`${__dirname}/../config.json`));
+    //return require("./../config.json");
+}
+
 /**
  * Reloads Config
  * @name Reload Config
  */
 function reloadConfig(){
-    return new Promise(async (resolve, error) => {
-        config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
-        resolve(true);
+    return new Promise((resolve, error)=>{
+            config = getConfig();
+            resolve(true);
     })
     
 }
@@ -345,9 +352,7 @@ app.use(limiter);
  * GetConfig - Used for every request;
  * @returns {Object}
  */
-function getConfig(){
-    return require("./../config.json");
-}
+
 
 //Test for Applications
 let appConfig = getConfig();
@@ -360,7 +365,6 @@ if(appConfig.other){
             link: ""
         }
         fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(appConfig, null, 2));
-        reloadConfig();
     }
 }
 
@@ -1141,6 +1145,7 @@ app.post('/setup', async (req,res)=>{
                     state: false,
                     link: ""
                 },
+                btnColor: false,
                 ident: makeid(25),
                 pirepPic: false,
                 pirepPicExpire: 86400000,
@@ -1198,6 +1203,7 @@ app.post('/setupNVN', async (req, res) => {
                     state: false,
                     link: ""
                 },
+                btnColor: false,
                 ident: makeid(25),
                 pirepPic: hosting? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
