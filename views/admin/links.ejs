@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./../components/head.ejs")%>
 </head>
 
@@ -18,24 +19,27 @@
         <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
             <h2>Custom Links</h2>
             <div class="table-responsive">
-                <table class="table table-striped table">
+                <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
                     <thead>
-                        <tr>
-                            <th scope="col">Title</th>
-                            <th scope="col">URL</th>
-                            <th scope="col">Action</th>
+                        <tr class="tr-class-2">
+                            <th data-field="title">Title</th>
+                            <th data-field="url">URL</th>
+                            <th data-field="data">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% links.forEach(link=>{%>
-                            <tr>
-                                <th scope="row">
-                                    <%= link.title %>
-                                </th>
-                                <td>
+                            <tr id="tr-id-<%=link.id%>" class="tr-class-<%=link.id%>" data-title="<%=link.id%>"
+                                title="<%=link.id%>" data-object='{"key": "value"}'>
+                                <td id="td-id-<%=link.id%>" class="td-class-<%=link.id%>" data-title="<%=link.title%>">
+                                    <strong>
+                                        <%=link.title%>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= link.url%>">
                                     <%= link.url %>
                                 </td>
-                                <td>
+                                <td data-text="Delete">
                                     <button class="btn btn-danger" onclick="removeLink('<%=link.id%>')"><i class="bi bi-x-circle"></i></button>
                                 </td>
                             </tr>
@@ -83,9 +87,6 @@
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
                 integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
                 crossorigin="anonymous"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
-                integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
-                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
             <script>
                 function removeLink(id) {
@@ -106,6 +107,9 @@
                     }, 1500);
                 }
             </script>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+
 </body>
 
 </html>
