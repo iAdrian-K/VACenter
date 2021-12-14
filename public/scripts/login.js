@@ -1,3 +1,14 @@
+function makeid(length) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
+}
+
 const getAppCookies = () => {
     // We extract the raw cookies from the request headers
     const rawCookies = document.cookie.split('; ');
@@ -63,7 +74,15 @@ if(urlParams.has('r')){
 }
 function applyAction(enabled, link){
     if(enabled){
-
+        swal({
+            title: "External Link",
+            text: `You will be leaving VACenter to apply visit the form for your application (${link})`,
+            icon: 'info'
+        }).then(result =>{
+            if(result){
+                window.open(link);
+            }
+        })
     }else{
         swal({
             title: "Application",
@@ -79,7 +98,7 @@ function resetAction(enabled){
     }else{
         swal({
             title: "Reset Password",
-            text: "This VA does not allow passwords to be reset here. Contact an Admin to have them reset it for you.",
+            text: "Please contact an Adminstrator of this VA to reset your password.",
             icon: "error"
         })
     }
