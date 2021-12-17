@@ -2,4 +2,3 @@ node_modules
 .DS_Store
 docs/*
 data/images/*
-database.db
