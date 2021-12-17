@@ -10,43 +10,50 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./../components/head.ejs")%>
 </head>
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
-            <h2>Ranks</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">Rank</th>
-                        <th scope="col">Min Hours</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% ranks.forEach(rank=>{%>
-                        <tr>
-                            <th scope="row">
-                                <%= rank.rank %>
-                            </th>
-                            <td>
-                                <%= rank.minH %>
-                            </td>
-                            <td>
-                                <button class="btn btn-danger" onclick="remRank('<%=rank.rank%>')"><i
-                                        class="bi bi-x-circle"></i></button>
-                            </td>
-
-                        </tr>
-                        <%})%>
-                </tbody>
-            </table>
-            <br>
-            <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <h2 class="d-inline-block">Ranks</h2>
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> float-end" data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
                 Add Rank
             </button>
+            <h2>Ranks</h2>
+            <div class="table-responsive">
+                <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
+                    <thead>
+                        <tr class="tr-class-2">
+                            <th data-field="title">Rank</th>
+                            <th data-field="url">Minimum Hours</th>
+                            <th data-field="data">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% ranks.forEach(rank=>{%>
+                            <tr id="tr-id-<%=rank.rank%>" class="tr-class-<%=rank.rank%>" data-title="<%=rank.rank%>" title="<%=rank.rank%>"
+                                data-object='{"key": "value"}'>
+                                <td id="td-id-<%=rank.rank%>" class="td-class-<%=rank.rank%>" data-title="<%=rank.rank%>">
+                                    <strong>
+                                        <%=rank.rank%>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= rank.minH%>">
+                                    <%= rank.minH %>
+                                </td>
+                                <td data-text="Delete">
+                                    <button class="btn btn-danger" onclick="remRank('<%=rank.rank%>')"><i class="bi bi-x-circle"></i></button>
+                                </td>
+                            </tr>
+                            <%})%>
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog">
@@ -83,9 +90,8 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
-            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
             
         <script>
             function loadAircraftLivData() {

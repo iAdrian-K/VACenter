@@ -19,8 +19,11 @@ const express = require('express');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
 const csv = require('csvtojson')
+const request = require('request');
 
 let hosting = process.env.HOSTFLAG ? true : false;
+
+
 
 //Storage
 let store = [];
@@ -83,6 +86,7 @@ const {
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
+const webhook = require("./webhook.js");
 //update();
 
 async function reloadUserRanks(){
@@ -237,6 +241,7 @@ function compareRanks(a, b) {
  * @returns {Promise<(any)>}
  */
 const testRank = async (ownerObj) =>{
+    let store = ownerObj.rank;
     return new Promise(async resolve =>{
         if(ownerObj){
             const ranks = await GetRanks();
@@ -246,6 +251,9 @@ const testRank = async (ownerObj) =>{
                 if(ownerObj.hours >= rank.minH){
                     ownerObj.rank = rank.rank;
                 }
+            }
+            if(store != ownerObj.rank){
+                webhook.send({ title: "Rank up!", description: `${config.code}${ownerObj.username} has achieved the rank of ${ownerObj.rank}` });
             }
             resolve(ownerObj.rank);
         }else{
@@ -518,6 +526,27 @@ app.get('/api/data/stats', async (req, res) => {
         if (req.query.auth == config.other.ident.slice(0, 5)) {
                 res.setHeader('Content-Type', 'application/json');
                 res.status(200).end(JSON.stringify(stats, null, 2));
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+})
+app.get('/api/data/config', async (req, res) =>{
+    if (req.query.auth) {
+        if (req.query.auth == config.other.ident.slice(0, 5)) {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200);
+            const newObj = config;
+            delete newObj.other.ident;
+            delete newObj.other.webhook;
+            if(newObj.key){
+                delete newObj.key;
+                delete newObj.key;
+                delete newObj.boostingTier;
+            }
+            res.end(JSON.stringify(newObj, null, 2));
         } else {
             res.sendStatus(401);
         }
@@ -1312,6 +1341,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                     }
                     
                     await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    webhook.send({title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.`})
                     res.redirect("/");
                 } else {
                     res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
@@ -1339,7 +1369,8 @@ app.post("/admin/events/new", async function (req, res) {
         if (user) {
             if(user.admin == true){
                 await CreateEvent(req.body.title, req.body.desc, req.body.arrICAO, req.body.depICAO, req.body.date, req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName , req.body.server, req.body.gates.split(","))
-                res.redirect("/admin/events")
+                res.redirect("/admin/events");
+                webhook.send({ title: "New Event!", description: `A new event has been scheduled (${req.body.title})! Check it out!` });
             }else{
                 res.sendStatus(403);
             }
@@ -1459,7 +1490,8 @@ app.post("/admin/aircraft/new", async function (req, res) {
                     if (user) {
                         if (user.admin == true) {
                             await CreateAircraft(req.body.livID, req.body.airID, liv.name, (vanetCraft.get(req.body.airID)).name, liv.name + " - " + (vanetCraft.get(req.body.airID)).name)
-                            res.redirect("/admin/aircraft")
+                            res.redirect("/admin/aircraft");
+                            webhook.send({ title: "New Aircraft!", description: `The ${liv.name + " - " + (vanetCraft.get(req.body.airID)).name} has been added to our fleet!` });
                         } else {
                             res.sendStatus(403);
                         }
@@ -1622,7 +1654,8 @@ app.post("/admin/users/new", async function (req, res) {
                     await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
                     await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
                     
-                    res.redirect("/admin/users")
+                    res.redirect("/admin/users");
+                    webhook.send({ title: "New Pilot!", description: `Welcome ${req.body.Name} (${config.code}${req.body.username}) to the VA!` });
                 }else{
                     res.sendStatus(409);
                 }
@@ -1809,7 +1842,10 @@ app.post("/admin/settings/pirepPic", async function (req, res) {
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
                 setTimeout(() => {
                     reloadConfig();
-                    res.redirect("/admin/settings")
+                    res.redirect("/admin/settings");
+                    if(req.body.state == "on"){
+                        webhook.send({title: "PIREP Images Enabled", description: `${config.name} has turned on PIREP images, now you can submit an image as part of your PIREP.`})
+                    }
                 }, 1000)
             }
         } else {
@@ -1839,7 +1875,27 @@ app.post("/admin/settings/bg", async function (req, res) {
         res.sendStatus(400);
     }
 })
-
+app.post("/admin/settings/webhook", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.value) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const newConfig = getConfig();
+                newConfig.other.webhook = req.body.value;
+                fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+                res.redirect("/admin/settings");
+                webhook.send({ title: "Webhook Setup", description: `Your webhook has been setup successfully!` })
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
 app.post("/admin/settings/accent", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.accent) {
@@ -1898,7 +1954,10 @@ app.post("/admin/pireps/apr", async function (req, res){
                         owner.hours = owner.hours + (targetPIREP.flightTime / 60);
                         owner.rank = await testRank(owner)
                         await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID)
-                        res.redirect("/admin/pireps")
+                        res.redirect("/admin/pireps");
+                        
+                        webhook.send({title:"PIREP Approved", description: `${config.code}${owner.username}'s PIREP (${targetPIREP.depICAO}=>${targetPIREP.arrICAO}) has been approved!`})
+
                     }else{
                         res.sendStatus(500);
                     }

@@ -136,6 +136,19 @@
                 <p>Used for external identification. (IF Experiment Bot, etc)</p>
                 <span style="word-wrap: break-word;"><strong>Ident: </strong><%= config.other.ident.slice(0,5)%></span>
             </div>
+            <div class="form-control shadow p-3 my-3">
+                <form action="/admin/settings/webhook" method="post" class="needs-validation" novalidate>
+                    <h4>Webhook</h4>
+                    <p>Used to send events like PIREPS to your communications server. <span class="text-muted">(Discord only for now)</span></p>
+                    <div>
+                        <input class="form-control" required type="url" name="value" value="<%= config.other.webhook %>">
+                        <div class="valid-feedback">Looks good!</div>
+                        <div class="invalid-feedback">Need a valid URL!</div>
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
+                </form>
+            </div>
         </div>
         <%- include('./../components/footer.ejs') %>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
