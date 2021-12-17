@@ -44,7 +44,7 @@
                             Password</button>
                     </form>
                     <p class="mt-5">Don't have an account? <a style="cursor: pointer" class="link link-primary text-decoration-none fw-bold"
-                            onclick="applyAction(false, null)">Apply</a></p>
+                            onclick="applyAction('<%= config.other.applications.state %>' == 'true' ? true : false, '<%=config.other.applications.link%>')">Apply</a></p>
                 </div>
             </td>
         </tr>
