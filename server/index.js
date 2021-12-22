@@ -803,10 +803,7 @@ app.get('*', async (req, res, next)=>{
                                 title: "My Stats",
                                 user: user,
                                 config: getConfig(),
-                                stats: stats,
-                                fleet: await GetAircrafts(),
-                                events: await GetEvents(),
-                                route: await GetRoutes()
+                                stats: stats
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -814,15 +811,19 @@ app.get('*', async (req, res, next)=>{
                         break;
                     case "/stats/va":
                         if (user) {
+                            const specConfig = getConfig();
+                            delete specConfig.other['ident'];
+                            delete specConfig['key'];
+                            delete specConfig['id'];
                             res.render("stats/va", {
                                 active: req.path,
                                 title: "VA Stats",
                                 user: user,
-                                config: getConfig(),
+                                config: specConfig,
                                 stats: stats,
-                                fleet: await GetAircrafts(),
-                                events: await GetEvents(),
-                                route: await GetRoutes()
+                                aircraft: await GetAircrafts(),
+                                routes: await GetRoutes(),
+                                pireps: await GetPireps()
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
