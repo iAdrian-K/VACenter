@@ -10,14 +10,17 @@ const airportMap = new Map();
 const airportArray = [];
 const loadedPortsRoutes = new Map();
 const loadedPortsFlown = new Map();
+let fuelUsed = 0;
 
 //Total Flights Stats
 pireps.forEach(flight =>{
     if(flight.status == "a"){
         pirepTicker ++;
+        fuelUsed += parseInt(flight.fuel);
     }
 })
 document.getElementById('stat_total_flights').innerHTML = pirepTicker;
+document.getElementById('stat_value_fuel').innerHTML = fuelUsed;
 
 //Total Flight Hours Stats
 pireps.forEach(flight =>{
@@ -41,6 +44,8 @@ pireps.forEach(flight =>{
 })
 let maxRoute = [...routeCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
 document.getElementById('stat_common_flight').innerHTML = maxRoute[0].split("_").join(" &#10142; ");
+
+let distanceFlown = 0;
 
 //Common Vehicle
 pireps.forEach(flight => {
@@ -112,8 +117,12 @@ function dataLoaded() {
             } else {
                 countryCounter.set(arrPort.country, 1);
             }
+
+            //Distance
+            distanceFlown += calcCrow(depPort.latitude, depPort.longitude, arrPort.latitude, arrPort.longitude);
         }
     })
+    document.getElementById('stat_value_distance').innerHTML = distanceFlown.toFixed(2);
     let maxCountry = [...countryCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
     document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ', maxCountry[0]].join("")
     //Common Type
@@ -145,7 +154,7 @@ function dataLoaded() {
     document.getElementById('loadingIndicator').classList.add('d-none');
     var map = L.map('allRoutesMap').setView([0, 0], 3);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '<a href="https://va-center.com">VACenter</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
         //Load Ports
         routes.forEach(route =>{
@@ -202,3 +211,22 @@ var airportIcon = L.icon({
     iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
     popupAnchor: [0, -20] // point from which the popup should open relative to the iconAnchor
 });
+
+function calcCrow(lat1, lon1, lat2, lon2) {
+    var R = 6371; // km
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var lat1 = toRad(lat1);
+    var lat2 = toRad(lat2);
+
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    var d = R * c;
+    return d;
+}
+
+// Converts numeric degrees to radians
+function toRad(Value) {
+    return Value * Math.PI / 180;
+}

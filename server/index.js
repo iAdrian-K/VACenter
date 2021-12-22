@@ -823,7 +823,8 @@ app.get('*', async (req, res, next)=>{
                                 stats: stats,
                                 aircraft: await GetAircrafts(),
                                 routes: await GetRoutes(),
-                                pireps: await GetPireps()
+                                pireps: await GetPireps(),
+                                pilotSize: (await GetUsers()).length
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
