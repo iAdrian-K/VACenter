@@ -23,7 +23,10 @@ data.pireps.forEach(async pirep =>{
         scheduler(depPort);
         scheduler(arrPort)
         if (!(lineMap.has(`${depPort}-${arrPort}`) || lineMap.has(`${arrPort}-${depPort}`))) {
-            lineMap.set(`${depPort}-${arrPort}`, [depPort, arrPort]);
+            lineMap.set(`${depPort}-${arrPort}`, [depPort, arrPort, 1]);
+        }else{
+            const line = lineMap.get(`${depPort}-${arrPort}`) || lineMap.get(`${arrPort}-${depPort}`);
+            lineMap.set(`${depPort}-${arrPort}`, [depPort, arrPort, line[2] + 1]);
         }
         if (routeCounter.has(`${depPort}_${arrPort}`)) {
             let route = routeCounter.get(`${depPort}_${arrPort}`);
@@ -151,7 +154,7 @@ function onFinish(){
             [start.latitude, start.longitude],
             [end.latitude, end.longitude]
         ])
-        polygon.bindPopup(`${line[0]} &#8660; ${line[1]}`);
+        polygon.bindPopup(`${line[0]} &#8660; ${line[1]} (${line[2]})`);
         polygon.addTo(map);
 
     })
