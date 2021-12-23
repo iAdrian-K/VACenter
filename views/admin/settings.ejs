@@ -139,7 +139,7 @@
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/webhook" method="post" class="needs-validation" novalidate>
                     <h4>Webhook</h4>
-                    <p>Used to send events like PIREPS to your communications server. <span class="text-muted">(Discord only for now)</span></p>
+                    <p>Used to send events like PIREPS to your communications server. <a class="link link-dark" href="https://va-center.com/webhooks" target="_blank">View List of Events</a> <span class="text-muted">(Discord only for now)</span></p>
                     <div>
                         <input class="form-control" required type="url" name="value" value="<%= config.other.webhook %>">
                         <div class="valid-feedback">Looks good!</div>

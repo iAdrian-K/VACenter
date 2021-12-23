@@ -289,9 +289,7 @@ const updateStats = async () => {
     stats.pirepsLength = 0;
     (await GetPireps()).forEach(pirep =>{
         stats.pirepsLength++;
-        console.log(pirep.status)
         if(pirep.status == "a"){
-            console.log(pirep)
             stats.totalHours = stats.totalHours + (pirep.flightTime)/60
         }
     })
@@ -659,6 +657,8 @@ app.get('*', async (req, res, next)=>{
         } else {
             res.sendStatus(404);
         }
+    }else if(req.path == '/mirrorContent'){
+        res.render("contentMirror")
     } else {
 
         //Check for setup
@@ -1216,8 +1216,10 @@ app.post('/setup', async (req,res)=>{
     }
 })
 app.post('/setupNVN', async (req, res) => {
-    if (req.body.data) {
-        const data = JSON.parse(req.body.data);
+    try{
+        if (req.body.data) {
+            const data = JSON.parse(req.body.data);
+            console.log(data);
             const newConfig = {
                 code: data.code,
                 name: data.name
@@ -1234,9 +1236,19 @@ app.post('/setupNVN', async (req, res) => {
                 },
                 btnColor: false,
                 ident: makeid(25),
-                pirepPic: hosting? false : data.pirepPictures,
+                pirepPic: hosting ? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
+                webhook: data.webhook
             }
+            newConfig.other.navColor = [];
+            newConfig.other.navColor.push(data.colors.main.value);
+            if (data.colors.main.value == "light") {
+                newConfig.other.navColor.push("light");
+            } else {
+                newConfig.other.navColor.push("dark");
+            }
+            newConfig.other.navColor.push(data.colors.buttons.value);
+
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(async () => {
                 await reloadConfig();
@@ -1251,12 +1263,18 @@ app.post('/setupNVN', async (req, res) => {
                     config.other.ident = regReq[2];
                     await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2));
                     vanetCraft = await getVANetData();
-                    CreateOperator(config.name)
+                    CreateOperator(config.name);
+                    webhook.send({ title: "Webhook Setup", description: `Your webhook has been setup successfully!` })
                     res.sendStatus(200);
                 }, 1000);
 
             }, 2000);
+        }
+    }catch(err){
+        res.status(500);
+        res.send(err);
     }
+    
 })
 
 app.post('/OSOR', async(req, res)=>{

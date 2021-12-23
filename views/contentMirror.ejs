@@ -1,0 +1,20 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mirror Content</title>
+</head>
+<body>
+    <p id="contentMirror"></p>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const content = atob(urlParams.get('content'));
+        if(typeof content === 'string'){
+            document.getElementById('contentMirror').innerHTML = content;
+        }else{
+            document.getElementById('contentMirror').innerHTML = "Cross Site Scripting is not supported";
+        }
+    </script>
+</body>
+</html>
