@@ -1,3 +1,13 @@
+function calcHighest(array) {
+    console.log(array)
+    if (array.length == 0 || array.size == 0) {
+        return ["None"];
+    } else {
+        return [...array.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+    }
+}
+
+
 //Data Stores
 let pirepHours = 0;
 let pirepTicker = 0;
@@ -42,7 +52,7 @@ pireps.forEach(flight =>{
         }
     }
 })
-let maxRoute = [...routeCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+let maxRoute = calcHighest(routeCounter);
 document.getElementById('stat_common_flight').innerHTML = maxRoute[0].split("_").join(" &#10142; ");
 
 let distanceFlown = 0;
@@ -59,7 +69,7 @@ pireps.forEach(flight => {
         }
     }
 })
-let maxCraft = [...craftCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+let maxCraft = calcHighest(craftCounter)
 document.getElementById('stat_common_plane').innerHTML = maxCraft[0].split("_").join(" &#10142; ");
 
 //Airport Info Required
@@ -123,7 +133,7 @@ function dataLoaded() {
         }
     })
     document.getElementById('stat_value_distance').innerHTML = distanceFlown.toFixed(2);
-    let maxCountry = [...countryCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+    let maxCountry = calcHighest(countryCounter);
     document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ', maxCountry[0]].join("")
     //Common Type
     pireps.forEach(flight => {
@@ -146,7 +156,7 @@ function dataLoaded() {
             }
         }
     })
-    let maxType = [...typeCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+    let maxType = calcHighest(typeCounter)
     document.getElementById('stat_common_type').innerHTML = maxType[0];
 
     //All Routes Map

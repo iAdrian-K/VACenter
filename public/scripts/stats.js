@@ -1,3 +1,13 @@
+function calcHighest(array){
+    console.log(array)
+    if(array.length == 0 || array.size == 0){
+        return ["None"];
+    }else{
+        return [...array.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+    }
+}
+
+
 //Get All Airports
 
 const airportMap = new Map();
@@ -50,10 +60,10 @@ document.getElementById('stat_total_flights').innerHTML = pirepTicker;
 
 document.getElementById('stat_total_hours').innerHTML = pirepHours / 60;
 
-let maxRoute = [...routeCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+let maxRoute = calcHighest(routeCounter);
 document.getElementById('stat_common_flight').innerHTML = maxRoute[0].split("_").join(" &#10142; ");
 
-let maxPlane = [...craftCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+let maxPlane = calcHighest(craftCounter);
 document.getElementById('stat_common_plane').innerHTML = maxPlane[0].split("_").join(" &#10142; ");
 
 
@@ -122,7 +132,7 @@ function onFinish(){
             countryCounter.set(arrPort.country, 1);
         }
     })
-    let maxCountry = [...countryCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+    let maxCountry = calcHighest(countryCounter);
     document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ',maxCountry[0]].join("")
 
 
@@ -145,7 +155,7 @@ function onFinish(){
         }).addTo(map)
             .bindPopup(`<strong>${airport.name}</strong><br>${airport.icaoCode} | ${airport.type}`)
     })
-    let maxType = [...typeCounter.entries()].reduce((a, e) => e[1] > a[1] ? e : a);
+    let maxType = calcHighest(typeCounter);
     document.getElementById('stat_common_type').innerHTML = maxType[0]
     lineMap.forEach(line =>{
         const start = airportMap.get(line[0]);
