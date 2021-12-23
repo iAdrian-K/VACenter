@@ -134,7 +134,12 @@ function dataLoaded() {
     })
     document.getElementById('stat_value_distance').innerHTML = distanceFlown.toFixed(2);
     let maxCountry = calcHighest(countryCounter);
-    document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ', maxCountry[0]].join("")
+    if(maxCountry[0] != "None"){
+        document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ', maxCountry[0]].join("")
+    }else{
+        document.getElementById('stat_common_country').innerHTML = [maxCountry[0]].join("")
+    }
+    
     //Common Type
     pireps.forEach(flight => {
         if (flight.status == "a") {

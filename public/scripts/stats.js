@@ -133,7 +133,11 @@ function onFinish(){
         }
     })
     let maxCountry = calcHighest(countryCounter);
-    document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ',maxCountry[0]].join("")
+    if (maxCountry[0] != "None") {
+        document.getElementById('stat_common_country').innerHTML = ['<span class="flag-icon rounded flag-icon-', maxCountry[0].toLowerCase(), '"></span> ', maxCountry[0]].join("")
+    } else {
+        document.getElementById('stat_common_country').innerHTML = [maxCountry[0]].join("")
+    }
 
 
     document.getElementById('map').style.height = "50vh";
