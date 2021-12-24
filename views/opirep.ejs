@@ -39,8 +39,8 @@
                                         <%= pirep.route%>
                                 </strong>
                             </td>
-                            <td data-text="<%= pirep.airline %>">
-                                <%= pirep.airline %>
+                            <td data-text="<%= operators_search.get(parseInt(pirep.operator)).name %>">
+                                <%= operators_search.get(parseInt(pirep.operator)).name %>
                             </td>
                             <td data-text="<%= pirep.vehiclePublic %>">
                                 <%= pirep.vehiclePublic %>

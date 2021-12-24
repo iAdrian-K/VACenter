@@ -40,7 +40,7 @@
                                 data-bs-target="#modal-<%=route.id%>">
                                 <td id="td-id-<%=route.id %>" class="td-class-<%=route.id %>" data-title="<%= route.id %>">
                                     <strong>
-                                        <%= config.code + route.num %>
+                                        <%= operators_search.get(route.operator).code + route.num %>
                                     </strong>
                                 </td>
                                 <td data-text="<%= route.aircraftPublic %>">
@@ -100,8 +100,8 @@
                                     <label class="form-label">Operator</label>
                                     <select class="form-select mb-3" name="op" value="<%= route.operator %>">
                                         <% ops.forEach(op=>{%>
-                                            <option value="<%= op.id%>">
-                                                <%= op.operator%>
+                                            <option <% if(route.operator == op.id){%>selected<%}%> value="<%= op.id%>">
+                                                <%= op.name%>
                                             </option>
                                             <%})%>
                                     </select>
@@ -212,7 +212,7 @@
                             <select class="form-select mb-3" required name="op">
                                 <% ops.forEach(op=>{%>
                                     <option value="<%= op.id%>">
-                                        <%= op.operator%>
+                                        <%= op.name%>
                                     </option>
                                     <%})%>
                             </select>

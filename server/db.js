@@ -304,7 +304,7 @@ function GetPireps() {
  * @param {string} vehicle - Livery ID
  * @param {string} vehiclePublic - Name of Vehicle
  * @param {string} author - Pirep Creator
- * @param {string} airline - Airline
+ * @param {number} operator - Operator
  * @param {string} depICAO - Departing ICAO code
  * @param {string} arrICAO - Arriving ICAO code
  * @param {string} route - Route
@@ -316,10 +316,10 @@ function GetPireps() {
  * @param {string|Boolean} [img] - ID of IMG
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, img) {
+function CreatePirep(vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, img) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, pirepImg)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null, (img ? img : null)], function (err) {
+        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, pirepImg)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null, (img ? img : null)], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -336,7 +336,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @param {string} vehicle - Livery ID
  * @param {string} vehiclePublic - Name of Vehicle
  * @param {string} author - Pirep Creator
- * @param {string} airline - Airline
+ * @param {number} operator - Operator
  * @param {string} depICAO - Departing ICAO code
  * @param {string} arrICAO - Arriving ICAO code
  * @param {string} route - Route
@@ -348,13 +348,13 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @param {string} [img] - PIREP Image
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
+ function UpdatePirep(id, vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE pireps SET 
                 vehicle = ?,
                 vehiclePublic = ?,
                 author = ?,
-                airline = ?,
+                operator = ?,
                 depICAO = ?,
                 arrICAO = ?,
                 route = ?,
@@ -365,7 +365,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
                 filed = ?,
                 rejectReason = ?,
                 pirepImg = ?
-                WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, (img?img:null), id], function (err) {
+                WHERE id = ?`, [vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, (img?img:null), id], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -577,7 +577,7 @@ function CreateUser(username, rank, manualRank, admin, password, display, profil
 function GetOperatorByName(name) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.get(`SELECT * FROM operators WHERE operator = ?`, [name], (err, row) => {
+            db.get(`SELECT * FROM operators WHERE name = ?`, [name], (err, row) => {
                 if (err) {
                     Sentry.captureException(err);
                 } else {
@@ -590,7 +590,7 @@ function GetOperatorByName(name) {
 
 /**
  * Returns record of specific Operator ID
- * @param {string} id - Unique id of operator 
+ * @param {number} id - Unique id of operator 
  * @returns {Promise<operator>} Record for that operator
  */
  function GetOperator(id) {
@@ -603,13 +603,14 @@ function GetOperatorByName(name) {
                     resolve(row);
                 }
             });
+            
         });
     });
 }
 
 /**
  * Returns all operators
- * @returns {Promise<Array.<{operator}>>} Operator objects in an array
+ * @returns {Promise<Array<operator>>} Operator objects in an array
  */
 function GetOperators() {
     return new Promise((resolve, error) => {
@@ -628,12 +629,14 @@ function GetOperators() {
 /**
  * Creates a new operator
  * @param {string} operator - Name of operator
+ * @param {0|1} self - Is self?
+ * @param {string} code - Code of operator
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreateOperator(operator) {
+function CreateOperator(operator, self, code) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO operators(operator) 
-                VALUES(?)`, [operator], function (err) {
+        db.run(`INSERT INTO operators(name,self,code) 
+                VALUES(?, ?, ?)`, [operator, self ? self : 0, code], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -705,7 +708,7 @@ function GetRouteByNum(num) {
 
 /**
  * Returns all routes
- * @returns {Promise<Array.<{route}>>} Route objects in an array
+ * @returns {Promise<Array<route>>} Route objects in an array
  */
 function GetRoutes() {
     return new Promise((resolve, error) => {
@@ -726,19 +729,18 @@ function GetRoutes() {
  * @param {string} id - Unique identifier
  * @param {string} num - Flight Number
  * @param {number} ft - Flight Time 
- * @param {string} operator - Airline
+ * @param {number} operator - Operator ID
  * @param {string} aircraft - Livery ID
  * @param {string} depICAO - Departing ICAO
  * @param {string} arrICAO - Arriving ICAO
  * @param {string} aircraftPublic - Common aircraft name
- * @param {string} operatorPublic - Common operator name
  * @param {string} minRank - Minimum rank to fly route
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
+function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
-                VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
+        db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank) 
+                VALUES(?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -754,16 +756,15 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
  * @param {string} id - Unique identifier
  * @param {string} num - Flight Number
  * @param {number} ft - Flight Time 
- * @param {string} operator - Airline
+ * @param {string} operator - Operator
  * @param {string} aircraft - Livery ID
  * @param {string} depICAO - Departing ICAO
  * @param {string} arrICAO - Arriving ICAO
  * @param {string} aircraftPublic - Common aircraft name
- * @param {string} operatorPublic - Common operator name
  * @param {string} minRank - Minimum rank to fly route
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
+ function UpdateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE routes SET 
                 num = ?,
@@ -773,9 +774,8 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
                 depICAO = ?,
                 arrICAO = ?,
                 aircraftPublic = ?,
-                operatorPublic = ?,
                 minRank = ?
-                WHERE id = ?`, [num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank, id], function (err) {
+                WHERE id = ?`, [num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank, id], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)

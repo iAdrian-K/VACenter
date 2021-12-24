@@ -20,6 +20,7 @@ const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
 const csv = require('csvtojson')
 const request = require('request');
+let operatorSearchable = new Map();
 
 let hosting = process.env.HOSTFLAG ? true : false;
 
@@ -88,6 +89,16 @@ const { update, checkForNewVersion, getVersionInfo } = require("./update");
 const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
 const webhook = require("./webhook.js");
 //update();
+
+function resetOperators(){
+    operatorSearchable = new Map();
+    GetOperators().then(list => {
+        list.forEach(op=>{
+            operatorSearchable.set(op.id, op)
+        })
+    })
+}
+resetOperators()
 
 async function reloadUserRanks(){
     (await GetUsers()).forEach(async user =>{
@@ -363,6 +374,7 @@ app.use(bodyParser.json())
 app.use(function(req,res,next){
     res.locals.rank_search = rankMap;
     res.locals.version = cvnb;
+    res.locals.operators_search = operatorSearchable;
     next();
 })
 let limiter = rateLimit({
@@ -475,6 +487,32 @@ async function getUserWithObjs(userObj, flags){
     }))
 }
 
+async function getRoutesWithOperator(){
+    return new Promise(async (resolve, error)=>{
+        const routes = await GetRoutes();
+        let ticker = 0;
+        routes.forEach(async route => {
+            route.operatorPublic = (await GetOperator(route.operator)).name;
+            route.operatorCode = (await GetOperator(route.operator)).code;
+            ticker++;
+        })
+        let checker = setInterval(()=>{
+            if(ticker >= routes.length){
+                clearInterval(checker);
+                resolve(routes);
+            }
+        }, 100);
+    })
+}
+
+async function getRouteWithOperator(id){
+    return new Promise(async (resolve, error) => {
+        const route = await GetRoute(id);
+        route.operatorPublic = (await GetOperator(route.operator)).name;
+        route.operatorCode = (await GetOperator(route.operator)).code;
+        resolve(route);
+    })
+}
 
 //Basic Routes
 
@@ -599,20 +637,16 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                             jsonObj.forEach(row => {
                                 setTimeout(async () =>{
                                     if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
-                                        console.log(await GetAircrafts())
                                         const aircraft = await GetAircraft(row.aircraftID);
                                         if (aircraft) {
-                                            console.log(row.rank);
                                             const rank = await GetRank(row.rank);
-                                            console.log(rank);
                                             if (rank) {
                                                 if (Array.isArray(rank) == false) {
-                                                    const operator = await GetOperatorByName(row.operator);
+                                                    const operator = await GetOperatorByName(row.name);
                                                     if (operator) {
                                                             setTimeout(() => {
                                                                 if (errorAllReadySent == false) {
-                                                                    console.log(rank);
-                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, rank.minH.toString());
+                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id, aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, rank.minH.toString());
                                                                     res.redirect("/admin/routes");
                                                                 }
                                                             }, 1500);
@@ -763,7 +797,7 @@ app.get('*', async (req, res, next)=>{
                                 active: req.path,
                                 title: "New Flight",
                                 user: user,
-                                routes: await GetRoutes(),
+                                routes: await getRoutesWithOperator(),
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
                                 config: getConfig(),
@@ -934,7 +968,7 @@ app.get('*', async (req, res, next)=>{
                                     activer: "/admin",
                                     craft: await GetAircrafts(),
                                     ops: await GetOperators(),
-                                    routes: await GetRoutes(),
+                                    routes: await getRoutesWithOperator(),
                                     ranks: await GetRanks(),
                                     config: getConfig()
                                 })
@@ -1215,7 +1249,7 @@ app.post('/setup', async (req,res)=>{
                     setTimeout(async () => {
                         vanetCraft = await getVANetData();
                     }, 1000)
-                    CreateOperator(config.name)
+                    CreateOperator(config.name, 1, newConfig.code);
                     if (regReq[1].statusCode == 200) {
                         await reloadConfig();
                         res.sendStatus(200);
@@ -1239,7 +1273,6 @@ app.post('/setupNVN', async (req, res) => {
     try{
         if (req.body.data) {
             const data = JSON.parse(req.body.data);
-            console.log(data);
             const newConfig = {
                 code: data.code,
                 name: data.name
@@ -1283,7 +1316,7 @@ app.post('/setupNVN', async (req, res) => {
                     config.other.ident = regReq[2];
                     await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2));
                     vanetCraft = await getVANetData();
-                    CreateOperator(config.name);
+                    CreateOperator(config.name, 1, newConfig.code);
                     webhook.send({ title: "Webhook Setup", description: `Your webhook has been setup successfully!` })
                     res.sendStatus(200);
                 }, 1000);
@@ -1362,7 +1395,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                 }
             })
             if(req.body.aircraft){
-                if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
+                if (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))) {
                     if(req.file){
                     fs.readFile(req.file.path, function (err, sourceData) {
                         Sentry.captureException(err);
@@ -1375,10 +1408,10 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                     })
                     }
                     if(config.key && user.VANetID){
-                        await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
+                        await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
                     }
                     
-                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
                     webhook.send({title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.`})
                     res.redirect("/");
                 } else {
@@ -1441,12 +1474,13 @@ app.delete("/admin/events/remove", async function (req, res) {
 //Operators
 app.post("/admin/codeshare/new", async function (req, res) {
     const cookies = getAppCookies(req)
-    if (req.body.airName) {
+    if (req.body.airName && req.body.airCode) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await CreateOperator(req.body.airName)
-                res.redirect("/admin/codeshare")
+                await CreateOperator(req.body.airName, 0, req.body.airCode)
+                res.redirect("/admin/codeshare");
+                resetOperators()
             } else {
                 res.sendStatus(403);
             }
@@ -1465,6 +1499,7 @@ app.delete("/admin/codeshare/remove", async function (req, res) {
             if (user.admin == true) {
                 await DeleteOperator(req.body.id);
                 res.redirect("/admin/codeshare");
+                resetOperators();
             } else {
                 res.sendStatus(403);
             }
@@ -1594,7 +1629,7 @@ app.post("/admin/routes/new", async function (req, res) {
                     if(counter == req.body.aircraft.length) {
                         clearInterval(checker);
                         let vehiclePublicList = vehiclePublic.join(", ");
-                        await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.minH);
+                        await CreateRoute(routeID, req.body.num, req.body.ft, parseInt(req.body.op), req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.minH);
                         res.redirect("/admin/routes")
                     }
                 }, 250)
@@ -1630,7 +1665,7 @@ app.post("/admin/routes/update", async function (req, res) {
                         if (counter == req.body.aircraft.length) {
                             clearInterval(checker);
                             let vehiclePublicList = vehiclePublic.join(", ");
-                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.rankReq);
+                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.rankReq);
                             res.redirect("/admin/routes")
                         }
                     }, 250)
@@ -2014,10 +2049,10 @@ app.post("/admin/pireps/apr", async function (req, res){
                     if(config.other.pirepPic == true){
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
-                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, targetPIREP.status, targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, targetPIREP.status, targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
                         }, config.other.pirepPicExpire);
                     }
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed,null, targetPIREP.pirepImg);
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed,null, targetPIREP.pirepImg);
                     const owner = await GetUser(targetPIREP.author);
                     if(owner){
                         owner.hours = owner.hours + (targetPIREP.flightTime / 60);
@@ -2057,10 +2092,10 @@ app.post("/admin/pireps/den", async function (req, res) {
                     if (config.other.pirepPic == true) {
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
-                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), "REMOVED");
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), "REMOVED");
                         }, config.other.pirepPicExpire);
                     }
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), targetPIREP.pirepImg);
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), targetPIREP.pirepImg);
                     res.redirect("/admin/pireps")
                 } else {
                     res.sendStatus(404);
@@ -2230,7 +2265,9 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                 }
-                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
+                // @ts-ignore
+                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, parseInt(route.operator), route.depICAO, route.arrICAO, operatorSearchable.get(route.operator).code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                webhook.send({ title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.` })
                 UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF")
                 res.redirect("/home");
             } else {

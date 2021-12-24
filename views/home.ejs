@@ -17,9 +17,11 @@
             <h1>Welcome <%= user.display%> to <%= config.name %></h1>
             <br>
             <% if(currentSession){%>
-                <h2>Current Session</h2>
-            <hr>
+                <h2><i class="bi bi-exclamation-circle text-warning"></i> Current Session</h2>
+                <hr>
+                <p>You are currently flying, click the button below to return to your flight.</p>
                 <div class="form-control w-100 mx-2 my-2 px-5 py-3">
+                    <h1></h1>
                     <h3 class="fw-bold">Session <%= currentSession.id %></h3>
                     <p>
                         Click the button to return to the flight.
