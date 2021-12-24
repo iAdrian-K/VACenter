@@ -350,7 +350,7 @@ app.use(function(req,res,next){
 })
 let limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 125 // limit each IP to 100 requests per windowMs
+    max: 200 // limit each IP to 200 requests per windowMs
 });
 app.use(limiter);
 //app.use(cookieParser());
