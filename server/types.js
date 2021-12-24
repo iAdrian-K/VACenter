@@ -73,7 +73,10 @@
  * A operator Object
  * @typedef {Object} operator
  * @property {number} id
- * @property {string} operator
+ * @property {string} name
+ * @property {1|0} self
+ * @property {string} code
+ * @property {0|1} inuse
  */
 
 /**
@@ -83,7 +86,7 @@
  * @property {string} vehicle
  * @property {string} vehiclePublic
  * @property {string} author
- * @property {string} airline
+ * @property {number} operator
  * @property {string} depICAO
  * @property {string} arrICAO
  * @property {string} route
@@ -109,11 +112,13 @@
  * @property {string} id
  * @property {string} num
  * @property {number} ft - Flight Time
- * @property {string} operator
+ * @property {number} operator
  * @property {string} aircraft
  * @property {string} depICAO
  * @property {string} arrICAO
  * @property {string} aircraftPublic
+ * @property {?string} operatorPublic
+ * @property {?string} operatorCode
  * @property {string} minRank
  */
 

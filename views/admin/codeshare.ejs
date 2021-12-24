@@ -10,6 +10,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./../components/head.ejs")%>
 </head>
 
@@ -21,28 +22,36 @@
                 data-bs-target="#exampleModal">
                 Add Airline
             </button>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% operators.forEach(op=>{%>
-                        <tr>
-                            <th scope="row">
-                                <%= op.operator %>
-                            </th>
-                            <td>
-                                <button <% if(op.operator != config.name){%>class="btn btn-danger" onclick="remCode('<%=op.id%>')"<%}else{%>class="btn btn-secondary" style="cursor: not-allowed !important;" disabled<%}%>><i
-                                        class="bi bi-x-circle"></i></button>
-                            </td>
-
+            <div class="table-responsive">
+                <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
+                    <thead>
+                        <tr class="tr-class-2">
+                            <th data-field="title">Name</th>
+                            <th data-field="url">Code</th>
+                            <th data-field="data">Action</th>
                         </tr>
-                        <%})%>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% operators.forEach(op=>{%>
+                            <tr id="tr-id-<%=op.id%>" class="tr-class-<%=op.id%>" data-title="<%=op.id%>" title="<%=op.id%>"
+                                data-object='{"key": "value"}'>
+                                <td id="td-id-<%=op.id%>" class="td-class-<%=op.id%>" data-title="<%=op.name%>">
+                                    <strong>
+                                        <%=op.name%>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= op.code%>">
+                                    <%= op.code %>
+                                </td>
+                                <td data-text="Delete">
+                                    <button <% if(op.self==0){%>class="btn btn-danger" onclick="remCode('<%=op.id%>')"<%}else{%>class="btn btn-secondary"
+                                                style="cursor: not-allowed !important;" disabled<%}%>><i class="bi bi-x-circle"></i></button>
+                                </td>
+                            </tr>
+                            <%})%>
+                    </tbody>
+                </table>
+            </div>
             <br>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
@@ -55,13 +64,23 @@
                             <form method="POST" action="/admin/codeshare/new" class="needs-validation" novalidate>
                                 <div>
                                     <label class="form-label">Operator Name:
-                                    <input class="form-control mt-1" id="newAirAirName" required type="text" name="airName">
+                                    <input class="form-control mt-1" id="newAirAirName" placeholder="VACenter Virtual" required type="text" name="airName">
                                     <div class="valid-feedback">
                                         Looks good!
                                     </div>
                                     <div class="invalid-feedback">
                                         Needs to be valid text.
                                     </div>
+                                </div>
+                                <div>
+                                    <label class="form-label">Operator Code:
+                                        <input class="form-control mt-1" id="newAirAirName" placeholder="VACV" minlength="3" maxlength="4" required type="text" name="airCode">
+                                        <div class="valid-feedback">
+                                            Looks good!
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Needs to be valid text, 3 to 4 characters long.
+                                        </div>
                                 </div>
                                 <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
                             </form>
@@ -77,55 +96,8 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"
-            integrity="sha512-s40QuZdS5wcjdt2OHUWSGRCECWr+YqbvRSaiBpEKOlOsbePPvXreeOTB4SVteinFcc1RpW/uDueEsknm9iJl2g=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            
-        <script>
-            function loadAircraftLivData() {
-                const airID = document.getElementById("newAirAirSel").value;
-                document.getElementById("newAirLivSel").innerHTML = "<option selected value='' disabled>Loading...</option>"
-                const data = null;
-                const xhr = new XMLHttpRequest();
-                xhr.addEventListener("readystatechange", function () {
-                    if (this.readyState === this.DONE) {
-                        console.log(this)
-                        if (this.status == 200) {
-                            const data = JSON.parse(this.responseText).result;
-                            document.getElementById("newAirLivSel").innerHTML = "";
-                            data.forEach(liv => {
-                                const el = document.createElement("option")
-                                el.value = liv.liveryID;
-                                el.innerHTML = liv.liveryName;
-                                document.getElementById("newAirLivSel").appendChild(el)
-                            })
-                        } else {
-                            alert(this.status)
-                        }
-                    }
-                });
-                xhr.open("GET", `/getLivData?liv=${airID}`);
-                xhr.send(data);
-            }
-            loadAircraftLivData()
-            function remCode(id) {
-                const data = `id=${id}`;
-                const xhr = new XMLHttpRequest();
-                xhr.withCredentials = true;
-                xhr.addEventListener("readystatechange", function () {
-                    console.log(this)
-                    if (this.readyState === this.DONE) {
-                        console.log(this.responseText);
-                    }
-                });
-                xhr.open("DELETE", `/admin/codeshare/remove`);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.send(data);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            }
-        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 </body>
 
 </html>

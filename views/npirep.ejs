@@ -46,7 +46,7 @@
                                     <datalist id="routes">
                                         <% routes.forEach(route=>{%>
                                             <% if((parseInt(route.minRank)) <= user.hours){%>
-                                                <option value="<%= config.code + route.num %>"></option>
+                                                <option value="<%= route.operatorCode.toString() + route.num.toString() %>"></option>
                                             <%}%>
                                         <%})%>
                                     </datalist>
@@ -68,14 +68,6 @@
                                 <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
                                 <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
                                     aria-label="Flight Time" name="ft">
-                                <label class="form-label">Operator</label>
-                                <select class="form-select mb-3" name="op">
-                                    <% ops.forEach(op=>{%>
-                                        <option value="<%= op.operator %>">
-                                            <%= op.operator%>
-                                        </option>
-                                        <%})%>
-                                </select>
                                 <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
                                 <input type="number" class="form-control mb-3" placeholder="Fuel used (kg)" required="" aria-label="Flight Time"
                                     name="fuel">
@@ -107,6 +99,7 @@
                         <th data-field="Departure-Airport">Departure Airport</th>
                         <th data-field="Arrival-Airport">Arrival Airport</th>
                         <th data-field="aircraft">Aircraft</th>
+                        <th data-field="Airline">Airline</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,7 +108,7 @@
                                 <tr id="tr-id-<%=route.num%>" class="tr-class-<%=route.num%> pirepClickable" data-title="<%=route.num%>" title="<%= route.num%>" data-object='{"key": "value"}' style="cursor: pointer;" onclick="openRoute('<%=route.num%>','<%= route.num%>')">
                                 <td id="td-id-<%=route.num %>" class="td-class-<%=route.num %>" data-title="<%= route.num%>">
                                     <strong>
-                                        <%= (route.opObj ? (route.opObj.code ? route.opObj.code : config.code ) : config.code) %><%= route.num%>
+                                        <%= route.operatorCode + route.num%> 
                                     </strong>
                                 </td>
                                 <td data-text="<%= route.depICAO %>">
@@ -126,6 +119,9 @@
                                 </td>
                                 <td data-text="<%= route.aircraftPublic %>">
                                     <%= route.aircraftPublic %>
+                                </td>
+                                <td data-text="<%= route.operatorPublic %>">
+                                    <%= route.operatorPublic %>
                                 </td>
                             </tr>        
                         <%}%>
