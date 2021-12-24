@@ -58,7 +58,7 @@ data.pireps.forEach(async pirep =>{
 
 document.getElementById('stat_total_flights').innerHTML = pirepTicker;
 
-document.getElementById('stat_total_hours').innerHTML = pirepHours / 60;
+document.getElementById('stat_total_hours').innerHTML = (pirepHours / 60).toFixed(2);
 
 let maxRoute = calcHighest(routeCounter);
 document.getElementById('stat_common_flight').innerHTML = maxRoute[0].split("_").join(" &#10142; ");
