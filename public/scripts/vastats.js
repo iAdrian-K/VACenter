@@ -38,7 +38,7 @@ pireps.forEach(flight =>{
         pirepHours += parseInt(flight.flightTime);
     }
 })
-document.getElementById('stat_total_hours').innerHTML = pirepHours / 60;
+document.getElementById('stat_total_hours').innerHTML = (pirepHours / 60).toFixed(2);
 
 //Common Flight
 pireps.forEach(flight =>{
