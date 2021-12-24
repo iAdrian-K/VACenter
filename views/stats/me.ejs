@@ -13,6 +13,15 @@
     <%- include("./../components/head.ejs")%>
     <link rel="stylesheet" href="/public/leaflet/leaflet.css">
     <link rel="stylesheet" href="/public/flags/css/flag-icons.min.css">
+    <style>
+        .fixed-table-body {
+            height: auto !important;
+        }
+    
+        .statsRow>.col>div>p {
+            margin-bottom: 0 !important;
+        }
+    </style>
 </head>
 
 <body class="w-100 bg-light-light h-auto">
@@ -26,7 +35,7 @@
             <br>
             <h2 class="text-muted d-inline-block">Summary of my flights</h2>
             <a class="btn btn-primary ms-3 mb-2" href="/oldPirep">View All</a>
-            <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-lg-3">
+            <div class="row g-3 statsRow row-cols-1 row-cols-md-2 row-cols-lg-3">
                 <div class="col">
                     <div class="form-control text-center p-2">
                         <h2 id="stat_total_flights">Total Flight</h2>
