@@ -379,7 +379,7 @@ app.use(function(req,res,next){
 })
 let limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 125 // limit each IP to 100 requests per windowMs
+    max: 200 // limit each IP to 200 requests per windowMs
 });
 app.use(limiter);
 //app.use(cookieParser());
@@ -848,17 +848,36 @@ app.get('*', async (req, res, next)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
-                    case "/aboutVA":
+                    case "/stats/me":
                         if (user) {
-                            res.render("about", {
+                            delete user['password'];
+                            res.render("stats/me", {
                                 active: req.path,
-                                title: "About",
+                                title: "My Stats",
                                 user: user,
                                 config: getConfig(),
+                                stats: stats
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/stats/va":
+                        if (user) {
+                            const specConfig = getConfig();
+                            delete specConfig.other['ident'];
+                            delete specConfig['key'];
+                            delete specConfig['id'];
+                            res.render("stats/va", {
+                                active: req.path,
+                                title: "VA Stats",
+                                user: user,
+                                config: specConfig,
                                 stats: stats,
-                                fleet: await GetAircrafts(),
-                                events: await GetEvents(),
-                                route: await GetRoutes()
+                                aircraft: await GetAircrafts(),
+                                routes: await GetRoutes(),
+                                pireps: await GetPireps(),
+                                pilotSize: (await GetUsers()).length
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
