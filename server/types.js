@@ -9,6 +9,7 @@
  * @typedef {Object} user
  * @property {string} username
  * @property {string} rank
+ * @property {0|1} manualRank
  * @property {string} password
  * @property {string} display
  * @property {number} hours
@@ -99,8 +100,10 @@
 /**
  * A rank Object
  * @typedef {Object} rank
- * @property {number} minH
- * @property {string} rank
+ * @property {number} id
+ * @property {string} label
+ * @property {0|1} manual
+ * @property {number} minH - Minimum Hours
  */
 
 /**

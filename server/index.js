@@ -99,6 +99,18 @@ async function reloadUserRanks(){
 }
 reloadUserRanks()
 
+
+let rankMap = new Map();
+function loadRanksMap(){
+    rankMap = new Map();
+    GetRanks().then(list =>{
+        list.forEach(rank =>{
+            rankMap.set(rank.label, rank);
+        })
+    })
+}
+loadRanksMap();
+
 //Versioning
 let branch = getVersionInfo().branch;
 let cvn = getVersionInfo().version;
@@ -244,18 +256,24 @@ const testRank = async (ownerObj) =>{
     let store = ownerObj.rank;
     return new Promise(async resolve =>{
         if(ownerObj){
-            const ranks = await GetRanks();
-            ranks.sort( compareRanks );
-            for (var i = 0; i < ranks.length; i++) { 
-                let rank = ranks[i];
-                if(ownerObj.hours >= rank.minH){
-                    ownerObj.rank = rank.rank;
+            if(ownerObj.manualRank != 1){
+                const ranks = await GetRanks();
+                ranks.sort(compareRanks);
+                for (var i = 0; i < ranks.length; i++){
+                    let rank = ranks[i];
+                    if(rank.manual == 0){
+                        if(ownerObj.hours >= rank.minH){
+                            ownerObj.rank = rank.label;
+                        }
+                    }
                 }
+                if (store != ownerObj.rank) {
+                    webhook.send({ title: "Rank up!", description: `${config.code}${ownerObj.username} has achieved the rank of ${ownerObj.rank}` });
+                }
+                resolve(ownerObj.rank);
+            }else{
+                resolve(ownerObj.rank)
             }
-            if(store != ownerObj.rank){
-                webhook.send({ title: "Rank up!", description: `${config.code}${ownerObj.username} has achieved the rank of ${ownerObj.rank}` });
-            }
-            resolve(ownerObj.rank);
         }else{
             resolve(false);
         }
@@ -335,14 +353,15 @@ Sentry.init({
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
 });
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
+//app.use(Sentry.Handlers.requestHandler());
+//app.use(Sentry.Handlers.tracingHandler());
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
 console.log(chalk.green("Starting VACenter"))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(function(req,res,next){
+    res.locals.rank_search = rankMap;
     res.locals.version = cvnb;
     next();
 })
@@ -935,6 +954,7 @@ app.get('*', async (req, res, next)=>{
                                     title: "Admin - Users",
                                     user: user,
                                     activer: "/admin",
+                                    ranks: await GetRanks(),
                                     users: await GetUsers(),
                                     ops: await GetOperators(),
                                     routes: await GetRoutes(),
@@ -1116,15 +1136,15 @@ app.get("*", (req, res, next) => {
 })
 
 
-app.use(Sentry.Handlers.errorHandler());
+//app.use(Sentry.Handlers.errorHandler());
 
 // Optional fallthrough error handler
-app.use(function onError(err, req, res, next) {
+/*app.use(function onError(err, req, res, next) {
     // The error id is attached to `res.sentry` to be returned
     // and optionally displayed to the user for support.
     res.statusCode = 500;
     res.end(res.sentry + "\n");
-});
+});*/
 
 app.listen(process.env.PORT, () => {
     console.log(chalk.green("Listening on port " + process.env.PORT));
@@ -1299,7 +1319,7 @@ app.post('/user/update', async(req, res) =>{
             if(user.profileURL != req.body.url){
                 user.profileURL = req.body.url
             }
-            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID)
+            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID, user.manualRank)
             res.redirect("/account")
         }else{
             res.sendStatus(401);
@@ -1316,7 +1336,7 @@ app.post('/CPWD', async(req, res)=>{
         if (user) {
 //                if(bcrypt.comuser.password)
                 user.password = bcrypt.hashSync(req.body.npwd, 10);
-                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked)
+            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked, user.VANetID, user.manualRank)
                 await DeleteTokens(user.username);
                 res.redirect("/");
         }else{
@@ -1463,8 +1483,9 @@ app.post("/admin/ranks/new", async function (req, res) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await CreateRank(req.body.name, req.body.min)
-                res.redirect("/admin/ranks")
+                await CreateRank(req.body.name, req.body.manual ? 1 : 0, req.body.min)
+                res.redirect("/admin/ranks");
+                loadRanksMap();
             } else {
                 res.sendStatus(403);
             }
@@ -1477,12 +1498,13 @@ app.post("/admin/ranks/new", async function (req, res) {
 })
 app.delete("/admin/ranks/remove", async function (req, res) {
     const cookies = getAppCookies(req)
-    if (req.body.name) {
+    if (req.body.id) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await DeleteRank(req.body.name);
-                res.redirect("/admin/ranks")
+                await DeleteRank(req.body.id);
+                res.redirect("/admin/ranks");
+                loadRanksMap();
             } else {
                 res.sendStatus(403);
             }
@@ -1669,8 +1691,8 @@ app.post("/admin/users/new", async function (req, res) {
                         id: pilotID ? pilotID : null,
                     }
 
-                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
-                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
+                    await CreateUser(req.body.username, "0", req.body.manual ? 1 : 0, req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
+                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id, user.manualRank)
                     
                     res.redirect("/admin/users");
                     webhook.send({ title: "New Pilot!", description: `Welcome ${req.body.Name} (${config.code}${req.body.username}) to the VA!` });
@@ -1699,7 +1721,7 @@ app.post("/admin/users/update", async function (req, res) {
                     if(req.body.name != target.display){
                         target.display = req.body.name;
                     }
-                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID, user.manualRank)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1714,6 +1736,35 @@ app.post("/admin/users/update", async function (req, res) {
         res.sendStatus(400)
     }
 })
+app.post("/admin/users/rankChange", async function (req, res){
+    const cookies = getAppCookies(req)
+    if (req.body.uid && req.body.rank) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const target = await GetUser(req.body.uid);
+                if(target){
+                    target.manualRank = req.body.manual ? 1 : 0;
+                    if(target.manualRank == 1){
+                        target.rank = (await GetRank(req.body.rank)).label;
+                    }else{
+                        target.rank = await testRank(target);
+                    }
+                    UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID, target.manualRank)
+                    res.redirect("/admin/users")
+                }else{
+                    res.sendStatus(404);
+                }
+            }else{
+                res.sendStatus(403)
+            }
+        }else{
+            res.sendStatus(401)
+        }
+    }else{
+        res.sendStatus(400)
+    }
+})
 app.post("/admin/users/revoke", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.uid) {
@@ -1723,7 +1774,7 @@ app.post("/admin/users/revoke", async function (req, res) {
                 const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
                 if (checkForTarget) {
                     const target = await GetUser(req.body.uid)
-                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, 1, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, 1, target.VANetID, user.manualRank)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1747,7 +1798,7 @@ app.post("/admin/users/unrevoke", async function (req, res) {
                 const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
                 if (checkForTarget) {
                     const target = await GetUser(req.body.uid)
-                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, 0, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, 0, target.VANetID, user.manualRank)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1771,7 +1822,7 @@ app.post("/admin/users/resetPWD", async function (req, res){
                     let target = await GetUser(decodeURIComponent(req.body.uid));
                     if (target) {
                         target.password = bcrypt.hashSync(decodeURIComponent(req.body.newpwd), 10);
-                        await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked)
+                        await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked, target.VANetID, user.manualRank)
                         await DeleteTokens(target.username);
                         res.sendStatus(200);
                     } else {
@@ -1795,7 +1846,7 @@ app.post("/users/linkVANet", async function (req, res){
             try{
                 const pilotID = (await getVANetUser(req.body.ifcname));
                 user.vanetID = pilotID;
-                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked,pilotID);
+                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, pilotID, user.manualRank);
                 res.redirect("/");
             }catch(err){
                 Sentry.captureException(err);
@@ -1971,7 +2022,7 @@ app.post("/admin/pireps/apr", async function (req, res){
                     if(owner){
                         owner.hours = owner.hours + (targetPIREP.flightTime / 60);
                         owner.rank = await testRank(owner)
-                        await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID)
+                        await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID, user.manualRank)
                         res.redirect("/admin/pireps");
                         
                         webhook.send({title:"PIREP Approved", description: `${config.code}${owner.username}'s PIREP (${targetPIREP.depICAO}=>${targetPIREP.arrICAO}) has been approved!`})

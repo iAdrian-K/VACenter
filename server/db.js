@@ -479,6 +479,7 @@ function GetUsers() {
  * Creates a new user
  * @param {string} username - Digit Username
  * @param {string} rank - Rank of user
+ * @param {0|1} manualRank - Manual rank of user
  * @param {boolean} admin - Admin status
  * @param {string} password - Hashed password of user
  * @param {string} display - Display Name
@@ -490,10 +491,10 @@ function GetUsers() {
  * @param {number} revoked - User access revoked
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
+function CreateUser(username, rank, manualRank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO users(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) 
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, "https://icons.getbootstrap.com/assets/icons/person-circle.svg", hours, created, llogin, cp, revoked, VANetID], function (err) {
+        db.run(`INSERT INTO users(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, manualRank) 
+                VALUES(?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, "https://icons.getbootstrap.com/assets/icons/person-circle.svg", hours, created, llogin, cp, revoked, VANetID, manualRank], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -517,9 +518,10 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
  * @param {number} revoked - User access revoked
+ * @param {0|1} manualRank - Manual Ranked user
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
+ function UpdateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, manualRank) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE users SET
                 rank = ?,
@@ -532,8 +534,9 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
                 llogin = ?,
                 cp = ?,
                 revoked = ?,
-                VANetID = ? 
-                WHERE username = ?`, [rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, username], function (err) {
+                VANetID = ?,
+                manualRank = ? 
+                WHERE username = ?`, [rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, manualRank, username], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -973,13 +976,13 @@ function UpdateStat(name, newName, newValue){
 
 /**
  * Get rank by name
- * @param {string} name 
+ * @param {string} id 
  * @returns {Promise<rank>} Ranks
  */
-function GetRank(name){
+function GetRank(id){
     return new Promise((resolve, error) =>{
         db.serialize(() => {
-            db.get(`SELECT * FROM ranks WHERE rank = ?`, [name], (err, row) => {
+            db.get(`SELECT * FROM ranks WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     Sentry.captureException(err);
                 } else {
@@ -993,7 +996,7 @@ function GetRank(name){
 
 /**
  * Get all ranks
- * @returns {Promise<Array.<rank>>} Array of ranks
+ * @returns {Promise<Array<rank>>} Array of ranks
  */
  function GetRanks(){
     return new Promise((resolve, error) => {
@@ -1011,13 +1014,13 @@ function GetRank(name){
 
 /**
  * Delete rank
- * @param {String} rank - Name of rank
+ * @param {String} id - ID of rank
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function DeleteRank(rank){
+ function DeleteRank(id){
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.run(`DELETE FROM ranks WHERE rank = ?`, [rank], (err) => {
+            db.run(`DELETE FROM ranks WHERE id = ?`, [id], (err) => {
                 if (err) {
                     Sentry.captureException(err);
                     resolve(false)
@@ -1056,18 +1059,19 @@ function UpdateRank(name, newName, newMinH){
 
 /**
  * Creates a new rank
- * @param {String} rank - Name of rank
+ * @param {String} label - Name of Rank
+ * @param {0|1} manual - Type of Rank
  * @param {Number} minH - Minimum hours
- * @returns {Promise<Boolean>} Returns boolean of query
+ * @returns {Promise<Number>} Returns ID of new Rank
  */
- function CreateRank(rank, minH) {
+ function CreateRank(label, manual, minH) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO ranks(rank, minH) VALUES(?, ?)`, [rank, minH], function (err) {
+        db.run(`INSERT INTO ranks(label, manual, minH) VALUES(?, ?,?)`, [label, manual, minH], function (err) {
             if (err) {
                 Sentry.captureException(err);
-                resolve(false)
+                error(err)
             } else {
-                resolve(true)
+                resolve(this.lastID);
             }
         });
     });

@@ -22,30 +22,37 @@
                 data-bs-target="#exampleModal">
                 Add Rank
             </button>
-            <h2>Ranks</h2>
             <div class="table-responsive">
                 <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
                     <thead>
                         <tr class="tr-class-2">
                             <th data-field="title">Rank</th>
-                            <th data-field="url">Minimum Hours</th>
+                            <th data-field="flags">Flags</th>
+                            <th data-field="minH">Minimum Hours</th>
                             <th data-field="data">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% ranks.forEach(rank=>{%>
-                            <tr id="tr-id-<%=rank.rank%>" class="tr-class-<%=rank.rank%>" data-title="<%=rank.rank%>" title="<%=rank.rank%>"
+                            <tr id="tr-id-<%=rank.id%>" class="tr-class-<%=rank.id%>" data-title="<%=rank.id%>" title="<%=rank.label%>"
                                 data-object='{"key": "value"}'>
-                                <td id="td-id-<%=rank.rank%>" class="td-class-<%=rank.rank%>" data-title="<%=rank.rank%>">
+                                <td id="td-id-<%=rank.id%>" class="td-class-<%=rank.id%>" data-title="<%=rank.id%>">
                                     <strong>
-                                        <%=rank.rank%>
+                                        <%=rank.label%>
                                     </strong>
+                                </td>
+                                <td data-text="<%= rank.manual == 1 ? 'manual rank' : 'None'%>">
+                                    <% if(rank.manual == 1){%>
+                                        <span class="badge bg-primary">Manual Rank</span>    
+                                    <%}else{%>
+                                        None
+                                    <%}%>
                                 </td>
                                 <td data-text="<%= rank.minH%>">
                                     <%= rank.minH %>
                                 </td>
                                 <td data-text="Delete">
-                                    <button class="btn btn-danger" onclick="remRank('<%=rank.rank%>')"><i class="bi bi-x-circle"></i></button>
+                                    <button class="btn btn-danger" onclick="remRank('<%=rank.id%>')"><i class="bi bi-x-circle"></i></button>
                                 </td>
                             </tr>
                             <%})%>
@@ -76,6 +83,14 @@
                                         <div class="valid-feedback">Looks Good!</div>
                                         <div class="invalid-feedback">Needs to be a valid number!</div>
                                 </div>
+                                <div class="form-check mt-1 text-start">
+                                    <input class="form-check-input" type="checkbox" value="yespls" name="manual" id="manualCheck">
+                                    <label class="form-check-label" for="manualCheck">
+                                        Manual Only
+                                    </label>
+                                </div>
+                                <p class="text-muted mb-3">This means to achieve this rank, the pilot must have been manually ranked via the <a
+                                        class="link link-primary" href="/admin/users">users page</a>.</p>
                                 <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Submit</button>
                             </form>
                         </div>
@@ -120,8 +135,8 @@
                 xhr.send(data);
             }
             loadAircraftLivData()
-            function remRank(name) {
-                const data = `name=${name}`;
+            function remRank(id) {
+                const data = `id=${id}`;
                 const xhr = new XMLHttpRequest();
                 xhr.withCredentials = true;
                 xhr.addEventListener("readystatechange", function () {
