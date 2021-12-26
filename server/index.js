@@ -335,7 +335,7 @@ setInterval(async () => {
             vanetCraft = (await getVANetData());
         }
     }
-}, 86400000);
+}, 1000 * 60 * 30);
 setTimeout(async () => {
     if (config.other) {
         if(config.other.ident){
