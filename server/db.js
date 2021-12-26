@@ -32,6 +32,7 @@ require('dotenv').config()
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
  * @typedef {import('./types.js').fsession} fsession
+ * @typedef {import('./types.js').Multiplier} Multiplier
  */
 
 const sqlite3 = require('sqlite3').verbose();
@@ -1431,6 +1432,103 @@ function DeleteSession(ID) {
     });
 }
 
+//Multiplier
+
+/**
+ * Gives all Multipliers
+ * @returns {Promise<Array<Multiplier>>}
+ */
+async function GetMultipliers(){
+    return new Promise((resolve, error) => {
+        db.serialize(()=>{
+            db.all(`SELECT * FROM multi`, [], (err, row) =>{
+                if(err){
+                    Sentry.captureException(err);
+                }else{
+                    resolve(row);
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Retrieves a Multiplier by ID
+ * @param {number} id 
+ * @returns {Promise<Multiplier>} Boolean Success
+ */
+async function GetMultiplier(id){
+    return new Promise((resolve, reject) =>{
+        db.serialize(() => {
+            db.get(`SELECT * FROM multi WHERE id = ?`, [id], (err, row) => {
+                if (err) {
+                    Sentry.captureException(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    })
+}
+
+/**
+ * Retrieves a Multiplier by label
+ * @param {string} label 
+ * @returns {Promise<Multiplier>} Boolean Success
+ */
+async function GetMultiplierByLabel(label) {
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM multi WHERE label = ?`, [label], (err, row) => {
+                if (err) {
+                    Sentry.captureException(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    })
+}
+
+/**
+ * Create a Multiplier
+ * @param {string} label 
+ * @param {number} amount 
+ * @returns {Promise<String|Number>} ID of new Multiplier
+ */
+async function CreateMulti(label, amount){
+    return new Promise((resolve, reject) => {
+        db.serialize(() =>{
+            db.run(`INSERT INTO multi (label, amount) VALUES(?, ?)`, [label, amount.toString()], (err) =>{
+                if(err){
+                    Sentry.captureException(err);
+                }else{
+                    resolve(this.lastID)
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Deletes a Multiplier
+ * @param {number} id 
+ * @returns {Promise<Boolean>}
+ */
+async function DeleteMulti(id){
+    return new Promise((resolve, error) => {
+        db.serialize(() =>{
+            db.get(`DELETE FROM multi WHERE id = ?`, [id], (err) =>{
+                if(err){
+                    Sentry.captureException(err);
+                }else{
+                    resolve(true);
+                }
+            })
+        })
+    })
+}
+
 module.exports = { 
     db, GetPPURL, run,
     GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
@@ -1445,5 +1543,6 @@ module.exports = {
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
     CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlot, GetSlotsWithRoutes,
     GetLinks, CreateLink, DeleteLink,
-    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
+    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession,
+    CreateMulti, GetMultipliers, GetMultiplier, GetMultiplierByLabel, DeleteMulti
     };

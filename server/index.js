@@ -83,7 +83,8 @@ const {
         GetToken, CreateToken, DeleteTokens,
         GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser, run,
         GetLinks, CreateLink, DeleteLink,
-    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
+        CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession,
+        CreateMulti, GetMultipliers, GetMultiplier, GetMultiplierByLabel, DeleteMulti
     } = require("./db")
 const { update, checkForNewVersion, getVersionInfo } = require("./update");
 const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
@@ -149,6 +150,7 @@ reloadVersion();
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
  * @typedef {import('./types.js').fsession} fsession
+ * @typedef {import('./types.js').Multiplier} Multiplier
  */
 function makeid(length) {
     var result = '';
@@ -801,6 +803,7 @@ app.get('*', async (req, res, next)=>{
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
                                 config: getConfig(),
+                                multipliers: await GetMultipliers(),
                                 allowNSession: !(activeFlightBool),
                                 activeFlight: activeFlight
                             })
@@ -1042,6 +1045,26 @@ app.get('*', async (req, res, next)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
+                    case "/admin/multi":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/multi", {
+                                    active: req.path,
+                                    title: "Admin - Multi",
+                                    user: user,
+                                    activer: "/admin",
+                                    Multipliers: await GetMultipliers(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+
                     case "/admin/import":
                         if (user) {
                             if (user.admin == true) {
@@ -1147,7 +1170,8 @@ app.get('*', async (req, res, next)=>{
                                     session: session,
                                     aircraft: await GetAircrafts(),
                                     route: await GetRoute(session.route),
-                                    vehicleUsed: await GetAircraft(session.aircraft)
+                                    vehicleUsed: await GetAircraft(session.aircraft),
+                                    multipliers: await GetMultipliers()
                                 })
                             } else {
                                 res.status(403).send("You aren't the designated pilot for this session.");
@@ -1400,8 +1424,9 @@ app.post('/CPWD', async(req, res)=>{
 })
 
 app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
-    const cookies = getAppCookies(req)
-    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
+    const cookies = getAppCookies(req);
+    console.log(req.body)
+    if (req.body.route && req.body.aircraft && req.body.ft && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
         let user = await checkForUser(cookies);
         if (user) {
             let list = await GetAircrafts();
@@ -1414,7 +1439,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                 }
             })
             if(req.body.aircraft){
-                if (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))) {
+                if (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(parseInt(req.body.op)).code.length, req.body.route.length))) {
                     if(req.file){
                     fs.readFile(req.file.path, function (err, sourceData) {
                         Sentry.captureException(err);
@@ -1426,11 +1451,25 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                     }
-                    if(config.key && user.VANetID){
-                        await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
+                    let ft = req.body.ft;
+                    let comment = req.body.comments ? req.body.comments : "No Comment";
+                    let operatorLength = (operatorSearchable.get(parseInt(req.body.op))).code.length;
+                    let route = (await GetRouteByNum(req.body.route.slice(operatorLength, req.body.route.length)));
+                    if(req.body.multi){
+                        let multi = await GetMultiplierByLabel(req.body.multi)
+                        if(multi){
+                            ft = ft * parseFloat((multi.amount).toString());
+                            if(comment == "No Comment"){
+                                comment = `Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            }else{
+                                comment += `\n \n Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            }
+                        }
                     }
-                    
-                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(req.body.op).code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    if(config.key && user.VANetID){
+                        await createVANetPirep(user.VANetID, route.depICAO, route.arrICAO, (new Date()).toString(), req.body.fuel, ft, req.body.aircraft)
+                    }
+                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, route.depICAO, route.arrICAO, req.body.route, ft, comment, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
                     webhook.send({title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.`})
                     res.redirect("/");
                 } else {
@@ -2168,6 +2207,50 @@ app.post("/admin/links/rem", async function (req, res) {
     }
 })
 
+//Multi
+app.post("/admin/multi/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.label && req.body.amount) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                if(!(await GetMultiplierByLabel(req.body.label))){
+                    await CreateMulti(req.body.label, req.body.amount);
+                    res.redirect("/admin/multi");
+                }else{
+                    res.status(409);
+                    res.send("This Already Exists.")
+                }
+                
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+app.post("/admin/multi/rem", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteMulti(parseInt(req.body.id));
+                res.redirect("/admin/multi");
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+
 app.post("/admin/applications/config", async (req, res) =>{
     const cookies = getAppCookies(req);
     let user = await checkForUser(cookies);
@@ -2273,22 +2356,42 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
             const session = await GetSession(sesID);
             if (session) {
                 const route = await GetRoute(session.route);
-                if (req.file && req.body.fuel) {
-                    fs.readFile(req.file.path, function (err, sourceData) {
-                        Sentry.captureException(err);
-                        tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                if (req.body.fuel) {
+                    if(req.file){
+                        fs.readFile(req.file.path, function (err, sourceData) {
                             Sentry.captureException(err);
-                            fs.unlinkSync(`${req.file.path}`);
-                            req.file.path = req.file.path + ".webp";
-                            fs.writeFileSync(`${req.file.path}`, resultData);
+                            tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                                Sentry.captureException(err);
+                                fs.unlinkSync(`${req.file.path}`);
+                                req.file.path = req.file.path + ".webp";
+                                fs.writeFileSync(`${req.file.path}`, resultData);
+                            })
                         })
-                    })
+                    }
+                    let ft = parseInt(session.arrTime);
+                    let comment = req.body.comments;
+                    if (req.body.multi) {
+                        let multi = await GetMultiplierByLabel(req.body.multi);
+                        if (multi) {
+                            ft = ft * parseFloat((multi.amount).toString());
+                            if (comment == "No Comment") {
+                                comment = `Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            } else {
+                                comment += `\n \n Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            }
+                        }
+                    }
+                    //@ts-ignore
+                    CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, operatorSearchable.get(parseInt(route.operator)).code + route.num.toString(), ft, comment, "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    webhook.send({ title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.` })
+                    UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF");
+                    res.redirect("/home");
+                    
+                }else{
+                    res.sendStatus(400);
                 }
                 // @ts-ignore
-                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, parseInt(route.operator), route.depICAO, route.arrICAO, operatorSearchable.get(route.operator).code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null));
-                webhook.send({ title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.` })
-                UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF")
-                res.redirect("/home");
+                
             } else {
                 res.status(404).send("Cant find session with ID: " + sesID);
             }
