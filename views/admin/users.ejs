@@ -353,6 +353,7 @@
                 })
                 //document.getElementById(`countfor_${username}`).innerHTML = document.getElementById(`tablefor_${username}`).childElementCount;
                 document.getElementById(`pilot_display_${username}`).classList.remove('d-none');
+                document.getElementById(`pilot_display_${username}`).scrollIntoView();
             }
             function revokeUser(user) {
                     const data = `uid=${encodeURIComponent(user)}`;
