@@ -278,7 +278,7 @@ const testRank = async (ownerObj) =>{
                         }
                     }
                 }
-                if (store != ownerObj.rank) {
+                if (store != ownerObj.rank && config.other) {
                     webhook.send({ title: "Rank up!", description: `${config.code}${ownerObj.username} has achieved the rank of ${ownerObj.rank}` });
                 }
                 resolve(ownerObj.rank);
