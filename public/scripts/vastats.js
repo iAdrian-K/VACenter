@@ -1,3 +1,8 @@
+const diff = (a, b) => {
+    return Math.abs(a - b);
+}
+
+
 function calcHighest(array) {
     console.log(array)
     if (array.length == 0 || array.size == 0) {
@@ -167,7 +172,7 @@ function dataLoaded() {
     //All Routes Map
     document.getElementById('allRoutesMap').style.height = "50vh";
     document.getElementById('loadingIndicator').classList.add('d-none');
-    var map = L.map('allRoutesMap').setView([0, 0], 3);
+    var map = L.map('allRoutesMap').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '<a href="https://va-center.com">VACenter</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
@@ -194,12 +199,7 @@ function dataLoaded() {
         routes.forEach(route =>{
             const start = airportMap.get(route.depICAO);
             const end = airportMap.get(route.arrICAO);
-            var polygon = L.polygon([
-                [start.latitude, start.longitude],
-                [end.latitude, end.longitude]
-            ])
-            polygon.bindPopup(`<strong>${config.code}${route.num}:</strong> ${route.depICAO} &#10142; ${route.arrICAO}`);
-            polygon.addTo(map);
+            const geodesic = new L.Geodesic([{ lat: start.latitude, lng: start.longitude }, { lat: end.latitude, lng: end.longitude }]).bindPopup(`<strong>${route.operatorCode}${route.num}:</strong> ${route.depICAO} ➞ ${route.arrICAO}`).addTo(map);
 
         });
 }

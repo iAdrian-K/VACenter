@@ -894,7 +894,7 @@ app.get('*', async (req, res, next)=>{
                                 config: specConfig,
                                 stats: stats,
                                 aircraft: await GetAircrafts(),
-                                routes: await GetRoutes(),
+                                routes: await getRoutesWithOperator(),
                                 pireps: await GetPireps(),
                                 pilotSize: (await GetUsers()).length
                             })

@@ -164,13 +164,7 @@ function onFinish(){
     lineMap.forEach(line =>{
         const start = airportMap.get(line[0]);
         const end = airportMap.get(line[1]);
-        var polygon = L.polygon([
-            [start.latitude, start.longitude],
-            [end.latitude, end.longitude]
-        ])
-        polygon.bindPopup(`${line[0]} &#8660; ${line[1]} (${line[2]})`);
-        polygon.addTo(map);
-
+        const geodesic = new L.Geodesic([{ lat: start.latitude, lng: start.longitude }, { lat: end.latitude, lng: end.longitude }]).bindPopup(`${line[0]} &#8660; ${line[1]} (${line[2]})`).addTo(map);
     })
     
 }
