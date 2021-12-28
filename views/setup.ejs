@@ -12,7 +12,7 @@
     <style>
         body {
             width: 100vw;
-            background-image: url('/public/images/stockBG2.jpg');
+            background-image: url('/public/images/stockBG3.jpg');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
@@ -157,6 +157,8 @@
                     Affect Buttons
                 </label>
             </div>
+            <br>
+            <p class="d-none" id="whiteWarning">(White Selected)</p>
             <br>
             <button class="btn btn-primary colourDemoButton" onclick="setColour()">Set Colour</button>
         </div>
@@ -417,6 +419,7 @@
             const text = Array.prototype.slice.call((document.getElementsByClassName('colourDemo')));
             
             if(currentTrial != "light"){
+                document.getElementById('whiteWarning').className = "d-none";
                 const textPrefix = "text-";
                 text.forEach(el => {
                     const classes = el.className.split(" ").filter(c => !c.startsWith(textPrefix));
@@ -424,7 +427,15 @@
                     el.classList.add(`text-${bsCode}`);
                 })
             }else{
+                document.getElementById('whiteWarning').className = "";
                 swal("It is working", "Whilst your colour choice won't be shown here (because it's too bright), it will be there in the Crew Center", "info");
+                const textPrefix = "text-";
+                text.forEach(el => {
+                    const classes = el.className.split(" ").filter(c => !c.startsWith(textPrefix));
+                    el.className = classes.join(" ").trim();
+                    el.classList.add(`text-primary`);
+                })
+
             }
             if(btnAffected){
                 if(currentTrial != "danger" && currentTrial != "light"){
