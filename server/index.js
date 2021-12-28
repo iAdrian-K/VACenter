@@ -742,7 +742,7 @@ app.get('*', async (req, res, next)=>{
             let user = await checkForUser(cookies);
             if (user) {
                 user = await getUserWithObjs(user, ["notifications", "pireps"]);
-                user.llogin = (new Date()).toString();
+                delete user['password'];
                 seenUser(user.username);
             }
             if (changePWD == true && req.path != "/changePWD") {
@@ -1703,7 +1703,7 @@ app.post("/admin/routes/new", async function (req, res) {
                     if(counter == req.body.aircraft.length) {
                         clearInterval(checker);
                         let vehiclePublicList = vehiclePublic.join(", ");
-                        await CreateRoute(routeID, req.body.num, req.body.ft, parseInt(req.body.op), req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.minH);
+                        await CreateRoute(routeID, req.body.num, req.body.ft, parseInt(req.body.op), req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.minH.toString());
                         resetRoutes()
                         res.redirect("/admin/routes");
                     }

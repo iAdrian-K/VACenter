@@ -66,14 +66,14 @@
                             </div>
                             <div class="modal-body">
                                 <form method="POST" action="/admin/routes/update" class="needs-validation" novalidate>
-                                    <h2>Modify <%=config.code + route.num%></h2>
+                                    <h2>Modify <%=route.operatorCode + route.num%></h2>
                                     <br>
                                     <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1">
-                                            <%= config.code%>
+                                        <span class="input-group-text" id="RouteOperCode">
+                                            <%= route.operatorCode %>
                                         </span>
-                                        <input type="text" class="form-control text-secondary" placeholder="Route Number" aria-label="Username" required=""
-                                            aria-describedby="basic-addon1" name="num" value="<%= route.num%>" readonly>
+                                        <input type="text" class="form-control text-secondary" placeholder="Route Number" aria-label="Route Number" required=""
+                                            aria-describedby="RouteOperCode" name="num" value="<%= route.num%>" readonly>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
@@ -105,14 +105,15 @@
                                             </option>
                                             <%})%>
                                     </select>
-                                    <label class="form-label">Min Rank</label>
-                                    <select class="form-select mb-3" required name="rankReq">
+                                    <label class="form-label">Minimum Rank</label>
+                                    <select class="form-select" required name="rankReq">
                                         <% ranks.forEach(rank=>{%>
-                                            <option value="<%= rank.minH%>" <% if(rank.minH == route.minRank){%>selected<%}%>>
-                                                <%= rank.rank%>
+                                            <option value="<%= rank.minH%>" <% if(rank.minH.toString() == route.minRank){%>selected<%}%>>
+                                                <%= rank.label%>
                                             </option>
-                                        <%})%>
+                                            <%})%>
                                     </select>
+                                    <br>
                                     <div class="mb-4">
                                         <label class="form-label" for="depICAO">Departure ICAO:</label>
                                         <input type="text" minlength="4" maxlength="4" class="form-control" placeholder="YSSY" required="" aria-label="ICAO Departure" name="depIcao" value="<%= route.depICAO%>">
@@ -159,12 +160,10 @@
                         <form method="POST" action="/admin/routes/new" class="needs-validation" novalidate id="nrform">
                             <h2>Create new route</h2>
                             <br>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text" id="basic-addon1">
-                                    <%= config.code%>
-                                </span>
-                                <input type="text" class="form-control" placeholder="Route Number" aria-label="Username"
-                                    required="" aria-describedby="basic-addon1" name="num">
+                            <div class="mb-3">
+                                <label>Route Number</label>
+                                <input type="text" class="form-control" placeholder="Route Number" aria-label="Route Number"
+                                    required="" name="num">
                                 <div class="valid-feedback">Looks good!</div>
                                 <div class="invalid-feedback">Needs to be a valid route number.</div>
                             </div>
