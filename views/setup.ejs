@@ -366,10 +366,12 @@
                     xhr.addEventListener("readystatechange", function () {
                         if (this.readyState === this.DONE) {
                             if (this.status == 200) {
-                                setTimeout(() => {
-                                    window.location.href = "/"
-                                }, 2500);
-                                return swal("Hooray", "Your VANet was successfully linked!", "success");
+                                swal("Hooray", "Your VANet Account was successfully linked!", "success").then(() =>{
+                                    return swal("Logging in.", "The default login for VACenter is: Username: 0, Password: 0. Click the button below to continue.", 'info').then(() => {
+                                        window.location.href = "/"
+                                    })  
+                                });
+                                                              
                             } else {
                                 return swal("Oh no!", "There was an error linking your VANet!", "error")
                             }
