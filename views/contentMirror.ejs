@@ -6,15 +6,6 @@
     <title>Mirror Content</title>
 </head>
 <body>
-    <p id="contentMirror"></p>
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const content = atob(urlParams.get('content'));
-        if(typeof content === 'string'){
-            document.getElementById('contentMirror').innerHTML = content;
-        }else{
-            document.getElementById('contentMirror').innerHTML = "Cross Site Scripting is not supported";
-        }
-    </script>
+    <p id="contentMirror"><%= content.mirror%></p>
 </body>
 </html>

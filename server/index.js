@@ -20,6 +20,7 @@ const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
 const csv = require('csvtojson')
 const request = require('request');
+const atob = require('atob');
 let operatorSearchable = new Map();
 
 let hosting = process.env.HOSTFLAG ? true : false;
@@ -727,7 +728,10 @@ app.get('*', async (req, res, next)=>{
             res.sendStatus(404);
         }
     }else if(req.path == '/mirrorContent'){
-        res.render("contentMirror")
+        const safedContent = sanitizer.sanitize(atob(req.query.content.toString()));
+        res.render("contentMirror", {
+            content: safedContent
+        })
     } else {
 
         //Check for setup
@@ -1384,7 +1388,9 @@ app.post('/setupNVN', async (req, res) => {
         }
     }catch(err){
         res.status(500);
-        res.send(err);
+        console.error(err);
+        Sentry.captureException(err);
+        res.send("err");
     }
     
 })
