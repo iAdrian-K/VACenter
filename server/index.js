@@ -91,6 +91,19 @@ const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
 const webhook = require("./webhook.js");
 //update();
 
+let routeSearchable = new Map();
+function resetRoutes(){
+    routeSearchable = new Map();
+    GetRoutes().then(list =>{
+        list.forEach(route =>{
+            routeSearchable.set(route.id, route)
+        })
+        
+    })
+}
+
+resetRoutes();
+
 function resetOperators(){
     operatorSearchable = new Map();
     GetOperators().then(list => {
@@ -376,7 +389,8 @@ app.use(bodyParser.json())
 app.use(function(req,res,next){
     res.locals.rank_search = rankMap;
     res.locals.version = cvnb;
-    res.locals.operators_search = operatorSearchable;
+    res.locals.operator_search = operatorSearchable;
+    res.locals.route_search = routeSearchable;
     next();
 })
 let limiter = rateLimit({
@@ -699,6 +713,7 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
 });
 
 app.get('*', async (req, res, next)=>{
+    console.log(routeSearchable)
     const cookies = getAppCookies(req)
     if (req.path.slice(0, 8) == "/public/") {
         if (await FileExists(path.join(__dirname, "..", req.path))) {
@@ -1688,7 +1703,8 @@ app.post("/admin/routes/new", async function (req, res) {
                         clearInterval(checker);
                         let vehiclePublicList = vehiclePublic.join(", ");
                         await CreateRoute(routeID, req.body.num, req.body.ft, parseInt(req.body.op), req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.minH);
-                        res.redirect("/admin/routes")
+                        resetRoutes()
+                        res.redirect("/admin/routes");
                     }
                 }, 250)
             } else {
@@ -1724,6 +1740,7 @@ app.post("/admin/routes/update", async function (req, res) {
                             clearInterval(checker);
                             let vehiclePublicList = vehiclePublic.join(", ");
                             await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.rankReq);
+                            resetRoutes()
                             res.redirect("/admin/routes")
                         }
                     }, 250)
@@ -1749,6 +1766,7 @@ app.delete("/admin/routes/remove", async function (req, res) {
             if (user.admin == true) {
                 const route = await GetRoute(req.body.id);
                 await DeleteRoute(req.body.id);
+                resetRoutes()
                 res.redirect("/admin/routes")
             } else {
                 res.sendStatus(403);

@@ -22,7 +22,7 @@
                 <p>You are currently flying, click the button below to return to your flight.</p>
                 <div class="form-control w-100 mx-2 my-2 px-5 py-3">
                     <h1></h1>
-                    <h3 class="fw-bold">Session <%= currentSession.id %></h3>
+                    <h3 class="fw-bold">Flying <%= operator_search.get((route_search.get(currentSession.route)).operator).code + (route_search.get(currentSession.route)).num %></h3>
                     <p>
                         Click the button to return to the flight.
                             </p>

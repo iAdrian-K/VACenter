@@ -189,8 +189,13 @@
                 }else{
                     swal({
                         title: "Oh no!",
-                        text:"We can't start a new session due to Session <%= activeFlight.id%> already running. Either cancel it, or go to the home screen to resume it.",
-                        icon: 'error'
+                        text:"We can't start a new session due to Session <%= activeFlight.id%> already running. Go to the home page to cancel or resume it.",
+                        icon: 'error',
+                        buttons: ["Stay Here", "Go Home"],
+                    }).then(value =>{
+                        if(value){
+                            window.location.href = "/home"
+                        }
                     })
                 }
                 
