@@ -379,8 +379,8 @@ Sentry.init({
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
 });
-//app.use(Sentry.Handlers.requestHandler());
-//app.use(Sentry.Handlers.tracingHandler());
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
 console.log(chalk.green("Starting VACenter"))
@@ -713,7 +713,6 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
 });
 
 app.get('*', async (req, res, next)=>{
-    console.log(routeSearchable)
     const cookies = getAppCookies(req)
     if (req.path.slice(0, 8) == "/public/") {
         if (await FileExists(path.join(__dirname, "..", req.path))) {
@@ -1228,15 +1227,15 @@ app.get("*", (req, res, next) => {
 })
 
 
-//app.use(Sentry.Handlers.errorHandler());
+app.use(Sentry.Handlers.errorHandler());
 
 // Optional fallthrough error handler
-/*app.use(function onError(err, req, res, next) {
+app.use(function onError(err, req, res, next) {
     // The error id is attached to `res.sentry` to be returned
     // and optionally displayed to the user for support.
     res.statusCode = 500;
     res.end(res.sentry + "\n");
-});*/
+});
 
 app.listen(process.env.PORT, () => {
     console.log(chalk.green("Listening on port " + process.env.PORT));
