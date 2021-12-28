@@ -742,6 +742,8 @@ app.get('*', async (req, res, next)=>{
             let user = await checkForUser(cookies);
             if (user) {
                 user = await getUserWithObjs(user, ["notifications", "pireps"]);
+                user.llogin = (new Date()).toString();
+                seenUser(user.username);
             }
             if (changePWD == true && req.path != "/changePWD") {
                 res.redirect('/changePWD');
@@ -2415,3 +2417,14 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
         }
     }
 })
+
+
+async function seenUser(userID){
+    console.log(userID)
+    const user = await GetUser(userID);
+    if (((new Date()).getTime() - new Date(user.llogin).getTime()) > (1000 * 60 * 10)){
+        user.llogin = (new Date()).toString();
+        UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID, user.manualRank);
+    }
+    
+}
