@@ -45,7 +45,7 @@
                                     <input list="routes" id="route" name="route" required class=" form-control" placeholder="Route">
                                     <datalist id="routes">
                                         <% routes.forEach(route=>{%>
-                                            <% if((parseInt(route.minRank)) <= user.hours){%>
+                                            <% if((route.minRank) <= user.hours || user.admin || (rank_search.get(user.rank)).manual == 1){%>
                                                 <option value="<%= route.operatorCode.toString() + route.num.toString() %>"></option>
                                             <%}%>
                                         <%})%>
@@ -65,7 +65,7 @@
                                     <div class="valid-feedback">Looks good!</div>
                                     <div class="invalid-feedback">Requires an aircraft.</div>
                                 </div>
-                                <label class="form-label">Flight Time<span style="font-size:12px"> (minutes, aprox)</span></label>
+                                <label class="form-label">Flight Time<span style="font-size:12px"> (minutes)</span></label>
                                 <input type="number" class="form-control mb-3" placeholder="Flight Time (mins)" required=""
                                     aria-label="Flight Time" name="ft">
                                 <label class="form-label">Fuel Used<span style="font-size:12px"> (kg)</span></label>
@@ -74,6 +74,25 @@
                                 <label class="form-label">Departure Date</label>
                                 <input type="date" class="form-control mb-3" placeholder="Departure Date" required="" aria-label="Departure Date"
                                     name="depT">
+                                <label class="form-label">Operator <span class="text-muted">Operator must mach the operator designated in the route number</span></label>
+                                <select class="form-select mb-3" name="op">
+                                    <% ops.forEach(op=>{%>
+                                        <option value="<%= op.id %>">
+                                            <%= op.name%>
+                                        </option>
+                                        <%})%>
+                                </select>
+                                <div class="mb-3">
+                                    <label for="multi">Multiplier <span class="text-muted">Optional</span></label>
+                                    <input list="multiList" id="multi" name="multi" class="form-control" placeholder="Type to Search">
+                                    <datalist id="multiList">
+                                        <% multipliers.forEach(multi=>{%>
+                                            <option value="<%= multi.label %>">
+                                                <%= multi.amount%>x
+                                            </option>
+                                            <%})%>
+                                    </datalist>
+                                </div>
                                 <label class="form-label">Comments</label><br>
                                 <textarea class="form-control-plaintext border border-secondary rounded mb-3 p-2" name="comments"></textarea>
                                 <% if(config.other.pirepPic == true){%>
