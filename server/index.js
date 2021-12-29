@@ -663,9 +663,12 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                 case "routes":
                     let errorAllReadySent = false;
                     if(req.file){
+                        let ticker = 0;
+                        let max = 0;
                         csv().fromFile(req.file.path).then((jsonObj) => {
-                            jsonObj.forEach(row => {
-                                setTimeout(async () =>{
+                            max = jsonObj.length;
+                            jsonObj.forEach(async row => {
+                                    ticker++;
                                     if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
                                         const aircraft = await GetAircraft(row.aircraftID);
                                         if (aircraft) {
@@ -678,12 +681,9 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                                     
                                                     const operator = await GetOperatorByName(row.operator);;
                                                     if (operator) {
-                                                            setTimeout(() => {
                                                                 if (errorAllReadySent == false) {
                                                                     CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id, aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, rank.minH.toString());
-                                                                    res.redirect("/admin/routes");
-                                                                }
-                                                            }, 1500);
+                                                                };
                                                     } else {
                                                         if (errorAllReadySent == false) {
                                                             errorAllReadySent = true;
@@ -719,11 +719,9 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                             res.send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
                                         }
                                     }
-                                }, randomizator(50, 750))
-                            }, () => {
-                                if (errorAllReadySent == false) {
-                                    res.redirect('/admin/routes')
-                                }
+                                    if (errorAllReadySent == false && ticker == max) {
+                                        res.redirect("/admin/routes");
+                                    }
                             })
                         })
                     }else{
