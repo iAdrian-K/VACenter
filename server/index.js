@@ -87,7 +87,7 @@ const {
         CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession,
         CreateMulti, GetMultipliers, GetMultiplier, GetMultiplierByLabel, DeleteMulti
     } = require("./db")
-const { update, checkForNewVersion, getVersionInfo } = require("./update");
+const { getVersionInfo } = require("./update");
 const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
 const webhook = require("./webhook.js");
 //update();
@@ -1979,21 +1979,6 @@ app.post("/users/linkVANet", async function (req, res){
 })
 
 //Settings
-app.post("/admin/settings/update", async function (req, res) {
-    const cookies = getAppCookies(req)
-        let user = await checkForUser(cookies);
-        if (user) {
-            if (user.admin == true) {
-                update().then(status=>{
-                    res.sendStatus(status == true ? 202 : 204);
-                })
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-})
 app.post("/admin/settings/logo", async function (req, res) {
     const cookies = getAppCookies(req)
     if(req.body.value){
