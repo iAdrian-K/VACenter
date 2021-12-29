@@ -19,8 +19,13 @@ const express = require('express');
 const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
 const csv = require('csvtojson')
+const request = require('request');
+const atob = require('atob');
+let operatorSearchable = new Map();
 
 let hosting = process.env.HOSTFLAG ? true : false;
+
+
 
 //Storage
 let store = [];
@@ -79,11 +84,36 @@ const {
         GetToken, CreateToken, DeleteTokens,
         GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser, run,
         GetLinks, CreateLink, DeleteLink,
-    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
+        CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession,
+        CreateMulti, GetMultipliers, GetMultiplier, GetMultiplierByLabel, DeleteMulti
     } = require("./db")
-const { update, checkForNewVersion, getVersionInfo } = require("./update");
+const { getVersionInfo } = require("./update");
 const { getVANetData, getVANetUser, createVANetPirep } = require('./vanet.js');
+const webhook = require("./webhook.js");
 //update();
+
+let routeSearchable = new Map();
+function resetRoutes(){
+    routeSearchable = new Map();
+    GetRoutes().then(list =>{
+        list.forEach(route =>{
+            routeSearchable.set(route.id, route)
+        })
+        
+    })
+}
+
+resetRoutes();
+
+function resetOperators(){
+    operatorSearchable = new Map();
+    GetOperators().then(list => {
+        list.forEach(op=>{
+            operatorSearchable.set(op.id, op)
+        })
+    })
+}
+resetOperators()
 
 async function reloadUserRanks(){
     (await GetUsers()).forEach(async user =>{
@@ -94,6 +124,18 @@ async function reloadUserRanks(){
     })
 }
 reloadUserRanks()
+
+
+let rankMap = new Map();
+function loadRanksMap(){
+    rankMap = new Map();
+    GetRanks().then(list =>{
+        list.forEach(rank =>{
+            rankMap.set(rank.label, rank);
+        })
+    })
+}
+loadRanksMap();
 
 //Versioning
 let branch = getVersionInfo().branch;
@@ -122,6 +164,7 @@ reloadVersion();
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
  * @typedef {import('./types.js').fsession} fsession
+ * @typedef {import('./types.js').Multiplier} Multiplier
  */
 function makeid(length) {
     var result = '';
@@ -176,21 +219,34 @@ function mode(array) {
 //Config
 let config = {
     other: {
-        rates: 100
+        rates: 100,
+        applications:{
+            state: false,
+            link: ""
+        }
     }
 };
+
+function getConfig() {
+    // @ts-ignore
+    return JSON.parse(fs.readFileSync(`${__dirname}/../config.json`));
+    //return require("./../config.json");
+}
+
 /**
  * Reloads Config
  * @name Reload Config
  */
-
 function reloadConfig(){
-    return new Promise(async (resolve, error) => {
-        config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
-        resolve(true);
+    return new Promise((resolve, error)=>{
+            config = getConfig();
+            resolve(true);
     })
     
 }
+
+
+
 reloadConfig()
 setInterval(reloadConfig, 15000);
 
@@ -224,17 +280,27 @@ function compareRanks(a, b) {
  * @returns {Promise<(any)>}
  */
 const testRank = async (ownerObj) =>{
+    let store = ownerObj.rank;
     return new Promise(async resolve =>{
         if(ownerObj){
-            const ranks = await GetRanks();
-            ranks.sort( compareRanks );
-            for (var i = 0; i < ranks.length; i++) { 
-                let rank = ranks[i];
-                if(ownerObj.hours >= rank.minH){
-                    ownerObj.rank = rank.rank;
+            if(ownerObj.manualRank != 1){
+                const ranks = await GetRanks();
+                ranks.sort(compareRanks);
+                for (var i = 0; i < ranks.length; i++){
+                    let rank = ranks[i];
+                    if(rank.manual == 0){
+                        if(ownerObj.hours >= rank.minH){
+                            ownerObj.rank = rank.label;
+                        }
+                    }
                 }
+                if (store != ownerObj.rank && config.other) {
+                    webhook.send({ title: "Rank up!", description: `${config.code}${ownerObj.username} has achieved the rank of ${ownerObj.rank}` });
+                }
+                resolve(ownerObj.rank);
+            }else{
+                resolve(ownerObj.rank)
             }
-            resolve(ownerObj.rank);
         }else{
             resolve(false);
         }
@@ -268,9 +334,7 @@ const updateStats = async () => {
     stats.pirepsLength = 0;
     (await GetPireps()).forEach(pirep =>{
         stats.pirepsLength++;
-        console.log(pirep.status)
         if(pirep.status == "a"){
-            console.log(pirep)
             stats.totalHours = stats.totalHours + (pirep.flightTime)/60
         }
     })
@@ -287,7 +351,7 @@ setInterval(async () => {
             vanetCraft = (await getVANetData());
         }
     }
-}, 86400000);
+}, 1000 * 60 * 30);
 setTimeout(async () => {
     if (config.other) {
         if(config.other.ident){
@@ -324,12 +388,15 @@ console.log(chalk.green("Starting VACenter"))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(function(req,res,next){
+    res.locals.rank_search = rankMap;
     res.locals.version = cvnb;
+    res.locals.operator_search = operatorSearchable;
+    res.locals.route_search = routeSearchable;
     next();
 })
 let limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 125 // limit each IP to 100 requests per windowMs
+    max: 200 // limit each IP to 200 requests per windowMs
 });
 app.use(limiter);
 //app.use(cookieParser());
@@ -339,9 +406,22 @@ app.use(limiter);
  * GetConfig - Used for every request;
  * @returns {Object}
  */
-function getConfig(){
-    return require("./../config.json");
+
+
+//Test for Applications
+let appConfig = getConfig();
+if(appConfig.other){
+    if(appConfig.other.applications){
+
+    } else {
+        appConfig.other.applications = {
+            state: false,
+            link: ""
+        }
+        fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(appConfig, null, 2));
+    }
 }
+
 /**
  * CheckCPWD - Used for checking if a user needs to change their password.
  * @param {Object} cookies 
@@ -424,6 +504,32 @@ async function getUserWithObjs(userObj, flags){
     }))
 }
 
+async function getRoutesWithOperator(){
+    return new Promise(async (resolve, error)=>{
+        const routes = await GetRoutes();
+        let ticker = 0;
+        routes.forEach(async route => {
+            route.operatorPublic = (await GetOperator(route.operator)).name;
+            route.operatorCode = (await GetOperator(route.operator)).code;
+            ticker++;
+        })
+        let checker = setInterval(()=>{
+            if(ticker >= routes.length){
+                clearInterval(checker);
+                resolve(routes);
+            }
+        }, 100);
+    })
+}
+
+async function getRouteWithOperator(id){
+    return new Promise(async (resolve, error) => {
+        const route = await GetRoute(id);
+        route.operatorPublic = (await GetOperator(route.operator)).name;
+        route.operatorCode = (await GetOperator(route.operator)).code;
+        resolve(route);
+    })
+}
 
 //Basic Routes
 
@@ -499,6 +605,27 @@ app.get('/api/data/stats', async (req, res) => {
         res.sendStatus(401);
     }
 })
+app.get('/api/data/config', async (req, res) =>{
+    if (req.query.auth) {
+        if (req.query.auth == config.other.ident.slice(0, 5)) {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200);
+            const newObj = config;
+            delete newObj.other.ident;
+            delete newObj.other.webhook;
+            if(newObj.key){
+                delete newObj.key;
+                delete newObj.key;
+                delete newObj.boostingTier;
+            }
+            res.end(JSON.stringify(newObj, null, 2));
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+})
 
 app.post('/import/:comp', upload.single('csv'), async (req, res) => {
     const cookies = getAppCookies(req);
@@ -527,20 +654,16 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                             jsonObj.forEach(row => {
                                 setTimeout(async () =>{
                                     if (row.num && row.flightTime && row.operator && row.aircraftID && row.depICAO && row.arrICAO && row.rank) {
-                                        console.log(await GetAircrafts())
                                         const aircraft = await GetAircraft(row.aircraftID);
                                         if (aircraft) {
-                                            console.log(row.rank);
                                             const rank = await GetRank(row.rank);
-                                            console.log(rank);
                                             if (rank) {
                                                 if (Array.isArray(rank) == false) {
-                                                    const operator = await GetOperatorByName(row.operator);
+                                                    const operator = await GetOperatorByName(row.name);
                                                     if (operator) {
                                                             setTimeout(() => {
                                                                 if (errorAllReadySent == false) {
-                                                                    console.log(rank);
-                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id.toString(), aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, operator.operator, rank.minH.toString());
+                                                                    CreateRoute(makeid(50), row.num, parseInt(row.flightTime), operator.id, aircraft.livID, row.depICAO, row.arrICAO, aircraft.publicName, rank.minH.toString());
                                                                     res.redirect("/admin/routes");
                                                                 }
                                                             }, 1500);
@@ -604,6 +727,11 @@ app.get('*', async (req, res, next)=>{
         } else {
             res.sendStatus(404);
         }
+    }else if(req.path == '/mirrorContent'){
+        const safedContent = sanitizer.sanitize(atob(req.query.content.toString()));
+        res.render("contentMirror", {
+            content: safedContent
+        })
     } else {
 
         //Check for setup
@@ -618,6 +746,8 @@ app.get('*', async (req, res, next)=>{
             let user = await checkForUser(cookies);
             if (user) {
                 user = await getUserWithObjs(user, ["notifications", "pireps"]);
+                delete user['password'];
+                seenUser(user.username);
             }
             if (changePWD == true && req.path != "/changePWD") {
                 res.redirect('/changePWD');
@@ -689,10 +819,11 @@ app.get('*', async (req, res, next)=>{
                                 active: req.path,
                                 title: "New Flight",
                                 user: user,
-                                routes: await GetRoutes(),
+                                routes: await getRoutesWithOperator(),
                                 craft: await GetAircrafts(),
                                 ops: await GetOperators(),
                                 config: getConfig(),
+                                multipliers: await GetMultipliers(),
                                 allowNSession: !(activeFlightBool),
                                 activeFlight: activeFlight
                             })
@@ -740,17 +871,36 @@ app.get('*', async (req, res, next)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
-                    case "/aboutVA":
+                    case "/stats/me":
                         if (user) {
-                            res.render("about", {
+                            delete user['password'];
+                            res.render("stats/me", {
                                 active: req.path,
-                                title: "About",
+                                title: "My Stats",
                                 user: user,
                                 config: getConfig(),
+                                stats: stats
+                            })
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+                    case "/stats/va":
+                        if (user) {
+                            const specConfig = getConfig();
+                            delete specConfig.other['ident'];
+                            delete specConfig['key'];
+                            delete specConfig['id'];
+                            res.render("stats/va", {
+                                active: req.path,
+                                title: "VA Stats",
+                                user: user,
+                                config: specConfig,
                                 stats: stats,
-                                fleet: await GetAircrafts(),
-                                events: await GetEvents(),
-                                route: await GetRoutes()
+                                aircraft: await GetAircrafts(),
+                                routes: await getRoutesWithOperator(),
+                                pireps: await GetPireps(),
+                                pilotSize: (await GetUsers()).length
                             })
                         } else {
                             res.clearCookie("authToken").redirect("/?r=ii");
@@ -860,7 +1010,7 @@ app.get('*', async (req, res, next)=>{
                                     activer: "/admin",
                                     craft: await GetAircrafts(),
                                     ops: await GetOperators(),
-                                    routes: await GetRoutes(),
+                                    routes: await getRoutesWithOperator(),
                                     ranks: await GetRanks(),
                                     config: getConfig()
                                 })
@@ -880,10 +1030,12 @@ app.get('*', async (req, res, next)=>{
                                     title: "Admin - Users",
                                     user: user,
                                     activer: "/admin",
+                                    ranks: await GetRanks(),
                                     users: await GetUsers(),
                                     ops: await GetOperators(),
                                     routes: await GetRoutes(),
-                                    config: getConfig()
+                                    config: getConfig(),
+                                    pireps: await GetPireps()
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -913,6 +1065,26 @@ app.get('*', async (req, res, next)=>{
                             res.clearCookie("authToken").redirect("/?r=ii");
                         }
                         break;
+                    case "/admin/multi":
+                        if (user) {
+                            if (user.admin == true) {
+                                res.render("admin/multi", {
+                                    active: req.path,
+                                    title: "Admin - Multi",
+                                    user: user,
+                                    activer: "/admin",
+                                    Multipliers: await GetMultipliers(),
+                                    config: getConfig()
+                                })
+                            } else {
+                                res.sendStatus(403);
+                            }
+
+                        } else {
+                            res.clearCookie("authToken").redirect("/?r=ii");
+                        }
+                        break;
+
                     case "/admin/import":
                         if (user) {
                             if (user.admin == true) {
@@ -1018,7 +1190,8 @@ app.get('*', async (req, res, next)=>{
                                     session: session,
                                     aircraft: await GetAircrafts(),
                                     route: await GetRoute(session.route),
-                                    vehicleUsed: await GetAircraft(session.aircraft)
+                                    vehicleUsed: await GetAircraft(session.aircraft),
+                                    multipliers: await GetMultipliers()
                                 })
                             } else {
                                 res.status(403).send("You aren't the designated pilot for this session.");
@@ -1114,6 +1287,11 @@ app.post('/setup', async (req,res)=>{
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark", "primary"],
+                applications: {
+                    state: false,
+                    link: ""
+                },
+                btnColor: false,
                 ident: makeid(25),
                 pirepPic: false,
                 pirepPicExpire: 86400000,
@@ -1134,7 +1312,7 @@ app.post('/setup', async (req,res)=>{
                     setTimeout(async () => {
                         vanetCraft = await getVANetData();
                     }, 1000)
-                    CreateOperator(config.name)
+                    CreateOperator(config.name, 1, newConfig.code);
                     if (regReq[1].statusCode == 200) {
                         await reloadConfig();
                         res.sendStatus(200);
@@ -1155,8 +1333,9 @@ app.post('/setup', async (req,res)=>{
     }
 })
 app.post('/setupNVN', async (req, res) => {
-    if (req.body.data) {
-        const data = JSON.parse(req.body.data);
+    try{
+        if (req.body.data) {
+            const data = JSON.parse(req.body.data);
             const newConfig = {
                 code: data.code,
                 name: data.name
@@ -1167,10 +1346,25 @@ app.post('/setupNVN', async (req, res) => {
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark", "primary"],
+                applications: {
+                    state: false,
+                    link: ""
+                },
+                btnColor: false,
                 ident: makeid(25),
-                pirepPic: hosting? false : data.pirepPictures,
+                pirepPic: hosting ? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
+                webhook: data.webhook
             }
+            newConfig.other.navColor = [];
+            newConfig.other.navColor.push(data.colors.main.value);
+            if (data.colors.main.value == "light") {
+                newConfig.other.navColor.push("light");
+            } else {
+                newConfig.other.navColor.push("dark");
+            }
+            newConfig.other.navColor.push(data.colors.buttons.value);
+
             await FileWrite(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
             setTimeout(async () => {
                 await reloadConfig();
@@ -1185,12 +1379,20 @@ app.post('/setupNVN', async (req, res) => {
                     config.other.ident = regReq[2];
                     await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2));
                     vanetCraft = await getVANetData();
-                    CreateOperator(config.name)
+                    CreateOperator(config.name, 1, newConfig.code);
+                    webhook.send({ title: "Webhook Setup", description: `Your webhook has been setup successfully!` })
                     res.sendStatus(200);
                 }, 1000);
 
             }, 2000);
+        }
+    }catch(err){
+        res.status(500);
+        console.error(err);
+        Sentry.captureException(err);
+        res.send("err");
     }
+    
 })
 
 app.post('/OSOR', async(req, res)=>{
@@ -1215,7 +1417,7 @@ app.post('/user/update', async(req, res) =>{
             if(user.profileURL != req.body.url){
                 user.profileURL = req.body.url
             }
-            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID)
+            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID, user.manualRank)
             res.redirect("/account")
         }else{
             res.sendStatus(401);
@@ -1232,7 +1434,7 @@ app.post('/CPWD', async(req, res)=>{
         if (user) {
 //                if(bcrypt.comuser.password)
                 user.password = bcrypt.hashSync(req.body.npwd, 10);
-                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked)
+            await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, false, user.revoked, user.VANetID, user.manualRank)
                 await DeleteTokens(user.username);
                 res.redirect("/");
         }else{
@@ -1244,8 +1446,9 @@ app.post('/CPWD', async(req, res)=>{
 })
 
 app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
-    const cookies = getAppCookies(req)
-    if (req.body.route && req.body.aircraft && req.body.ft && req.body.op && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
+    const cookies = getAppCookies(req);
+    console.log(req.body)
+    if (req.body.route && req.body.aircraft && req.body.ft && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
         let user = await checkForUser(cookies);
         if (user) {
             let list = await GetAircrafts();
@@ -1258,7 +1461,7 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                 }
             })
             if(req.body.aircraft){
-                if (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))) {
+                if (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(parseInt(req.body.op)).code.length, req.body.route.length))) {
                     if(req.file){
                     fs.readFile(req.file.path, function (err, sourceData) {
                         Sentry.captureException(err);
@@ -1270,11 +1473,26 @@ app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
                         })
                     })
                     }
-                    if(config.key && user.VANetID){
-                        await createVANetPirep(user.VANetID, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, (new Date()).toString(), req.body.fuel, req.body.ft, req.body.aircraft)
+                    let ft = req.body.ft;
+                    let comment = req.body.comments ? req.body.comments : "No Comment";
+                    let operatorLength = (operatorSearchable.get(parseInt(req.body.op))).code.length;
+                    let route = (await GetRouteByNum(req.body.route.slice(operatorLength, req.body.route.length)));
+                    if(req.body.multi){
+                        let multi = await GetMultiplierByLabel(req.body.multi)
+                        if(multi){
+                            ft = ft * parseFloat((multi.amount).toString());
+                            if(comment == "No Comment"){
+                                comment = `Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            }else{
+                                comment += `\n \n Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            }
+                        }
                     }
-                    
-                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).depICAO, (await GetRouteByNum(req.body.route.slice(config.code.length, req.body.route.length))).arrICAO, req.body.route, req.body.ft, req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    if(config.key && user.VANetID){
+                        await createVANetPirep(user.VANetID, route.depICAO, route.arrICAO, (new Date()).toString(), req.body.fuel, ft, req.body.aircraft)
+                    }
+                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, route.depICAO, route.arrICAO, req.body.route, ft, comment, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    webhook.send({title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.`})
                     res.redirect("/");
                 } else {
                     res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
@@ -1302,7 +1520,8 @@ app.post("/admin/events/new", async function (req, res) {
         if (user) {
             if(user.admin == true){
                 await CreateEvent(req.body.title, req.body.desc, req.body.arrICAO, req.body.depICAO, req.body.date, req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName , req.body.server, req.body.gates.split(","))
-                res.redirect("/admin/events")
+                res.redirect("/admin/events");
+                webhook.send({ title: "New Event!", description: `A new event has been scheduled (${req.body.title})! Check it out!` });
             }else{
                 res.sendStatus(403);
             }
@@ -1335,12 +1554,13 @@ app.delete("/admin/events/remove", async function (req, res) {
 //Operators
 app.post("/admin/codeshare/new", async function (req, res) {
     const cookies = getAppCookies(req)
-    if (req.body.airName) {
+    if (req.body.airName && req.body.airCode) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await CreateOperator(req.body.airName)
-                res.redirect("/admin/codeshare")
+                await CreateOperator(req.body.airName, 0, req.body.airCode)
+                res.redirect("/admin/codeshare");
+                resetOperators()
             } else {
                 res.sendStatus(403);
             }
@@ -1359,6 +1579,7 @@ app.delete("/admin/codeshare/remove", async function (req, res) {
             if (user.admin == true) {
                 await DeleteOperator(req.body.id);
                 res.redirect("/admin/codeshare");
+                resetOperators();
             } else {
                 res.sendStatus(403);
             }
@@ -1377,8 +1598,9 @@ app.post("/admin/ranks/new", async function (req, res) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await CreateRank(req.body.name, req.body.min)
-                res.redirect("/admin/ranks")
+                await CreateRank(req.body.name, req.body.manual ? 1 : 0, req.body.min)
+                res.redirect("/admin/ranks");
+                loadRanksMap();
             } else {
                 res.sendStatus(403);
             }
@@ -1391,12 +1613,13 @@ app.post("/admin/ranks/new", async function (req, res) {
 })
 app.delete("/admin/ranks/remove", async function (req, res) {
     const cookies = getAppCookies(req)
-    if (req.body.name) {
+    if (req.body.id) {
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                await DeleteRank(req.body.name);
-                res.redirect("/admin/ranks")
+                await DeleteRank(req.body.id);
+                res.redirect("/admin/ranks");
+                loadRanksMap();
             } else {
                 res.sendStatus(403);
             }
@@ -1422,7 +1645,8 @@ app.post("/admin/aircraft/new", async function (req, res) {
                     if (user) {
                         if (user.admin == true) {
                             await CreateAircraft(req.body.livID, req.body.airID, liv.name, (vanetCraft.get(req.body.airID)).name, liv.name + " - " + (vanetCraft.get(req.body.airID)).name)
-                            res.redirect("/admin/aircraft")
+                            res.redirect("/admin/aircraft");
+                            webhook.send({ title: "New Aircraft!", description: `The ${liv.name + " - " + (vanetCraft.get(req.body.airID)).name} has been added to our fleet!` });
                         } else {
                             res.sendStatus(403);
                         }
@@ -1485,8 +1709,9 @@ app.post("/admin/routes/new", async function (req, res) {
                     if(counter == req.body.aircraft.length) {
                         clearInterval(checker);
                         let vehiclePublicList = vehiclePublic.join(", ");
-                        await CreateRoute(routeID, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.minH);
-                        res.redirect("/admin/routes")
+                        await CreateRoute(routeID, req.body.num, req.body.ft, parseInt(req.body.op), req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.minH.toString());
+                        resetRoutes()
+                        res.redirect("/admin/routes");
                     }
                 }, 250)
             } else {
@@ -1521,7 +1746,8 @@ app.post("/admin/routes/update", async function (req, res) {
                         if (counter == req.body.aircraft.length) {
                             clearInterval(checker);
                             let vehiclePublicList = vehiclePublic.join(", ");
-                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, (await GetOperator(req.body.op)).operator, req.body.rankReq);
+                            await UpdateRoute(req.body.id, req.body.num, req.body.ft, req.body.op, req.body.aircraft.join(','), req.body.depIcao, req.body.arrIcao, vehiclePublicList, req.body.rankReq);
+                            resetRoutes()
                             res.redirect("/admin/routes")
                         }
                     }, 250)
@@ -1547,6 +1773,7 @@ app.delete("/admin/routes/remove", async function (req, res) {
             if (user.admin == true) {
                 const route = await GetRoute(req.body.id);
                 await DeleteRoute(req.body.id);
+                resetRoutes()
                 res.redirect("/admin/routes")
             } else {
                 res.sendStatus(403);
@@ -1582,10 +1809,11 @@ app.post("/admin/users/new", async function (req, res) {
                         id: pilotID ? pilotID : null,
                     }
 
-                    await CreateUser(req.body.username, "0", req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
-                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
+                    await CreateUser(req.body.username, "0", req.body.manual ? 1 : 0, req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id)
+                    await UpdateUser(req.body.username, await testRank(await GetUser(req.body.username)), req.body.admin ? true : false, bcrypt.hashSync(req.body.password, 10), req.body.Name, "/public/images/defaultPP.png", req.body.hours ? req.body.hours : 0, (new Date()).toString(), (new Date(0).toString()), true, 0, vanetid.id, user.manualRank)
                     
-                    res.redirect("/admin/users")
+                    res.redirect("/admin/users");
+                    webhook.send({ title: "New Pilot!", description: `Welcome ${req.body.Name} (${config.code}${req.body.username}) to the VA!` });
                 }else{
                     res.sendStatus(409);
                 }
@@ -1611,7 +1839,7 @@ app.post("/admin/users/update", async function (req, res) {
                     if(req.body.name != target.display){
                         target.display = req.body.name;
                     }
-                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID, user.manualRank)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1626,6 +1854,35 @@ app.post("/admin/users/update", async function (req, res) {
         res.sendStatus(400)
     }
 })
+app.post("/admin/users/rankChange", async function (req, res){
+    const cookies = getAppCookies(req)
+    if (req.body.uid && req.body.rank) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const target = await GetUser(req.body.uid);
+                if(target){
+                    target.manualRank = req.body.manual ? 1 : 0;
+                    if(target.manualRank == 1){
+                        target.rank = (await GetRank(req.body.rank)).label;
+                    }else{
+                        target.rank = await testRank(target);
+                    }
+                    UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, target.revoked, target.VANetID, target.manualRank)
+                    res.redirect("/admin/users")
+                }else{
+                    res.sendStatus(404);
+                }
+            }else{
+                res.sendStatus(403)
+            }
+        }else{
+            res.sendStatus(401)
+        }
+    }else{
+        res.sendStatus(400)
+    }
+})
 app.post("/admin/users/revoke", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.uid) {
@@ -1635,7 +1892,7 @@ app.post("/admin/users/revoke", async function (req, res) {
                 const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
                 if (checkForTarget) {
                     const target = await GetUser(req.body.uid)
-                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, 1, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, target.cp, 1, target.VANetID, user.manualRank)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1659,7 +1916,7 @@ app.post("/admin/users/unrevoke", async function (req, res) {
                 const checkForTarget = ((await GetUser(req.body.uid)) != undefined)
                 if (checkForTarget) {
                     const target = await GetUser(req.body.uid)
-                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, 0, target.VANetID)
+                    await UpdateUser(req.body.uid, target.rank, target.admin, bcrypt.hashSync(`VACENTER_REVOKED_PASSWORD`, 10), target.display, target.profileURL, target.hours, target.created, target.llogin, true, 0, target.VANetID, user.manualRank)
                     res.redirect("/admin/users")
                 } else {
                     res.sendStatus(409);
@@ -1679,17 +1936,13 @@ app.post("/admin/users/resetPWD", async function (req, res){
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                if (req.body.targetUID) {
-                    let target = await GetUser(req.body.targetUID);
+                if (req.body.uid && req.body.newpwd) {
+                    let target = await GetUser(decodeURIComponent(req.body.uid));
                     if (target) {
-                        if (!target.cp) {
-                            target.password = bcrypt.hashSync("VACENTERBACKUP1", 10);
-                            await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked)
-                            await DeleteTokens(target.username);
-                            res.redirect("/admin/users");
-                        } else {
-                            res.sendStatus(409);
-                        }
+                        target.password = bcrypt.hashSync(decodeURIComponent(req.body.newpwd), 10);
+                        await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked, target.VANetID, user.manualRank)
+                        await DeleteTokens(target.username);
+                        res.sendStatus(200);
                     } else {
                         res.sendStatus(404);
                     }
@@ -1711,7 +1964,7 @@ app.post("/users/linkVANet", async function (req, res){
             try{
                 const pilotID = (await getVANetUser(req.body.ifcname));
                 user.vanetID = pilotID;
-                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked,pilotID);
+                await UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, pilotID, user.manualRank);
                 res.redirect("/");
             }catch(err){
                 Sentry.captureException(err);
@@ -1726,21 +1979,6 @@ app.post("/users/linkVANet", async function (req, res){
 })
 
 //Settings
-app.post("/admin/settings/update", async function (req, res) {
-    const cookies = getAppCookies(req)
-        let user = await checkForUser(cookies);
-        if (user) {
-            if (user.admin == true) {
-                update().then(status=>{
-                    res.sendStatus(status == true ? 202 : 204);
-                })
-            } else {
-                res.sendStatus(403);
-            }
-        } else {
-            res.sendStatus(401);
-        }
-})
 app.post("/admin/settings/logo", async function (req, res) {
     const cookies = getAppCookies(req)
     if(req.body.value){
@@ -1776,7 +2014,10 @@ app.post("/admin/settings/pirepPic", async function (req, res) {
                 fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig));
                 setTimeout(() => {
                     reloadConfig();
-                    res.redirect("/admin/settings")
+                    res.redirect("/admin/settings");
+                    if(req.body.state == "on"){
+                        webhook.send({title: "PIREP Images Enabled", description: `${config.name} has turned on PIREP images, now you can submit an image as part of your PIREP.`})
+                    }
                 }, 1000)
             }
         } else {
@@ -1806,7 +2047,27 @@ app.post("/admin/settings/bg", async function (req, res) {
         res.sendStatus(400);
     }
 })
-
+app.post("/admin/settings/webhook", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.value) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                const newConfig = getConfig();
+                newConfig.other.webhook = req.body.value;
+                fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+                res.redirect("/admin/settings");
+                webhook.send({ title: "Webhook Setup", description: `Your webhook has been setup successfully!` })
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
 app.post("/admin/settings/accent", async function (req, res) {
     const cookies = getAppCookies(req)
     if (req.body.accent) {
@@ -1856,16 +2117,19 @@ app.post("/admin/pireps/apr", async function (req, res){
                     if(config.other.pirepPic == true){
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
-                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, targetPIREP.status, targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, targetPIREP.status, targetPIREP.fuel, targetPIREP.filed, null, "REMOVED");
                         }, config.other.pirepPicExpire);
                     }
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed,null, targetPIREP.pirepImg);
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "a", targetPIREP.fuel, targetPIREP.filed,null, targetPIREP.pirepImg);
                     const owner = await GetUser(targetPIREP.author);
                     if(owner){
                         owner.hours = owner.hours + (targetPIREP.flightTime / 60);
                         owner.rank = await testRank(owner)
-                        await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID)
-                        res.redirect("/admin/pireps")
+                        await UpdateUser(owner.username, owner.rank, owner.admin, owner.password, owner.display, owner.profileURL, owner.hours, owner.created, owner.llogin, owner.cp, owner.revoked, owner.VANetID, user.manualRank)
+                        res.redirect("/admin/pireps");
+                        
+                        webhook.send({title:"PIREP Approved", description: `${config.code}${owner.username}'s PIREP (${targetPIREP.depICAO}=>${targetPIREP.arrICAO}) has been approved!`})
+
                     }else{
                         res.sendStatus(500);
                     }
@@ -1896,10 +2160,10 @@ app.post("/admin/pireps/den", async function (req, res) {
                     if (config.other.pirepPic == true) {
                         setTimeout(() => {
                             FileRemove(`${__dirname}/..${targetPIREP.pirepImg}.webp`)
-                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), "REMOVED");
+                            UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), "REMOVED");
                         }, config.other.pirepPicExpire);
                     }
-                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.airline, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), targetPIREP.pirepImg);
+                    await UpdatePirep(targetPIREP.id, targetPIREP.vehicle, targetPIREP.vehiclePublic, targetPIREP.author, targetPIREP.operator, targetPIREP.depICAO, targetPIREP.arrICAO, targetPIREP.route, targetPIREP.flightTime, targetPIREP.comments, "d", targetPIREP.fuel, targetPIREP.filed, Buffer.from(req.body.rejectReason, 'base64').toString(), targetPIREP.pirepImg);
                     res.redirect("/admin/pireps")
                 } else {
                     res.sendStatus(404);
@@ -1950,6 +2214,77 @@ app.post("/admin/links/rem", async function (req, res) {
         }
     } else {
         res.sendStatus(400);
+    }
+})
+
+//Multi
+app.post("/admin/multi/new", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.label && req.body.amount) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                if(!(await GetMultiplierByLabel(req.body.label))){
+                    await CreateMulti(req.body.label, req.body.amount);
+                    res.redirect("/admin/multi");
+                }else{
+                    res.status(409);
+                    res.send("This Already Exists.")
+                }
+                
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+app.post("/admin/multi/rem", async function (req, res) {
+    const cookies = getAppCookies(req)
+    if (req.body.id) {
+        let user = await checkForUser(cookies);
+        if (user) {
+            if (user.admin == true) {
+                await DeleteMulti(parseInt(req.body.id));
+                res.redirect("/admin/multi");
+            } else {
+                res.sendStatus(403);
+            }
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(400);
+    }
+})
+
+app.post("/admin/applications/config", async (req, res) =>{
+    const cookies = getAppCookies(req);
+    let user = await checkForUser(cookies);
+    if (user) {
+        if (user.admin == true) {
+            const newConfig = getConfig();
+            if(req.body.state){
+                if(req.body.link){
+                    newConfig.other.applications.state = true;
+                    newConfig.other.applications.link = req.body.link;
+                }else{
+                    res.status(400);
+                    res.send("Missing Link");
+                }
+            }else{
+                newConfig.other.applications.state = false;
+            }
+            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
+            res.redirect("/admin/settings#apps");
+        } else {
+            res.sendStatus(403);
+        }
+    } else {
+        res.sendStatus(401);
     }
 })
 
@@ -2031,23 +2366,56 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
             const session = await GetSession(sesID);
             if (session) {
                 const route = await GetRoute(session.route);
-                if (req.file && req.body.fuel) {
-                    fs.readFile(req.file.path, function (err, sourceData) {
-                        Sentry.captureException(err);
-                        tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                if (req.body.fuel) {
+                    if(req.file){
+                        fs.readFile(req.file.path, function (err, sourceData) {
                             Sentry.captureException(err);
-                            fs.unlinkSync(`${req.file.path}`);
-                            req.file.path = req.file.path + ".webp";
-                            fs.writeFileSync(`${req.file.path}`, resultData);
+                            tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                                Sentry.captureException(err);
+                                fs.unlinkSync(`${req.file.path}`);
+                                req.file.path = req.file.path + ".webp";
+                                fs.writeFileSync(`${req.file.path}`, resultData);
+                            })
                         })
-                    })
+                    }
+                    let ft = parseInt(session.arrTime);
+                    let comment = req.body.comments;
+                    if (req.body.multi) {
+                        let multi = await GetMultiplierByLabel(req.body.multi);
+                        if (multi) {
+                            ft = ft * parseFloat((multi.amount).toString());
+                            if (comment == "No Comment") {
+                                comment = `Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            } else {
+                                comment += `\n \n Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                            }
+                        }
+                    }
+                    //@ts-ignore
+                    CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, operatorSearchable.get(parseInt(route.operator)).code + route.num.toString(), ft, comment, "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                    webhook.send({ title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.` })
+                    UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF");
+                    res.redirect("/home");
+                    
+                }else{
+                    res.sendStatus(400);
                 }
-                CreatePirep(session.aircraft, (await GetAircraft(session.aircraft)).publicName, session.pilot, route.operator, route.depICAO, route.arrICAO, config.code + route.num.toString(), parseInt(session.arrTime), req.body.comments ? req.body.comments : "No comments.", "n", req.body.fuel, new Date().toString(), (req.file ? `/data/images/${req.file.filename}` : null))
-                UpdateSession(session.id.toString(), session.pilot, session.route, session.aircraft, session.depTime, session.arrTime, 0, "PF")
-                res.redirect("/home");
+                // @ts-ignore
+                
             } else {
                 res.status(404).send("Cant find session with ID: " + sesID);
             }
         }
     }
 })
+
+
+async function seenUser(userID){
+    console.log(userID)
+    const user = await GetUser(userID);
+    if (((new Date()).getTime() - new Date(user.llogin).getTime()) > (1000 * 60 * 10)){
+        user.llogin = (new Date()).toString();
+        UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID, user.manualRank);
+    }
+    
+}

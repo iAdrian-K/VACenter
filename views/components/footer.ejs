@@ -1,11 +1,29 @@
-<footer class="w-100 px-5 py-3 text-center text-muted mt-5" style="bottom: 0;">
-<p>
-    <%= config.name%> | Powered by VACenter (V<%= version %>)
-</p>
+<footer class="w-100 px-5 py-3 text-center text-muted" id="pageFooter">
+    <p>
+        <%= config.name%> | Powered by VACenter (V<%= version %>)
+    </p>
 </footer>
 <script>
+    if (document.body.scrollHeight > window.innerHeight - 100) {
+            document.getElementById('pageFooter').style.position = "relative";
+        } else {
+            document.getElementById('pageFooter').style.position = "absolute";
+            document.getElementById('pageFooter').style.bottom = "0px";
+        }
+
+        window.addEventListener('resize', () => {
+            if (document.body.scrollHeight > window.innerHeight) {
+                document.getElementById('pageFooter').style.position = "relative";
+            } else {
+                document.getElementById('pageFooter').style.position = "absolute";
+                document.getElementById('pageFooter').style.bottom = "0px";
+            }
+        });
+</script>
+<script>
+    
+
     (function () {
-            'use strict'
 
             // Fetch all the forms we want to apply custom Bootstrap validation styles to
             var forms = document.querySelectorAll('.needs-validation')

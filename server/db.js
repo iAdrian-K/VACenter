@@ -32,6 +32,7 @@ require('dotenv').config()
  * @typedef {import('./types.js').statistic} statistic
  * @typedef {import('./types.js').link} link
  * @typedef {import('./types.js').fsession} fsession
+ * @typedef {import('./types.js').Multiplier} Multiplier
  */
 
 const sqlite3 = require('sqlite3').verbose();
@@ -304,7 +305,7 @@ function GetPireps() {
  * @param {string} vehicle - Livery ID
  * @param {string} vehiclePublic - Name of Vehicle
  * @param {string} author - Pirep Creator
- * @param {string} airline - Airline
+ * @param {number} operator - Operator
  * @param {string} depICAO - Departing ICAO code
  * @param {string} arrICAO - Arriving ICAO code
  * @param {string} route - Route
@@ -316,10 +317,10 @@ function GetPireps() {
  * @param {string|Boolean} [img] - ID of IMG
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, img) {
+function CreatePirep(vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, img) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, pirepImg)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null, (img ? img : null)], function (err) {
+        db.run(`INSERT INTO pireps(vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, pirepImg)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, null, (img ? img : null)], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -336,7 +337,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @param {string} vehicle - Livery ID
  * @param {string} vehiclePublic - Name of Vehicle
  * @param {string} author - Pirep Creator
- * @param {string} airline - Airline
+ * @param {number} operator - Operator
  * @param {string} depICAO - Departing ICAO code
  * @param {string} arrICAO - Arriving ICAO code
  * @param {string} route - Route
@@ -348,13 +349,13 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
  * @param {string} [img] - PIREP Image
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdatePirep(id, vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
+ function UpdatePirep(id, vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, img) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE pireps SET 
                 vehicle = ?,
                 vehiclePublic = ?,
                 author = ?,
-                airline = ?,
+                operator = ?,
                 depICAO = ?,
                 arrICAO = ?,
                 route = ?,
@@ -365,7 +366,7 @@ function CreatePirep(vehicle, vehiclePublic, author, airline, depICAO, arrICAO, 
                 filed = ?,
                 rejectReason = ?,
                 pirepImg = ?
-                WHERE id = ?`, [vehicle, vehiclePublic, author, airline, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, (img?img:null), id], function (err) {
+                WHERE id = ?`, [vehicle, vehiclePublic, author, operator, depICAO, arrICAO, route, flightTime, comments, status, fuel, filed, rejectReason, (img?img:null), id], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -479,6 +480,7 @@ function GetUsers() {
  * Creates a new user
  * @param {string} username - Digit Username
  * @param {string} rank - Rank of user
+ * @param {0|1} manualRank - Manual rank of user
  * @param {boolean} admin - Admin status
  * @param {string} password - Hashed password of user
  * @param {string} display - Display Name
@@ -490,10 +492,10 @@ function GetUsers() {
  * @param {number} revoked - User access revoked
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
+function CreateUser(username, rank, manualRank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO users(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) 
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, "https://icons.getbootstrap.com/assets/icons/person-circle.svg", hours, created, llogin, cp, revoked, VANetID], function (err) {
+        db.run(`INSERT INTO users(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, manualRank) 
+                VALUES(?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [username, rank, admin, password, display, "https://icons.getbootstrap.com/assets/icons/person-circle.svg", hours, created, llogin, cp, revoked, VANetID, manualRank], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -517,9 +519,10 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
  * @param {string} llogin - Last logged in
  * @param {boolean} cp - Force change password on next login
  * @param {number} revoked - User access revoked
+ * @param {0|1} manualRank - Manual Ranked user
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID) {
+ function UpdateUser(username, rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, manualRank) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE users SET
                 rank = ?,
@@ -532,8 +535,9 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
                 llogin = ?,
                 cp = ?,
                 revoked = ?,
-                VANetID = ? 
-                WHERE username = ?`, [rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, username], function (err) {
+                VANetID = ?,
+                manualRank = ? 
+                WHERE username = ?`, [rank, admin, password, display, profileURL, hours, created, llogin, cp, revoked, VANetID, manualRank, username], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -574,7 +578,7 @@ function CreateUser(username, rank, admin, password, display, profileURL, hours,
 function GetOperatorByName(name) {
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.get(`SELECT * FROM operators WHERE operator = ?`, [name], (err, row) => {
+            db.get(`SELECT * FROM operators WHERE name = ?`, [name], (err, row) => {
                 if (err) {
                     Sentry.captureException(err);
                 } else {
@@ -587,7 +591,7 @@ function GetOperatorByName(name) {
 
 /**
  * Returns record of specific Operator ID
- * @param {string} id - Unique id of operator 
+ * @param {number} id - Unique id of operator 
  * @returns {Promise<operator>} Record for that operator
  */
  function GetOperator(id) {
@@ -600,13 +604,14 @@ function GetOperatorByName(name) {
                     resolve(row);
                 }
             });
+            
         });
     });
 }
 
 /**
  * Returns all operators
- * @returns {Promise<Array.<{operator}>>} Operator objects in an array
+ * @returns {Promise<Array<operator>>} Operator objects in an array
  */
 function GetOperators() {
     return new Promise((resolve, error) => {
@@ -625,12 +630,14 @@ function GetOperators() {
 /**
  * Creates a new operator
  * @param {string} operator - Name of operator
+ * @param {0|1} self - Is self?
+ * @param {string} code - Code of operator
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreateOperator(operator) {
+function CreateOperator(operator, self, code) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO operators(operator) 
-                VALUES(?)`, [operator], function (err) {
+        db.run(`INSERT INTO operators(name,self,code) 
+                VALUES(?, ?, ?)`, [operator, self ? self : 0, code], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -702,7 +709,7 @@ function GetRouteByNum(num) {
 
 /**
  * Returns all routes
- * @returns {Promise<Array.<{route}>>} Route objects in an array
+ * @returns {Promise<Array<route>>} Route objects in an array
  */
 function GetRoutes() {
     return new Promise((resolve, error) => {
@@ -723,19 +730,18 @@ function GetRoutes() {
  * @param {string} id - Unique identifier
  * @param {string} num - Flight Number
  * @param {number} ft - Flight Time 
- * @param {string} operator - Airline
+ * @param {number} operator - Operator ID
  * @param {string} aircraft - Livery ID
  * @param {string} depICAO - Departing ICAO
  * @param {string} arrICAO - Arriving ICAO
  * @param {string} aircraftPublic - Common aircraft name
- * @param {string} operatorPublic - Common operator name
  * @param {string} minRank - Minimum rank to fly route
  * @returns {Promise<Boolean>} Returns boolean of query
  */
-function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
+function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) 
-                VALUES(?,?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank], function (err) {
+        db.run(`INSERT INTO routes(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank) 
+                VALUES(?,?,?,?,?,?,?,?,?)`, [id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -751,16 +757,15 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
  * @param {string} id - Unique identifier
  * @param {string} num - Flight Number
  * @param {number} ft - Flight Time 
- * @param {string} operator - Airline
+ * @param {string} operator - Operator
  * @param {string} aircraft - Livery ID
  * @param {string} depICAO - Departing ICAO
  * @param {string} arrICAO - Arriving ICAO
  * @param {string} aircraftPublic - Common aircraft name
- * @param {string} operatorPublic - Common operator name
  * @param {string} minRank - Minimum rank to fly route
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function UpdateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank) {
+ function UpdateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank) {
     return new Promise((resolve, error) => {
         db.run(`UPDATE routes SET 
                 num = ?,
@@ -770,9 +775,8 @@ function CreateRoute(id, num, ft, operator, aircraft, depICAO, arrICAO, aircraft
                 depICAO = ?,
                 arrICAO = ?,
                 aircraftPublic = ?,
-                operatorPublic = ?,
                 minRank = ?
-                WHERE id = ?`, [num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, operatorPublic, minRank, id], function (err) {
+                WHERE id = ?`, [num, ft, operator, aircraft, depICAO, arrICAO, aircraftPublic, minRank, id], function (err) {
             if (err) {
                 Sentry.captureException(err);
                 resolve(false)
@@ -973,13 +977,13 @@ function UpdateStat(name, newName, newValue){
 
 /**
  * Get rank by name
- * @param {string} name 
+ * @param {string} id 
  * @returns {Promise<rank>} Ranks
  */
-function GetRank(name){
+function GetRank(id){
     return new Promise((resolve, error) =>{
         db.serialize(() => {
-            db.get(`SELECT * FROM ranks WHERE rank = ?`, [name], (err, row) => {
+            db.get(`SELECT * FROM ranks WHERE id = ?`, [id], (err, row) => {
                 if (err) {
                     Sentry.captureException(err);
                 } else {
@@ -993,7 +997,7 @@ function GetRank(name){
 
 /**
  * Get all ranks
- * @returns {Promise<Array.<rank>>} Array of ranks
+ * @returns {Promise<Array<rank>>} Array of ranks
  */
  function GetRanks(){
     return new Promise((resolve, error) => {
@@ -1011,13 +1015,13 @@ function GetRank(name){
 
 /**
  * Delete rank
- * @param {String} rank - Name of rank
+ * @param {String} id - ID of rank
  * @returns {Promise<Boolean>} Returns boolean of query
  */
- function DeleteRank(rank){
+ function DeleteRank(id){
     return new Promise((resolve, error) => {
         db.serialize(() => {
-            db.run(`DELETE FROM ranks WHERE rank = ?`, [rank], (err) => {
+            db.run(`DELETE FROM ranks WHERE id = ?`, [id], (err) => {
                 if (err) {
                     Sentry.captureException(err);
                     resolve(false)
@@ -1056,18 +1060,19 @@ function UpdateRank(name, newName, newMinH){
 
 /**
  * Creates a new rank
- * @param {String} rank - Name of rank
+ * @param {String} label - Name of Rank
+ * @param {0|1} manual - Type of Rank
  * @param {Number} minH - Minimum hours
- * @returns {Promise<Boolean>} Returns boolean of query
+ * @returns {Promise<Number>} Returns ID of new Rank
  */
- function CreateRank(rank, minH) {
+ function CreateRank(label, manual, minH) {
     return new Promise((resolve, error) => {
-        db.run(`INSERT INTO ranks(rank, minH) VALUES(?, ?)`, [rank, minH], function (err) {
+        db.run(`INSERT INTO ranks(label, manual, minH) VALUES(?, ?,?)`, [label, manual, minH], function (err) {
             if (err) {
                 Sentry.captureException(err);
-                resolve(false)
+                error(err)
             } else {
-                resolve(true)
+                resolve(this.lastID);
             }
         });
     });
@@ -1427,6 +1432,103 @@ function DeleteSession(ID) {
     });
 }
 
+//Multiplier
+
+/**
+ * Gives all Multipliers
+ * @returns {Promise<Array<Multiplier>>}
+ */
+async function GetMultipliers(){
+    return new Promise((resolve, error) => {
+        db.serialize(()=>{
+            db.all(`SELECT * FROM multi`, [], (err, row) =>{
+                if(err){
+                    Sentry.captureException(err);
+                }else{
+                    resolve(row);
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Retrieves a Multiplier by ID
+ * @param {number} id 
+ * @returns {Promise<Multiplier>} Boolean Success
+ */
+async function GetMultiplier(id){
+    return new Promise((resolve, reject) =>{
+        db.serialize(() => {
+            db.get(`SELECT * FROM multi WHERE id = ?`, [id], (err, row) => {
+                if (err) {
+                    Sentry.captureException(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    })
+}
+
+/**
+ * Retrieves a Multiplier by label
+ * @param {string} label 
+ * @returns {Promise<Multiplier>} Boolean Success
+ */
+async function GetMultiplierByLabel(label) {
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.get(`SELECT * FROM multi WHERE label = ?`, [label], (err, row) => {
+                if (err) {
+                    Sentry.captureException(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+    })
+}
+
+/**
+ * Create a Multiplier
+ * @param {string} label 
+ * @param {number} amount 
+ * @returns {Promise<String|Number>} ID of new Multiplier
+ */
+async function CreateMulti(label, amount){
+    return new Promise((resolve, reject) => {
+        db.serialize(() =>{
+            db.run(`INSERT INTO multi (label, amount) VALUES(?, ?)`, [label, amount.toString()], (err) =>{
+                if(err){
+                    Sentry.captureException(err);
+                }else{
+                    resolve(this.lastID)
+                }
+            })
+        })
+    })
+}
+
+/**
+ * Deletes a Multiplier
+ * @param {number} id 
+ * @returns {Promise<Boolean>}
+ */
+async function DeleteMulti(id){
+    return new Promise((resolve, error) => {
+        db.serialize(() =>{
+            db.get(`DELETE FROM multi WHERE id = ?`, [id], (err) =>{
+                if(err){
+                    Sentry.captureException(err);
+                }else{
+                    resolve(true);
+                }
+            })
+        })
+    })
+}
+
 module.exports = { 
     db, GetPPURL, run,
     GetAircraft, GetAircrafts, CreateAircraft, DeleteAircraft,
@@ -1441,5 +1543,6 @@ module.exports = {
     GetUser, GetUsers, CreateUser, UpdateUser, DeleteUser,
     CreateSlot, GetSlots, UpdateSlot, DeleteSlot, GetSlot, GetSlotsWithRoutes,
     GetLinks, CreateLink, DeleteLink,
-    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession
+    CreateSession, GetSession, GetSessionByPilot, UpdateSession, DeleteSession,
+    CreateMulti, GetMultipliers, GetMultiplier, GetMultiplierByLabel, DeleteMulti
     };

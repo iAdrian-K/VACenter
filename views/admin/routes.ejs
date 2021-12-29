@@ -10,48 +10,52 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
     <%- include("./../components/head.ejs")%>
 </head>
 
 <body class="w-100 bg-light-light h-auto">
     <%- include("./../components/nav.ejs")%>
         <div class="w-100 content bg-light-light px-3 px-md-5 py-3" id="content">
-            <h2>Routes</h2>
+            <h2 class="d-inline-block">Routes</h2>
+            <button type="button" class="btn btn-<%= config.other.navColor[2] %> float-end" data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+                Add Route
+            </button>
             <p class="text-muted">Click on a route to see more.</p>
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
                     <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Aircraft</th>
-                            <th scope="col">Flight Time</th>
-                            <th scope="col">Operator</th>
+                        <tr class="tr-class-2">
+                            <th data-field="name">Name</th>
+                            <th data-field="aircraft">Aircraft</th>
+                            <th data-field="flightime">Flight Time</th>
+                            <th data-field="airline">Airline</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% routes.forEach(route=>{%>
-                            <tr style="cursor: pointer;"
-                                data-bs-toggle="modal" data-bs-target="#modal-<%=route.id%>">
-                                    <th scope="row">
-                                        <%= config.code + route.num %>
-                                    </th>
-                                    <td>
-                                        <%= route.aircraftPublic %>
-                                    </td>
-                                    <td>
-                                        <%= route.ft %>
-                                    </td>
-                                    <td>
-                                        <%= route.operatorPublic %>
-                                    </td>
+                            <tr id="tr-id-<%=route.id%>" class="tr-class-<%=route.id%> pirepClickable" data-title="<%=route.id%>"
+                                title="<%= route.id%>" data-object='{"key": "value"}' style="cursor: pointer;" data-bs-toggle="modal"
+                                data-bs-target="#modal-<%=route.id%>">
+                                <td id="td-id-<%=route.id %>" class="td-class-<%=route.id %>" data-title="<%= route.id %>">
+                                    <strong>
+                                        <%= operator_search.get(route.operator).code + route.num %>
+                                    </strong>
+                                </td>
+                                <td data-text="<%= route.aircraftPublic %>">
+                                    <%= route.aircraftPublic %>
+                                </td>
+                                <td data-text="<%= route.ft %>">
+                                    <%= route.ft %>
+                                </td>
+                                <td data-text="<%= route.operatorPublic %>">
+                                    <%= route.operatorPublic %>
+                                </td>
                             </tr>
-                            <%})%>
+                        <%})%>
                     </tbody>
                 </table>
-            
-                <button type="button" class="btn btn-<%= config.other.navColor[2] %>" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    Add Route
-                </button>
                 <% routes.forEach(route=>{%>
                 <div class="modal fade" id="modal-<%= route.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -62,14 +66,14 @@
                             </div>
                             <div class="modal-body">
                                 <form method="POST" action="/admin/routes/update" class="needs-validation" novalidate>
-                                    <h2>Modify <%=config.code + route.num%></h2>
+                                    <h2>Modify <%=route.operatorCode + route.num%></h2>
                                     <br>
                                     <div class="input-group mb-3">
-                                        <span class="input-group-text" id="basic-addon1">
-                                            <%= config.code%>
+                                        <span class="input-group-text" id="RouteOperCode">
+                                            <%= route.operatorCode %>
                                         </span>
-                                        <input type="text" class="form-control text-secondary" placeholder="Route Number" aria-label="Username" required=""
-                                            aria-describedby="basic-addon1" name="num" value="<%= route.num%>" readonly>
+                                        <input type="text" class="form-control text-secondary" placeholder="Route Number" aria-label="Route Number" required=""
+                                            aria-describedby="RouteOperCode" name="num" value="<%= route.num%>" readonly>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Aircraft<span style="font-size:12px"> (Can select multiple)</span></label>
@@ -96,19 +100,20 @@
                                     <label class="form-label">Operator</label>
                                     <select class="form-select mb-3" name="op" value="<%= route.operator %>">
                                         <% ops.forEach(op=>{%>
-                                            <option value="<%= op.id%>">
-                                                <%= op.operator%>
+                                            <option <% if(route.operator == op.id){%>selected<%}%> value="<%= op.id%>">
+                                                <%= op.name%>
                                             </option>
                                             <%})%>
                                     </select>
-                                    <label class="form-label">Min Rank</label>
-                                    <select class="form-select mb-3" required name="rankReq">
+                                    <label class="form-label">Minimum Rank</label>
+                                    <select class="form-select" required name="rankReq">
                                         <% ranks.forEach(rank=>{%>
-                                            <option value="<%= rank.minH%>" <% if(rank.minH == route.minRank){%>selected<%}%>>
-                                                <%= rank.rank%>
+                                            <option value="<%= rank.minH%>" <% if(rank.minH.toString() == route.minRank){%>selected<%}%>>
+                                                <%= rank.label%>
                                             </option>
-                                        <%})%>
+                                            <%})%>
                                     </select>
+                                    <br>
                                     <div class="mb-4">
                                         <label class="form-label" for="depICAO">Departure ICAO:</label>
                                         <input type="text" minlength="4" maxlength="4" class="form-control" placeholder="YSSY" required="" aria-label="ICAO Departure" name="depIcao" value="<%= route.depICAO%>">
@@ -155,12 +160,10 @@
                         <form method="POST" action="/admin/routes/new" class="needs-validation" novalidate id="nrform">
                             <h2>Create new route</h2>
                             <br>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text" id="basic-addon1">
-                                    <%= config.code%>
-                                </span>
-                                <input type="text" class="form-control" placeholder="Route Number" aria-label="Username"
-                                    required="" aria-describedby="basic-addon1" name="num">
+                            <div class="mb-3">
+                                <label>Route Number</label>
+                                <input type="text" class="form-control" placeholder="Route Number" aria-label="Route Number"
+                                    required="" name="num">
                                 <div class="valid-feedback">Looks good!</div>
                                 <div class="invalid-feedback">Needs to be a valid route number.</div>
                             </div>
@@ -208,7 +211,7 @@
                             <select class="form-select mb-3" required name="op">
                                 <% ops.forEach(op=>{%>
                                     <option value="<%= op.id%>">
-                                        <%= op.operator%>
+                                        <%= op.name%>
                                     </option>
                                     <%})%>
                             </select>
@@ -216,7 +219,7 @@
                             <select class="form-select" required name="minH">
                                 <% ranks.forEach(rank=>{%>
                                     <option value="<%= rank.minH%>">
-                                        <%= rank.rank%>
+                                        <%= rank.label%>
                                     </option>
                                     <%})%>
                             </select>
@@ -282,6 +285,9 @@
                         });
                     })
                 </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 </body>
 
 </html>
