@@ -118,23 +118,25 @@ function dataLoaded() {
         if(flight.status == "a"){
             const depPort = airportMap.get(flight.depICAO);
             const arrPort = airportMap.get(flight.arrICAO);
-            if (countryCounter.has(depPort.country)) {
-                let country = countryCounter.get(depPort.country);
-                country++;
-                countryCounter.set(depPort.country, country);
-            } else {
-                countryCounter.set(depPort.country, 1);
-            }
-            if (countryCounter.has(arrPort.country)) {
-                let country = countryCounter.get(arrPort.country);
-                country++;
-                countryCounter.set(arrPort.country, country);
-            } else {
-                countryCounter.set(arrPort.country, 1);
-            }
+            if(depPort && arrPort){
+                if (countryCounter.has(depPort.country)) {
+                    let country = countryCounter.get(depPort.country);
+                    country++;
+                    countryCounter.set(depPort.country, country);
+                } else {
+                    countryCounter.set(depPort.country, 1);
+                }
+                if (countryCounter.has(arrPort.country)) {
+                    let country = countryCounter.get(arrPort.country);
+                    country++;
+                    countryCounter.set(arrPort.country, country);
+                } else {
+                    countryCounter.set(arrPort.country, 1);
+                }
 
-            //Distance
-            distanceFlown += calcCrow(depPort.latitude, depPort.longitude, arrPort.latitude, arrPort.longitude);
+                //Distance
+                distanceFlown += calcCrow(depPort.latitude, depPort.longitude, arrPort.latitude, arrPort.longitude);
+            }
         }
     })
     document.getElementById('stat_value_distance').innerHTML = distanceFlown.toFixed(2);
