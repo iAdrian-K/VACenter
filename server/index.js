@@ -670,31 +670,36 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                                     } else {
                                                         if (errorAllReadySent == false) {
                                                             errorAllReadySent = true;
-                                                            res.status(404).send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)}`)
+                                                            res.status(404);
+                                                            res.send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)}`)
                                                         }
                                                     }
                                                 } else {
                                                     if (errorAllReadySent == false) {
                                                         errorAllReadySent = true;
-                                                        res.status(400).send(`Found 2 Ranks with the name: ${sanitizer.sanitize(row.rank)}, please update your ranks.`)
+                                                        res.status(400);
+                                                        res.send(`Found 2 Ranks with the name: ${sanitizer.sanitize(row.rank)}, please update your ranks.`)
                                                     }
                                                 }
                                             } else {
                                                 if (errorAllReadySent == false) {
                                                     errorAllReadySent = true;
-                                                    res.status(404).send(`Can't find rank by the name: ${sanitizer.sanitize(row.rank)}`)
+                                                    res.status(404);
+                                                    res.send(`Can't find rank by the name: ${sanitizer.sanitize(row.rank)}`)
                                                 }
                                             }
                                         } else {
                                             if (errorAllReadySent == false) {
                                                 errorAllReadySent = true;
-                                                res.status(404).send(`Can't find aircraft with the ID: ${sanitizer.sanitize(row.aircraftID)}. Check the aircraft is in your fleet.`);
+                                                res.status(404);
+                                                res.send(`Can't find aircraft with the ID: ${sanitizer.sanitize(row.aircraftID)}. Check the aircraft is in your fleet.`);
                                             }
                                         }
                                     } else {
                                         if(errorAllReadySent == false){
                                             errorAllReadySent = true;
-                                            res.status(400).send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
+                                            res.status(400);
+                                            res.send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
                                         }
                                     }
                                 }, randomizator(50, 750))
