@@ -671,7 +671,7 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                                         if (errorAllReadySent == false) {
                                                             errorAllReadySent = true;
                                                             res.status(404);
-                                                            res.send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)}`)
+                                                            res.send(`Could not find Operator with the name: ${sanitizer.sanitize(row.operator)} (On ${row.num}, ${row.depICAO}, ${row.arrICAO})`)
                                                         }
                                                     }
                                                 } else {
