@@ -719,6 +719,7 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                             res.send("Oh no! One of your rows was missing some data, please check you have used the template correctly.");
                                         }
                                     }
+                                    console.log(max, ticker)
                                     if (errorAllReadySent == false && ticker == max) {
                                         res.redirect("/admin/routes");
                                     }
