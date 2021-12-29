@@ -120,7 +120,7 @@ async function reloadUserRanks(){
         //@ts-ignore
         user.rank = await testRank(user);
         //@ts-ignore
-        UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked)
+        UpdateUser(user.username, user.rank, user.admin, user.password, user.display, user.profileURL, user.hours, user.created, user.llogin, user.cp, user.revoked, user.VANetID, user.manualRank)
     })
 }
 reloadUserRanks()
