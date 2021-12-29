@@ -84,7 +84,7 @@
         <script src="/public/leaflet/leaflet.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet.geodesic"></script>
         <script>
-            const data = JSON.parse(atob('<%- btoa(Buffer.from(user).toString("base64")) %>'));
+            const data = JSON.parse(atob('<%- Buffer.from(user).toString("base64") %>'));
         </script>
         <script src="/public/scripts/stats.js"></script>
 </body>
