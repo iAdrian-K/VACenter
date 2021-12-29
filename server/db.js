@@ -983,7 +983,7 @@ function UpdateStat(name, newName, newValue){
 function GetRank(id){
     return new Promise((resolve, error) =>{
         db.serialize(() => {
-            db.get(`SELECT * FROM ranks WHERE id = ?`, [id], (err, row) => {
+            db.get(`SELECT * FROM ranks WHERE label = ?`, [id], (err, row) => {
                 if (err) {
                     Sentry.captureException(err);
                 } else {
