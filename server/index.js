@@ -672,7 +672,7 @@ app.post('/import/:comp', upload.single('csv'), async (req, res) => {
                                             const rank = await GetRank(row.rank);
                                             if (rank) {
                                                 if (Array.isArray(rank) == false) {
-                                                    const operator = await GetOperatorByName(removeDiacritics(row.name));
+                                                    const operator = await GetOperatorByName(removeDiacritics(row.operator));
                                                     if (operator) {
                                                             setTimeout(() => {
                                                                 if (errorAllReadySent == false) {
