@@ -380,8 +380,8 @@ Sentry.init({
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
 });
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
+//app.use(Sentry.Handlers.requestHandler());
+//app.use(Sentry.Handlers.tracingHandler());
 app.set('view engine', "ejs");
 app.set('views', path.join(__dirname, '/../views'));
 console.log(chalk.green("Starting VACenter"))
@@ -1222,9 +1222,9 @@ app.get('*', async (req, res, next)=>{
     }
 })
 
-app.get("/debug-sentry", function mainHandler(req, res) {
+/*app.get("/debug-sentry", function mainHandler(req, res) {
     throw new Error("My first Sentry error!");
-});
+});*/
 
 app.get("*", (req, res, next) => {
     res.render("404", {
@@ -1233,7 +1233,7 @@ app.get("*", (req, res, next) => {
 })
 
 
-app.use(Sentry.Handlers.errorHandler());
+/*app.use(Sentry.Handlers.errorHandler());
 
 // Optional fallthrough error handler
 app.use(function onError(err, req, res, next) {
@@ -1241,7 +1241,7 @@ app.use(function onError(err, req, res, next) {
     // and optionally displayed to the user for support.
     res.statusCode = 500;
     res.end(res.sentry + "\n");
-});
+});*/
 
 app.listen(process.env.PORT, () => {
     console.log(chalk.green("Listening on port " + process.env.PORT));
