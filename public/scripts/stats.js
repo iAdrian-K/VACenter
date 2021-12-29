@@ -117,20 +117,23 @@ function onFinish(){
     data.pireps.forEach(pirep =>{
         const depPort = airportMap.get(pirep.depICAO);
         const arrPort = airportMap.get(pirep.arrICAO);
-        if (countryCounter.has(depPort.country)) {
-            let country = countryCounter.get(depPort.country);
-            country++;
-            countryCounter.set(depPort.country, country);
-        } else {
-            countryCounter.set(depPort.country, 1);
+        if(depPort && arrPort){
+            if (countryCounter.has(depPort.country)) {
+                let country = countryCounter.get(depPort.country);
+                country++;
+                countryCounter.set(depPort.country, country);
+            } else {
+                countryCounter.set(depPort.country, 1);
+            }
+            if (countryCounter.has(arrPort.country)) {
+                let country = countryCounter.get(arrPort.country);
+                country++;
+                countryCounter.set(arrPort.country, country);
+            } else {
+                countryCounter.set(arrPort.country, 1);
+            }
         }
-        if (countryCounter.has(arrPort.country)) {
-            let country = countryCounter.get(arrPort.country);
-            country++;
-            countryCounter.set(arrPort.country, country);
-        } else {
-            countryCounter.set(arrPort.country, 1);
-        }
+        
     })
     let maxCountry = calcHighest(countryCounter);
     if (maxCountry[0] != "None") {
