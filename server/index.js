@@ -1469,62 +1469,63 @@ app.post('/CPWD', async(req, res)=>{
 app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
     const cookies = getAppCookies(req);
     console.log(req.body)
-    if (req.body.route && req.body.aircraft && req.body.ft && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
-        let user = await checkForUser(cookies);
-        if (user) {
-            let list = await GetAircrafts();
-            let backup = req.body.aircraft;
-            req.body.aircraft = null;
-            list.forEach(vic =>{
-                if(vic.publicName == backup){
-                    req.body.aircraft = vic.livID;
-                    return;
-                }
-            })
-            if(req.body.aircraft){
-                if (await GetRouteByNum(req.body.route.slice(operatorSearchable.get(parseInt(req.body.op)).code.length, req.body.route.length))) {
-                    if(req.file){
-                    fs.readFile(req.file.path, function (err, sourceData) {
-                        Sentry.captureException(err);
-                        tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
-                            Sentry.captureException(err);
-                            fs.unlinkSync(`${req.file.path}`);
-                            req.file.path = req.file.path + ".webp";
-                            fs.writeFileSync(`${req.file.path}`, resultData);
-                        })
-                    })
+    if (req.body.routeActual && req.body.aircraft && req.body.ft && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
+        const route = await GetRoute(req.body.routeActual);
+        if(route){
+            let user = await checkForUser(cookies);
+            if (user) {
+                let list = await GetAircrafts();
+                let backup = req.body.aircraft;
+                req.body.aircraft = null;
+                list.forEach(vic => {
+                    if (vic.publicName == backup) {
+                        req.body.aircraft = vic.livID;
+                        return;
                     }
-                    let ft = req.body.ft;
-                    let comment = req.body.comments ? req.body.comments : "No Comment";
-                    let operatorLength = (operatorSearchable.get(parseInt(req.body.op))).code.length;
-                    let route = (await GetRouteByNum(req.body.route.slice(operatorLength, req.body.route.length)));
-                    if(req.body.multi){
-                        let multi = await GetMultiplierByLabel(req.body.multi)
-                        if(multi){
-                            ft = ft * parseFloat((multi.amount).toString());
-                            if(comment == "No Comment"){
-                                comment = `Used Multiplier: ${multi.label} (${multi.amount}x)`;
-                            }else{
-                                comment += `\n \n Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                })
+                if (req.body.aircraft) {
+                        if (req.file) {
+                            fs.readFile(req.file.path, function (err, sourceData) {
+                                Sentry.captureException(err);
+                                tinify.fromBuffer(sourceData).toBuffer(function (err, resultData) {
+                                    Sentry.captureException(err);
+                                    fs.unlinkSync(`${req.file.path}`);
+                                    req.file.path = req.file.path + ".webp";
+                                    fs.writeFileSync(`${req.file.path}`, resultData);
+                                })
+                            })
+                        }
+                        let ft = req.body.ft;
+                        let comment = req.body.comments ? req.body.comments : "No Comment";
+                        if (req.body.multi) {
+                            let multi = await GetMultiplierByLabel(req.body.multi)
+                            if (multi) {
+                                ft = ft * parseFloat((multi.amount).toString());
+                                if (comment == "No Comment") {
+                                    comment = `Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                                } else {
+                                    comment += `\n \n Used Multiplier: ${multi.label} (${multi.amount}x)`;
+                                }
                             }
                         }
-                    }
-                    if(config.key && user.VANetID){
-                        await createVANetPirep(user.VANetID, route.depICAO, route.arrICAO, (new Date()).toString(), req.body.fuel, ft, req.body.aircraft)
-                    }
-                    await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, req.body.op, route.depICAO, route.arrICAO, req.body.route, ft, comment, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
-                    webhook.send({title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.`})
-                    res.redirect("/");
+                        if (config.key && user.VANetID) {
+                            await createVANetPirep(user.VANetID, route.depICAO, route.arrICAO, (new Date()).toString(), req.body.fuel, ft, req.body.aircraft)
+                        }
+                        await CreatePirep(req.body.aircraft, (await GetAircraft(req.body.aircraft)).publicName, user.username, route.operator, route.depICAO, route.arrICAO, req.body.route, ft, comment, "n", req.body.fuel, (new Date(req.body.depT)).toString(), (req.file ? `/data/images/${req.file.filename}` : null));
+                        webhook.send({ title: "PIREP Submitted", "description": `${config.code}${user.username} has submitted a PIREP, and is awaiting action.` })
+                        res.redirect("/");
                 } else {
-                    res.status(404).send("This route does not exist. Please enter a route that appears in the search box.");
+                    res.status(404).send("No aircraft found.")
                 }
-            }else{
-                res.status(404).send("No aircraft found.")
+
+            } else {
+                res.sendStatus(401);
             }
-            
         }else{
-            res.sendStatus(401);
+            res.status(404);
+            res.send("No route found.")
         }
+        
     }else{
         res.sendStatus(400);
     }

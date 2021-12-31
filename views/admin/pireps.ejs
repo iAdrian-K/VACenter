@@ -65,11 +65,11 @@
                             <div class="modal-body">
                                 <div class="form-control mb-3">
                                     <h2>PIREP <%= pirep.route%></h2>
-                                    <h5>Author: <%= config.code + Buffer.from(pirep.author, 'base64' ).toString() %></h5>
+                                    <h5>Author: <%= config.code + pirep.author %></h5>
                                     <hr>
                                     <p>
                                         <strong><i class="fa fa-plane"></i> Plane: </strong><%= pirep.vehiclePublic %><br>
-                                        <strong><i class="bi bi-shop"></i> Operator: </strong><%= pirep.airline %><br>
+                                        <strong><i class="bi bi-shop"></i> Operator: </strong><%= operator_search.get(pirep.operator).name %><br>
                                         <strong><i class="fa fa-plane-departure"></i> Departure ICAO: </strong><%= pirep.depICAO %><br>
                                         <strong><i class="fa fa-plane-arrival"></i> Arrival ICAO: </strong><%= pirep.arrICAO %><br>
                                         <strong><i class="bi bi-chevron-up"></i> Route: </strong><%= pirep.route %><br>
