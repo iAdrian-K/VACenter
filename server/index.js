@@ -1029,13 +1029,13 @@ app.get('*', async (req, res, next)=>{
                         if (user) {
                             if (user.admin == true) {
                                 console.log("1")
-                                await GetAircrafts();
+                                console.log(await GetAircrafts());
                                 console.log("2");
-                                await getRoutesWithOperator();
+                                console.log(await getRoutesWithOperator());
                                 console.log("3");
-                                await GetRanks();
+                                console.log(await GetRanks());
                                 console.log("4");
-                                await GetOperators();
+                                console.log(await GetOperators());
                                 console.log('5');
                                 res.render("admin/routes", {
                                     active: req.path,
