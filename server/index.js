@@ -1028,6 +1028,15 @@ app.get('*', async (req, res, next)=>{
                     case "/admin/routes":
                         if (user) {
                             if (user.admin == true) {
+                                console.log("1")
+                                await GetAircrafts();
+                                console.log("2");
+                                await getRoutesWithOperator();
+                                console.log("3");
+                                await GetRanks();
+                                console.log("4");
+                                await GetOperators();
+                                console.log('5');
                                 res.render("admin/routes", {
                                     active: req.path,
                                     title: "Admin - Routes",
