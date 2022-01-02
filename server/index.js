@@ -519,19 +519,23 @@ async function getUserWithObjs(userObj, flags){
 
 async function getRoutesWithOperator(){
     return new Promise(async (resolve, error)=>{
-        const routes = await GetRoutes();
-        let ticker = 0;
-        routes.forEach(async route => {
-            route.operatorPublic = (await GetOperator(route.operator)).name;
-            route.operatorCode = (await GetOperator(route.operator)).code;
-            ticker++;
-        })
-        let checker = setInterval(()=>{
-            if(ticker >= routes.length){
-                clearInterval(checker);
-                resolve(routes);
-            }
-        }, 100);
+        try{
+            const routes = await GetRoutes();
+            let ticker = 0;
+            routes.forEach(async route => {
+                route.operatorPublic = (await GetOperator(route.operator)).name;
+                route.operatorCode = (await GetOperator(route.operator)).code;
+                ticker++;
+            })
+            let checker = setInterval(() => {
+                if (ticker >= routes.length) {
+                    clearInterval(checker);
+                    resolve(routes);
+                }
+            }, 100);
+        }catch(err){
+            console.error(err);
+        }
     })
 }
 
