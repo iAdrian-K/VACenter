@@ -1184,7 +1184,9 @@ app.post('/setupNVN', async (req, res) => {
                     });
                     config.other.ident = regReq[2];
                     await FileWrite(`${__dirname}/../config.json`, JSON.stringify(config, null, 2));
-                    vanetCraft = await getVANetData();
+                    setTimeout(async ()=>{
+                        vanetCraft = await getVANetData();
+                    }, 5000);
                     CreateOperator(config.name)
                     res.sendStatus(200);
                 }, 1000);

@@ -93,6 +93,7 @@ function getVANetData(){
             await reloadConfig();
             const apiReq = await URLReq("GET", "https://api.va-center.com/VVCL/getAircraft", {"Content-Type": "application/x-www-form-urlencoded"}, null, {id: config.other.ident});
             const requestRes = apiReq[2];
+            console.log(requestRes);
             resolve(jsonToMap(requestRes));
             
         }
