@@ -2437,7 +2437,6 @@ app.post('/finSlot', upload.single('pirepImg'), async (req, res) => {
 
 
 async function seenUser(userID){
-    console.log(userID)
     const user = await GetUser(userID);
     if (((new Date()).getTime() - new Date(user.llogin).getTime()) > (1000 * 60 * 10)){
         user.llogin = (new Date()).toString();
