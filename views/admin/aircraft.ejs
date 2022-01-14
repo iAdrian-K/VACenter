@@ -22,29 +22,33 @@
                 data-bs-target="#exampleModal">
                 Add Aircraft
             </button>
-            <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
-                <thead>
-                    <tr class="tr-class-2">
-                        <th data-field="title">Vehicle</th>
-                        <th data-field="data">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% aircraft.forEach(vic=>{%>
-                        <tr id="tr-id-<%=vic.livID%>" class="tr-class-<%=vic.livID%>" data-title="<%=vic.livID%>"
-                            title="<%=vic.livID%>" data-object='{"key": "value"}'>
-                            <td id="td-id-<%=vic.livID%>" class="td-class-<%=vic.livID%>" data-title="<%=vic.publicName%>">
-                                <strong>
-                                    <%=vic.publicName%>
-                                </strong>
-                            </td>
-                            <td data-text="Delete">
-                                <button class="btn btn-danger" onclick="remCraft('<%=vic.livID%>')"><i class="bi bi-x-circle"></i></button>
-                            </td>
+            <div class="table-responsive">
+                <table data-toggle="table" data-search="true" data-show-columns="true" id="mainTable">
+                    <thead>
+                        <tr class="tr-class-2">
+                            <th data-field="title">Vehicle</th>
+                            <th data-field="data">Action</th>
                         </tr>
-                        <%})%>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% aircraft.forEach(vic=>{%>
+                            <tr id="tr-id-<%=vic.livID%>" class="tr-class-<%=vic.livID%>" data-title="<%=vic.livID%>"
+                                title="<%=vic.livID%>" data-object='{"key": "value"}'>
+                                <td id="td-id-<%=vic.livID%>" class="td-class-<%=vic.livID%>" data-title="<%=vic.publicName%>">
+                                    <strong>
+                                        <%=vic.publicName%>
+                                    </strong>
+                                </td>
+                                <td data-text="Delete">
+                                    <button class="btn btn-danger" onclick="remCraft('<%=vic.livID%>')"><i
+                                            class="bi bi-x-circle"></i></button>
+                                </td>
+                            </tr>
+                            <%})%>
+                    </tbody>
+                </table>
+            </div>
+            
             <br>
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">

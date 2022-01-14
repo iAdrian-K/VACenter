@@ -27,3 +27,7 @@ border-color: rgb(208, 207, 253) !important;
   padding-bottom: 7.5vh;
   min-height: 60vh;
 }
+
+.fixed-table-body{
+             height: auto !important;
+         }
