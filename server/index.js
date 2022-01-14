@@ -219,34 +219,21 @@ function mode(array) {
 //Config
 let config = {
     other: {
-        rates: 100,
-        applications:{
-            state: false,
-            link: ""
-        }
+        rates: 100
     }
 };
-
-function getConfig() {
-    // @ts-ignore
-    return JSON.parse(fs.readFileSync(`${__dirname}/../config.json`));
-    //return require("./../config.json");
-}
-
 /**
  * Reloads Config
  * @name Reload Config
  */
+
 function reloadConfig(){
-    return new Promise((resolve, error)=>{
-            config = getConfig();
-            resolve(true);
+    return new Promise(async (resolve, error) => {
+        config = JSON.parse(await FileRead(`${__dirname}/../config.json`));
+        resolve(true);
     })
     
 }
-
-
-
 reloadConfig()
 setInterval(reloadConfig, 15000);
 
@@ -419,22 +406,9 @@ function removeDiacritics(str) {
  * GetConfig - Used for every request;
  * @returns {Object}
  */
-
-
-//Test for Applications
-let appConfig = getConfig();
-if(appConfig.other){
-    if(appConfig.other.applications){
-
-    } else {
-        appConfig.other.applications = {
-            state: false,
-            link: ""
-        }
-        fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(appConfig, null, 2));
-    }
+function getConfig(){
+    return require("./../config.json");
 }
-
 /**
  * CheckCPWD - Used for checking if a user needs to change their password.
  * @param {Object} cookies 
@@ -1059,8 +1033,7 @@ app.get('*', async (req, res, next)=>{
                                     users: await GetUsers(),
                                     ops: await GetOperators(),
                                     routes: await GetRoutes(),
-                                    config: getConfig(),
-                                    pireps: await GetPireps()
+                                    config: getConfig()
                                 })
                             } else {
                                 res.sendStatus(403);
@@ -1312,11 +1285,6 @@ app.post('/setup', async (req,res)=>{
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark", "primary"],
-                applications: {
-                    state: false,
-                    link: ""
-                },
-                btnColor: false,
                 ident: makeid(25),
                 pirepPic: false,
                 pirepPicExpire: 86400000,
@@ -1371,11 +1339,6 @@ app.post('/setupNVN', async (req, res) => {
                 logo: "https://va-center.com/public/images/logo.webp",
                 rates: 100,
                 navColor: ["dark", "dark", "primary"],
-                applications: {
-                    state: false,
-                    link: ""
-                },
-                btnColor: false,
                 ident: makeid(25),
                 pirepPic: hosting ? false : data.pirepPictures,
                 pirepPicExpire: 86400000,
@@ -1962,8 +1925,8 @@ app.post("/admin/users/resetPWD", async function (req, res){
         let user = await checkForUser(cookies);
         if (user) {
             if (user.admin == true) {
-                if (req.body.uid && req.body.newpwd) {
-                    let target = await GetUser(decodeURIComponent(req.body.uid));
+                if (req.body.targetUID) {
+                    let target = await GetUser(req.body.targetUID);
                     if (target) {
                         target.password = bcrypt.hashSync(decodeURIComponent(req.body.newpwd), 10);
                         await UpdateUser(target.username, target.rank, target.admin, target.password, target.display, target.profileURL, target.hours, target.created, target.llogin, true, target.revoked, target.VANetID, user.manualRank)
