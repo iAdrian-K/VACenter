@@ -29,9 +29,8 @@
                     </thead>
                     <tbody>
                         <% links.forEach(link=>{%>
-                            <tr id="tr-id-<%=link.title%>" class="tr-class-<%=link.title%> pirepClickable" data-title="<%=link.title%>"
-                                title="<%=link.title%>" data-object='{"key": "value"}' style="cursor: pointer;" data-bs-toggle="modal"
-                                data-bs-target="#modal-<%=link.title%>">
+                            <tr id="tr-id-<%=link.title%>" class="tr-class-<%=link.title%> pirepClickable" data-title="<%=link.url%>"
+                                title="<%=link.url%>" data-object='{"key": "value"}' style="cursor: pointer;">
                                 <td id="td-id-<%=link.title%>" class="td-class-<%=link.title%>" data-title="<%=link.title%>">
                                     <strong>
                                         <%=link.title%>
@@ -55,6 +54,10 @@
                         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
                     <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
                     <script>
+                        $('#mainTable').on('click-row.bs.table', function (row, el, field) {
+                                confirmLink(el._data.title);
+                                console.log(el._data)
+                        })
                         function confirmLink(link){
                             swal({
                                 title: "Are you sure you want to visit this link?",
