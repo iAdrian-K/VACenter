@@ -1435,7 +1435,6 @@ app.post('/CPWD', async(req, res)=>{
 
 app.post("/newPIREP", upload.single('pirepImg'), async (req, res) => {
     const cookies = getAppCookies(req);
-    console.log(req.body)
     if (req.body.routeActual && req.body.aircraft && req.body.ft && req.body.fuel && req.body.depT && (config.other.pirepImg == true ? req.file.path : true)) {
         const route = await GetRoute(req.body.routeActual);
         if(route){
