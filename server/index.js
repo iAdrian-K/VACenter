@@ -2162,33 +2162,6 @@ app.post("/admin/multi/rem", async function (req, res) {
     }
 })
 
-app.post("/admin/applications/config", async (req, res) =>{
-    const cookies = getAppCookies(req);
-    let user = await checkForUser(cookies);
-    if (user) {
-        if (user.admin == true) {
-            const newConfig = getConfig();
-            if(req.body.state){
-                if(req.body.link){
-                    newConfig.other.applications.state = true;
-                    newConfig.other.applications.link = req.body.link;
-                }else{
-                    res.status(400);
-                    res.send("Missing Link");
-                }
-            }else{
-                newConfig.other.applications.state = false;
-            }
-            fs.writeFileSync(`${__dirname}/../config.json`, JSON.stringify(newConfig, null, 2));
-            res.redirect("/admin/settings#apps");
-        } else {
-            res.sendStatus(403);
-        }
-    } else {
-        res.sendStatus(401);
-    }
-})
-
 app.post('/updateSlot', async (req, res) => {
     const cookies = getAppCookies(req);
     //Check for setup
