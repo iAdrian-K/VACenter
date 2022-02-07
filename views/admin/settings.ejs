@@ -26,75 +26,75 @@
             <hr>
 
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/accent" method="post">
-                    <h4>Accent Color</h4>
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="primary"){%>checked<%}%> name="accent" value="primary" id="primary" autocomplete="off">
-                    <label class="btn btn-primary my-2" for="primary">Blue</label>
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="secondary"){%>checked<%}%> name="accent" value="secondary" id="secondary" autocomplete="off">
-                    <label class="btn btn-secondary my-2" for="secondary">Grey</label>
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="danger"){%>checked<%}%> name="accent" value="danger" id="danger" autocomplete="off">
-                    <label class="btn btn-danger my-2" for="danger">Red</label>
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="success"){%>checked<%}%> name="accent" value="success" id="success" autocomplete="off">
-                    <label class="btn btn-success my-2" for="success">Green</label>
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="warning"){%>checked<%}%> name="accent" value="warning" id="warning" autocomplete="off">
-                    <label class="btn btn-warning my-2" for="warning">Yellow</label>
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="light"){%>checked<%}%> name="accent" value="light" id="light" autocomplete="off">
+                <form disabled>
+                    <h4>Accent Color <span class="text-muted">(Disabled)</span></h4>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="primary"){%>checked<%}%> name="accent" value="primary" id="primary" autocomplete="off">
+                    <label class="btn btn-primary my-2" disabled for="primary">Blue</label>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="secondary"){%>checked<%}%> name="accent" value="secondary" id="secondary" autocomplete="off">
+                    <label class="btn btn-secondary my-2" disabled for="secondary">Grey</label>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="danger"){%>checked<%}%> name="accent" value="danger" id="danger" autocomplete="off">
+                    <label class="btn btn-danger my-2" disabled for="danger">Red</label>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="success"){%>checked<%}%> name="accent" value="success" id="success" autocomplete="off">
+                    <label class="btn btn-success my-2" disabled for="success">Green</label>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="warning"){%>checked<%}%> name="accent" value="warning" id="warning" autocomplete="off">
+                    <label class="btn btn-warning my-2" disabled for="warning">Yellow</label>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="light"){%>checked<%}%> name="accent" value="light" id="light" autocomplete="off">
                     <label class="btn btn-light my-2" for="light">Light</label>
                     <!--<input type="radio" class="btn-check" <% if(config.other.navColor[0]=="white"){%>checked<%}%> name="accent" value="white" id="white" autocomplete="off">
                     <label class="btn btn-white my-2 border border-black" for="white">White</label>-->
-                    <input type="radio" class="btn-check" <% if(config.other.navColor[0]=="dark"){%>checked<%}%> name="accent" value="dark" id="dark" autocomplete="off">
-                    <label class="btn btn-dark my-2" for="dark">Dark</label>
+                    <input type="radio" disabled class="btn-check" <% if(config.other.navColor[0]=="dark"){%>checked<%}%> name="accent" value="dark" id="dark" autocomplete="off">
+                    <label class="btn btn-dark my-2" disabled for="dark">Dark</label>
                     <br>
                     <div class="form-check form-switch mt-3">
-                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.btnColor == true){%>checked<%}%>>
+                        <input class="form-check-input" disabled type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.btnColor == true){%>checked<%}%>>
                         <label class="form-check-label" for="flexSwitchCheckDefault">Affect Buttons</label>
                     </div>
                     <span class="text-muted">Not avaliable with red or light</span>
                     <br><br>
-                    <button class="btn btn-<%= config.other.navColor[2] %>" type="submit">Submit new Color</button>
+                    <button class="btn btn-<%= config.other.navColor[2] %>" disabled type="submit">Submit new Color</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/bg" novalidate class="needs-validation" method="post">
-                <h4>Background URL</h4>
+                <form disabled novalidate class="needs-validation">
+                <h4>Background URL <span class="text-muted">(Disabled)</span></h4>
                 <div>
-                    <input class="form-control" required type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>">
+                    <input class="form-control" disabled required type="url" name="value" id="fill1" value="<%= config.other.bg == "/public/images/stockBG2.jpg" ? "" : config.other.bg %>">
                     <div class="valid-feedback">Looks good!</div>
                     <div class="invalid-feedback">Need a valid URL!</div>
                 </div>
                 <br>
-                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
+                <button type="submit" disabled class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/logo" method="post" class="needs-validation" novalidate>
-                <h4>Logo URL</h4>
+                <form class="needs-validation" novalidate>
+                <h4>Logo URL <span class="text-muted">(Disabled)</span></h4>
                 <div>
-                    <input class="form-control" required type="url" name="value" value="<%= config.other.logo%>">
+                    <input class="form-control" disabled required type="url" name="value" value="<%= config.other.logo%>">
                     <div class="valid-feedback">Looks good!</div>
                     <div class="invalid-feedback">Need a valid URL!</div>
                 </div>
                 <br>
-                <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
+                <button type="submit" disabled class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3">
-                <form action="/admin/settings/pirepPic" novalidate class="needs-validation" method="post">
-                    <h4>PIREP Pictures</h4>
+                <form novalidate class="needs-validation">
+                    <h4>PIREP Pictures <span class="text-muted">(Disabled)</span></h4>
                     <p>Allow Pilots to submit pictures of their Flights. <% if(hosting){%><span class="text-muted">This feature is disabled since you are on VACenter Standard Plan.</span><%}%></p>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.pirepPic == true){%>checked<%}%> <% if(hosting){%>disabled<%}%>>
+                        <input class="form-check-input" disabled type="checkbox" id="flexSwitchCheckDefault" name="state" <% if(config.other.pirepPic == true){%>checked<%}%> <% if(hosting){%>disabled<%}%>>
                         <label class="form-check-label" for="flexSwitchCheckDefault">Allow Pictures</label>
                     </div>
                     <br>
-                    <div class="progress">
-                        <div class="progress-bar bg-<%= config.other.navColor[2] %>" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
+                    <div class="progress" disabled>
+                        <div disabled class="progress-bar bg-<%= config.other.navColor[2] %>" role="progressbar" aria-valuenow="<%= store[0] %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= store[0]%>%"></div>
                     </div>
                     <br>
                     <span>Storage Used (<%= store[1]%>/<%=store[2]%>)</span><br>
                     <hr>
                     <div>
-                        <label>Pireps will be removed <input min="0" max="24" step="any" type="number" required class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied. <span class="text-muted" style="font-size: 10px;">Max 24 days</span></label>
+                        <label>Pireps will be removed <input min="0" disabled max="24" step="any" type="number" required class="d-inline-block form-control w-auto" name="imgExpireDays" value="<%=(((((config.other.pirepPicExpire)/1000)/60)/60)/24)%>"> days after the PIREP has been approved/denied. <span class="text-muted" style="font-size: 10px;">Max 24 days</span></label>
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -103,47 +103,47 @@
                         </div>
                     </div>
                     <br>
-                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
+                    <button type="submit" disabled <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <div class="form-control shadow p-3 my-3" id="apps">
-                <form action="/admin/applications/config" class="needs-validation" novalidate method="POST">
-                    <h4>Applications</h4>
+                <form class="needs-validation" novalidate >
+                    <h4>Applications <span class="text-muted">(Disabled)</span></h4>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="APPCHECKBOX" name="state"
+                        <input class="form-check-input" disabled type="checkbox" id="APPCHECKBOX" name="state"
                             <%if(config.other.applications.state==true){%>checked<%}%>> <label class="form-check-label"
                                 for="APPCHECKBOX">Enable Applications</label>
                     </div>
                     <div id="configLink">
                         <label class="form-label fw-bold">Link to Application Form <span class="text-muted"
                                 style="font-size: 12px;">Google Forms, Airtable, etc</span></label>
-                        <input value="<%= config.other.applications.link%>" type="url" class="form-control" name="link" required
+                        <input value="<%= config.other.applications.link%>" disabled type="url" class="form-control" name="link" required
                             placeholder="Link" id="configLinkInput">
                         <div class="invalid-feedback">Need a valid link</div>
                     </div>
                     <br>
-                    <button type="submit" <% if(hosting){%>disabled<%}%> class="btn btn-<%= config.other.navColor[2] %>">Update</button>
+                    <button type="submit" <% if(hosting){%>disabled<%}%> disabled class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
             <br>
             <h2>3rd Party</h2>
             <hr>
             <div class="form-control shadow p-3 my-3">
-                <h4>Identifier</h4>
+                <h4>Identifier <span class="text-muted">(Disabled)</span></h4>
                 <p>Used for external identification. (IF Experiment Bot, etc)</p>
-                <span style="word-wrap: break-word;"><strong>Ident: </strong><%= config.other.ident.slice(0,5)%></span>
+                <span style="word-wrap: break-word;"><strong>Ident: </strong>DISABLED</span>
             </div>
             <div class="form-control shadow p-3 my-3">
                 <form action="/admin/settings/webhook" method="post" class="needs-validation" novalidate>
-                    <h4>Webhook</h4>
+                    <h4>Webhook <span class="text-muted">(Disabled)</span></h4>
                     <p>Used to send events like PIREPS to your communications server. <a class="link link-dark" href="https://va-center.com/webhooks" target="_blank">View List of Events</a> <span class="text-muted">(Discord only for now)</span></p>
                     <div>
-                        <input class="form-control" required type="url" name="value" value="<%= config.other.webhook %>">
+                        <input class="form-control" disabled required type="url" name="value" value="<%= config.other.webhook %>">
                         <div class="valid-feedback">Looks good!</div>
                         <div class="invalid-feedback">Need a valid URL!</div>
                     </div>
                     <br>
-                    <button type="submit" class="btn btn-<%= config.other.navColor[2] %>">Update</button>
+                    <button type="submit" disabled class="btn btn-<%= config.other.navColor[2] %>">Update</button>
                 </form>
             </div>
         </div>
