@@ -20,13 +20,13 @@
             <p class="text-muted">Download the required template, add your information (remove example), do not change the headings, save as a csv and upload here.</p>
             <div id="routes">
                 <h2 class="mt-5">Routes</h2>
-                <a class="btn btn-primary w-100 mb-2" onclick="location.href='/public/import/routes.csv'">Download template route CSV</a>
+                <button class="btn btn-primary w-100 mb-2" disabled>Download template route CSV</button>
                 <p><span class="fw-bold">Note: </span> For the AircraftID column you need to use the <a class="link link-primary" href="#newAirAirSel">Aircraft ID Getter</a>. This aircraft must also be in your fleet.</p>
                 <br>
-                <form action="/import/routes" method="POST" novalidate class="needs-validation" enctype="multipart/form-data">
+                <form novalidate class="needs-validation">
                 <div class="row">
                     <div class="col-8 col-md-9">
-                        <input type="file" accept=".csv" required class="form-control w-100" name="csv"> 
+                        <input type="file" disabled accept=".csv" required class="form-control w-100" name="csv"> 
                         <div class="valid-feedback">
                             Looks good!
                         </div>
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="col-4 col-md-3">
-                        <button class="btn btn-<%= config.other.navColor[2] %> w-100">Import</button>
+                        <button disabled class="btn btn-<%= config.other.navColor[2] %> w-100">Import</button>
                     </div>
                 </div>
                 </form>
