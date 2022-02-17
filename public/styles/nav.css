@@ -12,3 +12,7 @@
         top: 0px !important;
     }
 }
+.navbar {
+    background: rgb(56,5,28);
+    background: linear-gradient(90deg, rgba(56,5,28,1) 0%, rgba(75,30,49,1) 83%);
+}

@@ -1,1 +1,23 @@
-{}
+{
+  "code": "QRV",
+  "name": "Qatar Airways Virtual",
+  "other": {
+    "bg": "/public/images/stockBG2.jpg",
+    "logo": "https://va-center.com/public/images/logo.webp",
+    "rates": 100,
+    "navColor": [
+      "Dark",
+      "dark",
+      "Dark"
+    ],
+    "applications": {
+      "state": false,
+      "link": ""
+    },
+    "btnColor": false,
+    "ident": "rPz3Suife4uvmlfjeslFRmf8uUpI6k6ZZlJcr4XnbRYj7wanNEbPeLdUryvWmWfDSBDxuTg77lDtIb4EaPPoaN5tUVifD1fyguYS",
+    "pirepPic": true,
+    "pirepPicExpire": 86400000,
+    "webhook": ""
+  }
+}
